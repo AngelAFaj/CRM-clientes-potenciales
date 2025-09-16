@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Admin - Panel de Administración</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header admin-theme">
+            <div class="header-left">
+                <h1>CRM Admin</h1>
+                <span class="user-role">Administrador</span>
+            </div>
+            <div class="header-right">
+                <span id="userInfo">Admin User</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav admin-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#statistics" class="nav-link" data-section="statistics">Estadísticas</a></li>
+                <li><a href="#kpis" class="nav-link" data-section="kpis">KPIs</a></li>
+                <li><a href="#ai-analysis" class="nav-link" data-section="ai-analysis">Análisis IA</a></li>
+                <li><a href="#team-overview" class="nav-link" data-section="team-overview">Equipo</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <h2>Dashboard Administrativo</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Leads</h3>
+                        <div class="stat-number" id="totalLeads">0</div>
+                        <div class="stat-change positive">+12% vs mes anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Conversiones</h3>
+                        <div class="stat-number" id="totalConversions">0</div>
+                        <div class="stat-change positive">+8% vs mes anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Asesores Activos</h3>
+                        <div class="stat-number" id="activeAdvisors">0</div>
+                        <div class="stat-change neutral">Sin cambios</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tasa Conversión</h3>
+                        <div class="stat-number" id="conversionRate">0%</div>
+                        <div class="stat-change positive">+2% vs mes anterior</div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Rendimiento por Asesor</h3>
+                        <canvas id="advisorPerformanceChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Conversiones por Mes</h3>
+                        <canvas id="monthlyConversionsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section id="statistics" class="content-section">
+                <h2>Estadísticas Detalladas</h2>
+                <div class="period-selector">
+                    <label for="statsPeriod">Período:</label>
+                    <select id="statsPeriod">
+                        <option value="daily">Diario</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly" selected>Mensual</option>
+                        <option value="yearly">Anual</option>
+                    </select>
+                </div>
+
+                <div class="team-stats-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Asesor</th>
+                                <th>Leads Asignados</th>
+                                <th>Acciones Realizadas</th>
+                                <th>Conversiones</th>
+                                <th>Tasa Conversión</th>
+                                <th>Tiempo Medio (días)</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamStatsTable">
+                            <!-- Team stats will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- KPIs Section -->
+            <section id="kpis" class="content-section">
+                <h2>Gestión de KPIs</h2>
+                <div class="kpi-tabs">
+                    <button class="tab-btn active" data-tab="global-kpis">KPIs Globales</button>
+                    <button class="tab-btn" data-tab="manager-kpis">KPIs por Gerente</button>
+                </div>
+
+                <!-- Global KPIs -->
+                <div id="global-kpis" class="tab-content active">
+                    <div class="kpi-form">
+                        <h3>Configurar KPIs Globales</h3>
+                        <form id="globalKPIForm">
+                            <div class="form-group">
+                                <label for="dailyTargetClients">Clientes Objetivo Diarios:</label>
+                                <input type="number" id="dailyTargetClients" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="weeklyConversionTarget">Objetivo Conversión Semanal (%):</label>
+                                <input type="number" id="weeklyConversionTarget" min="1" max="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="maxDaysPerState">Máximo Días por Estado:</label>
+                                <input type="number" id="maxDaysPerState" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Guardar KPIs Globales</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Manager KPIs -->
+                <div id="manager-kpis" class="tab-content">
+                    <div class="manager-kpis-list">
+                        <h3>KPIs Definidos por Gerentes</h3>
+                        <div id="managerKPIsList">
+                            <!-- Manager KPIs will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Analysis Section -->
+            <section id="ai-analysis" class="content-section">
+                <h2>Análisis con Inteligencia Artificial</h2>
+                <div class="ai-controls">
+                    <button id="runAIAnalysis" class="btn btn-primary">Generar Análisis IA</button>
+                    <button id="exportReport" class="btn btn-success">Exportar Reporte CSV</button>
+                </div>
+                <div id="aiResults" class="ai-results">
+                    <!-- AI analysis results will appear here -->
+                </div>
+            </section>
+
+            <!-- Team Overview Section -->
+            <section id="team-overview" class="content-section">
+                <h2>Vista General del Equipo</h2>
+                <div class="leads-filters">
+                    <select id="leadsStatusFilter">
+                        <option value="">Todos los Estados</option>
+                        <option value="Calificar">Calificar</option>
+                        <option value="Desarrollar">Desarrollar</option>
+                        <option value="Proponer">Proponer</option>
+                        <option value="Cierre">Cierre</option>
+                    </select>
+                    <select id="leadsInterestFilter">
+                        <option value="">Todos los Niveles</option>
+                        <option value="Poco interesado">Poco interesado</option>
+                        <option value="Interesado">Interesado</option>
+                        <option value="Medianamente interesado">Medianamente interesado</option>
+                    </select>
+                    <select id="leadsAdvisorFilter">
+                        <option value="">Todos los Asesores</option>
+                    </select>
+                </div>
+                <div class="leads-grid" id="leadsGrid">
+                    <!-- Leads will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="leadDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="leadDetailTitle">Detalle del Lead</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="leadDetailContent">
+                <!-- Lead details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize admin interface
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando admin...');
+            if (window.crm && typeof window.crm.initAdmin === 'function') {
+                window.crm.initAdmin();
+            } else {
+                console.error('CRM App no está disponible');
+            }
+        });
+    </script>
+</body>
+</html>

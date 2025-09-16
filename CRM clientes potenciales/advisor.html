@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Advisor - Panel de Asesor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header advisor-theme">
+            <div class="header-left">
+                <h1>CRM Advisor</h1>
+                <span class="user-role">Asesor</span>
+            </div>
+            <div class="header-right">
+                <span id="userInfo">Advisor User</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav advisor-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#kanban" class="nav-link" data-section="kanban">Kanban</a></li>
+                <li><a href="#tasks" class="nav-link" data-section="tasks">Tareas</a></li>
+                <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
+                <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
+                <li><a href="#clients" class="nav-link" data-section="clients">Clientes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <h2>Mi Dashboard</h2>
+                <div class="personal-stats-grid">
+                    <div class="stat-card">
+                        <h3>Mis Leads</h3>
+                        <div class="stat-number" id="myLeadsCount">0</div>
+                        <div class="stat-change positive">+3 esta semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tareas Completadas</h3>
+                        <div class="stat-number" id="myCompletedTasks">0</div>
+                        <div class="stat-change positive">+12 esta semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Conversiones</h3>
+                        <div class="stat-number" id="myConversions">0</div>
+                        <div class="stat-change positive">+2 esta semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tasa Conversión</h3>
+                        <div class="stat-number" id="myConversionRate">0%</div>
+                        <div class="stat-change positive">+5% vs semana anterior</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>Próximas Tareas</h3>
+                        <div id="upcomingTasksWidget">
+                            <!-- Upcoming tasks will be populated here -->
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h3>Secuencias Asignadas</h3>
+                        <div id="assignedSequencesWidget">
+                            <!-- Assigned sequences will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kanban Section -->
+            <section id="kanban" class="content-section">
+                <div class="kanban-header">
+                    <h2>Tablero Kanban - Mis Leads</h2>
+                    <button id="createLeadBtn" class="btn btn-primary">+ Nuevo Lead</button>
+                </div>
+                <div class="kanban-board">
+                    <!-- Calificar Column -->
+                    <div class="kanban-column" data-state="Calificar">
+                        <div class="column-header">
+                            <h3>Calificar</h3>
+                            <span class="lead-count" id="calificarCount">0</span>
+                        </div>
+                        <div class="column-content" id="calificarLeads" data-state="Calificar">
+                            <!-- Leads in Calificar state will be here -->
+                        </div>
+                    </div>
+
+                    <!-- Desarrollar Column -->
+                    <div class="kanban-column" data-state="Desarrollar">
+                        <div class="column-header">
+                            <h3>Desarrollar</h3>
+                            <span class="lead-count" id="desarrollarCount">0</span>
+                        </div>
+                        <div class="column-content" id="desarrollarLeads" data-state="Desarrollar">
+                            <!-- Leads in Desarrollar state will be here -->
+                        </div>
+                    </div>
+
+                    <!-- Proponer Column -->
+                    <div class="kanban-column" data-state="Proponer">
+                        <div class="column-header">
+                            <h3>Proponer</h3>
+                            <span class="lead-count" id="proponerCount">0</span>
+                        </div>
+                        <div class="column-content" id="proponerLeads" data-state="Proponer">
+                            <!-- Leads in Proponer state will be here -->
+                        </div>
+                    </div>
+
+                    <!-- Cierre Column -->
+                    <div class="kanban-column" data-state="Cierre">
+                        <div class="column-header">
+                            <h3>Cierre</h3>
+                            <span class="lead-count" id="cierreCount">0</span>
+                        </div>
+                        <div class="column-content" id="cierreLeads" data-state="Cierre">
+                            <!-- Leads in Cierre state will be here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section id="tasks" class="content-section">
+                <h2>Gestión de Tareas</h2>
+                <div class="task-controls">
+                    <button id="createTaskBtn" class="btn btn-primary">Crear Nueva Tarea</button>
+                    <div class="task-filters">
+                        <select id="taskStatusFilter">
+                            <option value="">Todos los Estados</option>
+                            <option value="abierto">Abierto</option>
+                            <option value="programada">Programada</option>
+                            <option value="completada">Completada</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                        <select id="taskTypeFilter">
+                            <option value="">Todos los Tipos</option>
+                            <option value="Llamada">Llamada</option>
+                            <option value="Mensaje">Mensaje</option>
+                            <option value="Correo">Correo</option>
+                            <option value="Reunión presencial">Reunión presencial</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tasks-list" id="tasksList">
+                    <!-- Tasks will be populated here -->
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendar" class="content-section">
+                <h2>Mi Calendario</h2>
+                
+                <!-- Controles del Calendario -->
+                <div class="calendar-controls">
+                    <button id="prevWeek" class="btn btn-secondary">‹ Semana Anterior</button>
+                    <button id="todayBtn" class="btn btn-outline">Hoy</button>
+                    <span id="currentWeek" class="week-display"></span>
+                    <button id="nextWeek" class="btn btn-secondary">Siguiente Semana ›</button>
+                </div>
+                
+                <!-- Calendario Semanal -->
+                <div class="weekly-calendar-container">
+                    <div class="calendar-header">
+                        <div class="day-header">Hora</div>
+                        <div class="day-header">Lunes</div>
+                        <div class="day-header">Martes</div>
+                        <div class="day-header">Miércoles</div>
+                        <div class="day-header">Jueves</div>
+                        <div class="day-header">Viernes</div>
+                        <div class="day-header">Sábado</div>
+                        <div class="day-header">Domingo</div>
+                    </div>
+                    <div class="calendar-grid" id="advisorCalendar">
+                        <!-- El calendario se generará dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leads Section -->
+            <section id="leads" class="content-section">
+                <h2>Mis Leads</h2>
+                <div class="leads-filters">
+                    <select id="leadsStatusFilter">
+                        <option value="">Todos los Estados</option>
+                        <option value="Calificar">Calificar</option>
+                        <option value="Desarrollar">Desarrollar</option>
+                        <option value="Proponer">Proponer</option>
+                        <option value="Cierre">Cierre</option>
+                    </select>
+                    <select id="leadsInterestFilter">
+                        <option value="">Todos los Niveles</option>
+                        <option value="Poco interesado">Poco interesado</option>
+                        <option value="Interesado">Interesado</option>
+                        <option value="Medianamente interesado">Medianamente interesado</option>
+                    </select>
+                </div>
+                <div id="leadsGrid">
+                    <!-- Leads will be populated here -->
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section id="clients" class="content-section">
+                <h2>Mis Clientes</h2>
+                
+                <!-- Filtros -->
+                <div class="clients-filters">
+                    <div class="filter-group">
+                        <label for="clientStatusFilter">Estado:</label>
+                        <select id="clientStatusFilter">
+                            <option value="">Todos</option>
+                            <option value="Calificar">Calificar</option>
+                            <option value="Desarrollar">Desarrollar</option>
+                            <option value="Proponer">Proponer</option>
+                            <option value="Cierre" selected>Cerrados (Nuestros Clientes)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="clientTypeFilter">Tipo:</label>
+                        <select id="clientTypeFilter">
+                            <option value="">Todos</option>
+                            <option value="perdido">Cliente Perdido</option>
+                            <option value="fidelizado" selected>Cliente Fidelizado</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="clientInterestFilter">Interés:</label>
+                        <select id="clientInterestFilter">
+                            <option value="">Todos</option>
+                            <option value="Poco interesado">Poco interesado</option>
+                            <option value="Interesado">Interesado</option>
+                            <option value="Medianamente interesado">Medianamente interesado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Clientes -->
+                <div class="clients-stats">
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Clientes:</span>
+                            <span class="stat-value" id="totalClientsCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Clientes Fidelizados:</span>
+                            <span class="stat-value" id="fidelizedClientsCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Clientes Perdidos:</span>
+                            <span class="stat-value" id="lostClientsCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="clientsGrid">
+                    <!-- Clients will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Lead Detail Modal -->
+    <div id="leadDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="leadDetailTitle">Detalle del Lead</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="leadDetailContent">
+                <!-- Lead details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="taskModalTitle">Crear/Editar Tarea</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <input type="hidden" id="taskId">
+                    <div class="form-group">
+                        <label for="taskLead">Lead:</label>
+                        <select id="taskLead" required>
+                            <option value="">Seleccionar lead...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskType">Tipo de Tarea:</label>
+                        <select id="taskType" required>
+                            <option value="Llamada">Llamada</option>
+                            <option value="Mensaje">Mensaje</option>
+                            <option value="Correo">Correo</option>
+                            <option value="Reunión presencial">Reunión presencial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Fecha y Hora Límite:</label>
+                        <input type="datetime-local" id="taskDueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDuration">Duración Estimada (minutos):</label>
+                        <input type="number" id="taskDuration" min="15" max="480" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskNotes">Notas:</label>
+                        <textarea id="taskNotes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelTask">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Tarea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Task Modal -->
+    <div id="completeTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Completar Tarea</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="completeTaskForm">
+                    <input type="hidden" id="completeTaskId">
+                    <div class="form-group">
+                        <label for="completionNotes">Nota de Cierre (Obligatoria):</label>
+                        <textarea id="completionNotes" rows="4" required placeholder="Describe el resultado de la tarea..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelComplete">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Completar Tarea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div id="taskDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalle de Tarea</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="taskDetailContent">
+                    <!-- Task details will be populated here -->
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="crm.closeModal('taskDetailModal')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Lead Modal -->
+    <div id="createLeadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Nuevo Lead</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="createLeadForm">
+                    <div class="form-group">
+                        <label for="leadName">Nombre del Cliente:</label>
+                        <input type="text" id="leadName" required placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="leadCompany">Empresa:</label>
+                        <input type="text" id="leadCompany" required placeholder="Ej: Empresa ABC">
+                    </div>
+                    <div class="form-group">
+                        <label for="leadEmail">Email:</label>
+                        <input type="email" id="leadEmail" required placeholder="Ej: juan@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="leadPhone">Teléfono:</label>
+                        <input type="tel" id="leadPhone" required placeholder="Ej: +1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label for="leadInterest">Nivel de Interés:</label>
+                        <select id="leadInterest" required>
+                            <option value="">Seleccionar nivel...</option>
+                            <option value="Poco interesado">Poco interesado</option>
+                            <option value="Interesado">Interesado</option>
+                            <option value="Medianamente interesado">Medianamente interesado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="leadNotes">Notas:</label>
+                        <textarea id="leadNotes" rows="3" placeholder="Información adicional sobre el cliente..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelLead">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Lead</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize advisor interface
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando advisor...');
+            if (window.crm && typeof window.crm.initAdvisor === 'function') {
+                window.crm.initAdvisor();
+            } else {
+                console.error('CRM App no está disponible');
+            }
+        });
+    </script>
+</body>
+</html>

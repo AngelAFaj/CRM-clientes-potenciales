@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Manager - Panel de Gerencia</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header manager-theme">
+            <div class="header-left">
+                <h1>CRM Manager</h1>
+                <span class="user-role">Gerente de Ventas</span>
+            </div>
+            <div class="header-right">
+                <span id="userInfo">Manager User</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav manager-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#team-stats" class="nav-link" data-section="team-stats">Estadísticas</a></li>
+                <li><a href="#advisor-management" class="nav-link" data-section="advisor-management">Asesores</a></li>
+                <li><a href="#sequences" class="nav-link" data-section="sequences">Secuencias</a></li>
+                <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
+                <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
+                <li><a href="#clients" class="nav-link" data-section="clients">Clientes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <h2>Dashboard de Gerencia</h2>
+                <div class="period-selector">
+                    <label for="periodSelect">Período:</label>
+                    <select id="periodSelect">
+                        <option value="daily">Diario</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly" selected>Mensual</option>
+                        <option value="yearly">Anual</option>
+                    </select>
+                </div>
+
+                <div class="team-stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Leads</h3>
+                        <div class="stat-number" id="teamTotalLeads">0</div>
+                        <div class="stat-change positive">+15% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Acciones Realizadas</h3>
+                        <div class="stat-number" id="teamTotalActions">0</div>
+                        <div class="stat-change positive">+22% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Conversiones</h3>
+                        <div class="stat-number" id="teamConversions">0</div>
+                        <div class="stat-change positive">+8% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tasa Conversión</h3>
+                        <div class="stat-number" id="teamConversionRate">0%</div>
+                        <div class="stat-change positive">+3% vs período anterior</div>
+                    </div>
+                </div>
+
+                <!-- Resumen de Cumplimiento de KPIs -->
+                <div class="kpis-summary-section">
+                    <h3>📊 Resumen de Cumplimiento de KPIs</h3>
+                    <div class="kpis-summary-grid" id="kpisSummaryGrid">
+                        <!-- Los KPIs se cargarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Análisis de IA del Equipo -->
+                <div class="ai-analysis-section">
+                    <div class="ai-analysis-header">
+                        <h3>🤖 Análisis de IA del Equipo</h3>
+                        <button id="generateTeamAIAnalysis" class="btn btn-ai">
+                            <span class="ai-icon">🧠</span>
+                            Generar Análisis
+                        </button>
+                    </div>
+                    <div class="ai-analysis-content" id="teamAIAnalysisContent">
+                        <div class="ai-analysis-placeholder">
+                            <div class="ai-placeholder-icon">🤖</div>
+                            <h4>Análisis de IA Disponible</h4>
+                            <p>Haz click en "Generar Análisis" para obtener insights inteligentes sobre el rendimiento del equipo, tendencias de ventas y recomendaciones estratégicas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team Stats Section -->
+            <section id="team-stats" class="content-section">
+                <h2>Estadísticas del Equipo</h2>
+                <div class="team-stats-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Asesor</th>
+                                <th>Leads Asignados</th>
+                                <th>Acciones Realizadas</th>
+                                <th>Conversiones</th>
+                                <th>Tasa Conversión</th>
+                                <th>Leads Activos</th>
+                                <th>Última Actividad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamStatsTable">
+                            <!-- Team stats will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Advisor Management Section -->
+            <section id="advisor-management" class="content-section">
+                <h2>Gestión de Asesores</h2>
+                
+                <!-- Navegación de Pantallas -->
+                <div class="screen-navigation">
+                    <button class="screen-nav-btn active" data-screen="advisor-stats-screen">Estadísticas por Asesor</button>
+                    <button class="screen-nav-btn" data-screen="advisor-kpis-screen">Definir KPIs</button>
+                    <button class="screen-nav-btn" data-screen="lead-assignment-screen">Asignación de Leads</button>
+                </div>
+
+                <!-- Pantalla 1: Estadísticas por Asesor -->
+                <div id="advisor-stats-screen" class="advisor-screen active">
+                    <h3>Estadísticas por Asesor</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>Total de Asesores</h4>
+                            <div class="stat-value" id="totalAdvisors">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Leads Asignados</h4>
+                            <div class="stat-value" id="totalAssignedLeads">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Conversiones del Equipo</h4>
+                            <div class="stat-value" id="teamConversions">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Tasa de Conversión</h4>
+                            <div class="stat-value" id="teamConversionRate">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <h4>Estadísticas Detalladas por Asesor</h4>
+                        <table class="data-table" id="teamStatsTable">
+                            <thead>
+                                <tr>
+                                    <th>Asesor</th>
+                                    <th>Leads Asignados</th>
+                                    <th>Acciones Realizadas</th>
+                                    <th>Conversiones</th>
+                                    <th>Tasa Conversión</th>
+                                    <th>Leads Activos</th>
+                                    <th>Última Actividad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pantalla 2: Definir KPIs por Asesor -->
+                <div id="advisor-kpis-screen" class="advisor-screen">
+                    <h3>Definir KPIs por Asesor</h3>
+                    <form id="advisorKPIForm" class="form-container">
+                        <div class="form-group">
+                            <label for="advisorSelect">Seleccionar Asesor:</label>
+                            <select id="advisorSelect" name="advisor" required>
+                                <option value="">Seleccionar asesor...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dailyLeadsGoal">Meta Diaria de Leads:</label>
+                            <input type="number" id="dailyLeadsGoal" name="dailyLeadsGoal" min="0" placeholder="Ej: 5">
+                        </div>
+                        <div class="form-group">
+                            <label for="weeklyConversionsGoal">Meta Semanal de Conversiones:</label>
+                            <input type="number" id="weeklyConversionsGoal" name="weeklyConversionsGoal" min="0" placeholder="Ej: 2">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxActionsPerDay">Máximo Acciones por Día:</label>
+                            <input type="number" id="maxActionsPerDay" name="maxActionsPerDay" min="0" placeholder="Ej: 10">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar KPIs</button>
+                    </form>
+                </div>
+
+                <!-- Pantalla 3: Asignación de Leads -->
+                <div id="lead-assignment-screen" class="advisor-screen">
+                    <h3>Asignar Lead a Asesor</h3>
+                    <form id="leadAssignmentForm" class="form-container">
+                        <div class="form-group">
+                            <label for="leadSelect">Seleccionar Lead:</label>
+                            <select id="leadSelect" name="leadId" required>
+                                <option value="">Seleccionar lead...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignToAdvisor">Asignar a Asesor:</label>
+                            <select id="assignToAdvisor" name="advisor" required>
+                                <option value="">Seleccionar asesor...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sequenceAssign">Asignar Secuencia:</label>
+                            <select id="sequenceAssign" name="sequenceId">
+                                <option value="">Sin secuencia específica</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Asignar Lead</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Sequences Section -->
+            <section id="sequences" class="content-section">
+                <h2>Gestión de Secuencias</h2>
+                
+                <div class="sequences-container">
+                    <div class="sequence-form-card">
+                        <div class="card-header">
+                            <h3>Crear Nueva Secuencia</h3>
+                            <p>Define las acciones automáticas para cada estado del lead</p>
+                        </div>
+                        
+                        <form id="sequenceForm" class="sequence-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sequenceName">Nombre de la Secuencia</label>
+                                    <input type="text" id="sequenceName" placeholder="Ej: Secuencia de Calificación" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sequenceState">Estado del Lead</label>
+                                    <select id="sequenceState" required>
+                                        <option value="">Seleccionar estado...</option>
+                                        <option value="Calificar">Calificar</option>
+                                        <option value="Desarrollar">Desarrollar</option>
+                                        <option value="Proponer">Proponer</option>
+                                        <option value="Cierre">Cierre</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sequenceInterest">Nivel de Interés</label>
+                                    <select id="sequenceInterest">
+                                        <option value="">Todos los niveles</option>
+                                        <option value="Poco interesado">Poco interesado</option>
+                                        <option value="Interesado">Interesado</option>
+                                        <option value="Medianamente interesado">Medianamente interesado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="sequence-actions-section">
+                                <div class="section-header">
+                                    <h4>Acciones de la Secuencia</h4>
+                                    <button type="button" id="addSequenceAction" class="btn btn-outline">
+                                        + Agregar Acción
+                                    </button>
+                                </div>
+                                
+                                <div id="sequenceActions" class="actions-list">
+                                    <div class="sequence-action">
+                                        <div class="action-type-group">
+                                            <label>Tipo de Acción</label>
+                                            <select class="action-type">
+                                                <option value="Llamada">Llamada</option>
+                                                <option value="Mensaje">Mensaje</option>
+                                                <option value="Correo">Correo</option>
+                                                <option value="Reunión presencial">Reunión presencial</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="action-count-group">
+                                            <label>Cantidad</label>
+                                            <input type="number" class="action-repetitions" placeholder="1" min="1" value="1">
+                                        </div>
+                                        
+                                        <div class="action-delay-group">
+                                            <label>Delay (horas)</label>
+                                            <input type="number" class="action-delay" placeholder="0" min="0" value="0">
+                                        </div>
+                                        
+                                        <div class="action-max-time-group">
+                                            <label>Tiempo máx (días)</label>
+                                            <input type="number" class="action-max-time" placeholder="7" min="1" value="7">
+                                        </div>
+                                        
+                                        <div class="action-remove-group">
+                                            <button type="button" class="btn btn-danger btn-sm remove-action">
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="resetSequence">Limpiar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    Crear Secuencia
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="sequences-list-card">
+                        <div class="card-header">
+                            <h3>Secuencias Existentes</h3>
+                            <span class="sequence-count" id="sequenceCount">0 secuencias</span>
+                        </div>
+                        
+                        <div id="sequencesList" class="sequences-grid">
+                            <!-- Sequences will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendar" class="content-section">
+                <h2>Calendario del Equipo</h2>
+                
+                <!-- Controles del Calendario -->
+                <div class="calendar-controls">
+                    <button id="prevWeek" class="btn btn-secondary">‹ Semana Anterior</button>
+                    <button id="todayBtn" class="btn btn-outline">Hoy</button>
+                    <span id="currentWeek" class="week-display"></span>
+                    <button id="nextWeek" class="btn btn-secondary">Siguiente Semana ›</button>
+                    <button id="createEventBtn" class="btn btn-primary">+ Crear Evento</button>
+                </div>
+                
+                <!-- Calendario Semanal -->
+                <div class="weekly-calendar-container">
+                    <div class="calendar-header">
+                        <div class="day-header">Hora</div>
+                        <div class="day-header">Lunes</div>
+                        <div class="day-header">Martes</div>
+                        <div class="day-header">Miércoles</div>
+                        <div class="day-header">Jueves</div>
+                        <div class="day-header">Viernes</div>
+                        <div class="day-header">Sábado</div>
+                        <div class="day-header">Domingo</div>
+                    </div>
+                    <div class="calendar-grid" id="teamCalendar">
+                        <!-- El calendario se generará dinámicamente -->
+                    </div>
+                </div>
+                
+                <!-- Resumen de Tareas del Equipo -->
+                <div class="team-tasks-summary">
+                    <h3>Resumen de Tareas del Equipo</h3>
+                    <div class="tasks-summary-grid" id="tasksSummary">
+                        <!-- Las tareas se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leads Section -->
+            <section id="leads" class="content-section">
+                <h2>Gestión de Leads</h2>
+                <div class="leads-filters">
+                    <select id="leadsStatusFilter">
+                        <option value="">Todos los Estados</option>
+                        <option value="Calificar">Calificar</option>
+                        <option value="Desarrollar">Desarrollar</option>
+                        <option value="Proponer">Proponer</option>
+                        <option value="Cierre">Cierre</option>
+                    </select>
+                    <select id="leadsInterestFilter">
+                        <option value="">Todos los Niveles</option>
+                        <option value="Poco interesado">Poco interesado</option>
+                        <option value="Interesado">Interesado</option>
+                        <option value="Medianamente interesado">Medianamente interesado</option>
+                    </select>
+                    <select id="leadsAdvisorFilter">
+                        <option value="">Todos los Asesores</option>
+                    </select>
+                    <button onclick="window.crm.loadManagerLeads()" class="btn btn-primary">Cargar Leads</button>
+                </div>
+                <div class="leads-grid" id="leadsGrid">
+                    <!-- Leads will be populated here -->
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section id="clients" class="content-section">
+                <h2>Lista de Clientes</h2>
+                <div class="clients-filters">
+                    <select id="clientsAdvisorFilter">
+                        <option value="">Todos los Asesores</option>
+                    </select>
+                    <select id="clientsTypeFilter">
+                        <option value="">Todos los Tipos</option>
+                        <option value="potencial">Cliente Potencial</option>
+                        <option value="fidelizado">Cliente Fidelizado</option>
+                    </select>
+                    <button onclick="window.crm.loadManagerClients()" class="btn btn-primary">Cargar Clientes</button>
+                </div>
+                <div class="clients-list" id="clientsList">
+                    <!-- Clients will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="leadDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="leadDetailTitle">Detalle del Lead</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="leadDetailContent">
+                <!-- Lead details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="sequenceDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="sequenceDetailTitle">Detalle de Secuencia</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="sequenceDetailContent">
+                <!-- Sequence details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Asignación Múltiple de Asesores -->
+    <div id="assignAdvisorsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Asignar Secuencia a Asesores</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="assignment-info">
+                    <h4 id="assignmentSequenceName"></h4>
+                    <p>Selecciona los asesores a los que quieres asignar esta secuencia:</p>
+                </div>
+                
+                <div class="advisors-selection">
+                    <div class="selection-controls">
+                        <button type="button" id="selectAllAdvisors" class="btn btn-outline btn-sm">Seleccionar Todos</button>
+                        <button type="button" id="deselectAllAdvisors" class="btn btn-outline btn-sm">Deseleccionar Todos</button>
+                    </div>
+                    
+                    <div id="advisorsList" class="advisors-checkbox-list">
+                        <!-- Lista de asesores con checkboxes -->
+                    </div>
+                </div>
+                
+                <div class="current-assignments">
+                    <h5>Asignaciones Actuales:</h5>
+                    <div id="currentAssignmentsList" class="current-assignments-list">
+                        <!-- Lista de asesores actualmente asignados -->
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAssignment">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveAssignments">Guardar Asignaciones</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize manager interface
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando manager...');
+            if (window.crm && typeof window.crm.initManager === 'function') {
+                window.crm.initManager();
+            } else {
+                console.error('CRM App no está disponible');
+            }
+        });
+    </script>
+
+    <!-- Modal para Crear Evento -->
+    <div id="createEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Nuevo Evento</h3>
+                <span class="close" onclick="window.crm.closeCreateEventModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="createEventForm">
+                    <div class="form-group">
+                        <label for="eventTitle">Título del Evento:</label>
+                        <input type="text" id="eventTitle" name="title" required placeholder="Ej: Reunión de equipo">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDescription">Descripción:</label>
+                        <textarea id="eventDescription" name="description" placeholder="Descripción del evento..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventDate">Fecha:</label>
+                            <input type="date" id="eventDate" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventTime">Hora:</label>
+                            <input type="time" id="eventTime" name="time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDuration">Duración (minutos):</label>
+                        <input type="number" id="eventDuration" name="duration" min="15" max="480" value="60" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventAdvisor">Asignar a Asesor:</label>
+                        <select id="eventAdvisor" name="advisor">
+                            <option value="">Todos los asesores</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventType">Tipo de Evento:</label>
+                        <select id="eventType" name="type" required>
+                            <option value="meeting">Reunión</option>
+                            <option value="call">Llamada</option>
+                            <option value="task">Tarea</option>
+                            <option value="reminder">Recordatorio</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.crm.closeCreateEventModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="window.crm.saveEvent()">Crear Evento</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
