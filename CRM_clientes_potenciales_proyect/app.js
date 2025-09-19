@@ -11,11 +11,88 @@ class CRMApp {
         
         // Mock data
         this.users = [
-            { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', hidden: true },
-            { id: 2, username: 'manager', password: 'manager123', role: 'manager', name: 'Gerente de Ventas' },
-            { id: 3, username: 'advisor', password: 'advisor123', role: 'advisor', name: 'Asesor' },
-            { id: 4, username: 'advisor2', password: 'advisor123', role: 'advisor', name: 'Asesor 2', hidden: true },
-            { id: 5, username: 'advisor3', password: 'advisor123', role: 'advisor', name: 'Asesor 3', hidden: true }
+            { 
+                id: 1, 
+                username: 'admin', 
+                password: 'admin123', 
+                role: 'admin', 
+                name: 'Administrador',
+                firstName: 'Administrador',
+                lastName: 'Sistema',
+                email: 'admin@sistema.com',
+                phone: '+1234567890',
+                cedula: '1234567890',
+                address: 'Oficina Principal, Ciudad',
+                isActive: false,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
+            },
+            { 
+                id: 2, 
+                username: 'manager', 
+                password: 'manager123', 
+                role: 'manager', 
+                name: 'Gerente de Ventas',
+                firstName: 'Gerente',
+                lastName: 'Ventas',
+                email: 'gerente@empresa.com',
+                phone: '+1234567891',
+                cedula: '1234567891',
+                address: 'Oficina Gerencia, Ciudad',
+                isActive: false,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
+            },
+            { 
+                id: 3, 
+                username: 'advisor', 
+                password: 'advisor123', 
+                role: 'advisor', 
+                name: 'Asesor',
+                firstName: 'Asesor',
+                lastName: 'Principal',
+                email: 'asesor@empresa.com',
+                phone: '+1234567892',
+                cedula: '1234567892',
+                address: 'Oficina Ventas, Ciudad',
+                isActive: true,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
+            },
+            { 
+                id: 4, 
+                username: 'advisor2', 
+                password: 'advisor123', 
+                role: 'advisor', 
+                name: 'Asesor 2', 
+                hidden: true,
+                firstName: 'Asesor',
+                lastName: 'Secundario',
+                email: 'asesor2@empresa.com',
+                phone: '+1234567893',
+                cedula: '1234567893',
+                address: 'Oficina Ventas 2, Ciudad',
+                isActive: true,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
+            },
+            { 
+                id: 5, 
+                username: 'advisor3', 
+                password: 'advisor123', 
+                role: 'advisor', 
+                name: 'Asesor 3', 
+                hidden: true,
+                firstName: 'Asesor',
+                lastName: 'Terciario',
+                email: 'asesor3@empresa.com',
+                phone: '+1234567894',
+                cedula: '1234567894',
+                address: 'Oficina Ventas 3, Ciudad',
+                isActive: true,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
+            }
         ];
         
         this.leads = [
@@ -1242,9 +1319,25 @@ class CRMApp {
             this.sequences = data.sequences || this.sequences;
             this.kpis = data.kpis || this.kpis;
             this.activities = data.activities || this.activities;
+            this.users = data.users || this.users;
+            
+            // Asegurar que los usuarios tengan todos los campos necesarios
+            this.users = this.users.map(user => ({
+                ...user,
+                firstName: user.firstName || user.name?.split(' ')[0] || 'Usuario',
+                lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || 'Sin Apellido',
+                email: user.email || `${user.username}@empresa.com`,
+                phone: user.phone || '+1234567890',
+                cedula: user.cedula || '1234567890',
+                address: user.address || 'Dirección no especificada',
+                isActive: user.isActive !== undefined ? user.isActive : true,
+                createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+                createdBy: user.createdBy || 'Sistema'
+            }));
             
             console.log('Datos cargados:', {
                 sequences: this.sequences.length,
+                users: this.users.length,
                 data: data
             });
         } else {
@@ -1258,10 +1351,12 @@ class CRMApp {
             tasks: this.tasks,
             sequences: this.sequences,
             kpis: this.kpis,
-            activities: this.activities
+            activities: this.activities,
+            users: this.users
         };
         console.log('Guardando datos:', {
             sequences: this.sequences.length,
+            users: this.users.length,
             data: data
         });
         localStorage.setItem('crmData', JSON.stringify(data));
@@ -1927,6 +2022,26 @@ class CRMApp {
         }, 100);
     }
     
+    initManagerForAdmin() {
+        this.checkAuthentication();
+        if (!this.isAuthenticated || (this.currentRole !== 'manager' && this.currentRole !== 'admin')) {
+            this.redirectToRole();
+            return;
+        }
+        
+        this.setupManagerEventListeners();
+        this.updateManagerDashboard();
+        
+        // Initialize sequences display
+        setTimeout(() => {
+            console.log('Inicializando secuencias del admin/manager...');
+            this.updateManagerSequences();
+            
+            // Agregar botón de prueba temporal
+            this.addTestButton();
+        }, 100);
+    }
+    
     initAdvisor() {
         this.checkAuthentication();
         if (!this.isAuthenticated || this.currentRole !== 'advisor') {
@@ -1945,6 +2060,8 @@ class CRMApp {
         setTimeout(() => {
             this.updateAdvisorTasks();
             this.updateAdvisorKanban();
+            this.updateTodayPendingTasks();
+            this.updateUpcomingTasksWidget();
         }, 100);
     }
     
@@ -2294,6 +2411,132 @@ class CRMApp {
                 this.closeModal('assignAdvisorsModal');
             });
         }
+
+        // User Management Event Listeners
+        const userCreationForm = document.getElementById('userCreationForm');
+        if (userCreationForm) {
+            userCreationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleUserCreation();
+            });
+        }
+
+        const resetUserFormBtn = document.getElementById('resetUserForm');
+        if (resetUserFormBtn) {
+            resetUserFormBtn.addEventListener('click', () => {
+                document.getElementById('userCreationForm').reset();
+            });
+        }
+
+        const editUserForm = document.getElementById('editUserForm');
+        if (editUserForm) {
+            editUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleUserEdit();
+            });
+        }
+
+        // Users filter
+        const usersRoleFilter = document.getElementById('usersRoleFilter');
+        if (usersRoleFilter) {
+            usersRoleFilter.addEventListener('change', () => {
+                this.loadUsers();
+            });
+        }
+
+        // User Detail Modal Event Listeners
+        const userDetailModal = document.getElementById('userDetailModal');
+        if (userDetailModal) {
+            const closeBtn = userDetailModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    userDetailModal.style.display = 'none';
+                    userDetailModal.classList.remove('show');
+                });
+            }
+            
+            // Click fuera del modal
+            userDetailModal.addEventListener('click', (e) => {
+                if (e.target === userDetailModal) {
+                    userDetailModal.style.display = 'none';
+                    userDetailModal.classList.remove('show');
+                }
+            });
+        }
+
+        // Edit User Modal Event Listeners
+        const editUserModal = document.getElementById('editUserModal');
+        if (editUserModal) {
+            const closeBtn = editUserModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.closeEditUserModal();
+                });
+            }
+            
+            // Click fuera del modal
+            editUserModal.addEventListener('click', (e) => {
+                if (e.target === editUserModal) {
+                    this.closeEditUserModal();
+                }
+            });
+        }
+
+        // Lead Detail Modal Event Listeners
+        const leadDetailModal = document.getElementById('leadDetailModal');
+        if (leadDetailModal) {
+            const closeBtn = leadDetailModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    leadDetailModal.style.display = 'none';
+                    leadDetailModal.classList.remove('show');
+                });
+            }
+            
+            // Click fuera del modal
+            leadDetailModal.addEventListener('click', (e) => {
+                if (e.target === leadDetailModal) {
+                    leadDetailModal.style.display = 'none';
+                    leadDetailModal.classList.remove('show');
+                }
+            });
+        }
+
+        // Create Event Modal Event Listeners
+        const createEventModal = document.getElementById('createEventModal');
+        if (createEventModal) {
+            const closeBtn = createEventModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.closeCreateEventModal();
+                });
+            }
+            
+            // Click fuera del modal
+            createEventModal.addEventListener('click', (e) => {
+                if (e.target === createEventModal) {
+                    this.closeCreateEventModal();
+                }
+            });
+        }
+
+        // Task Detail Modal Event Listeners
+        const taskDetailModal = document.getElementById('taskDetailModal');
+        if (taskDetailModal) {
+            const closeBtn = taskDetailModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.closeTaskDetailModal();
+                });
+            }
+            
+            // Click fuera del modal
+            taskDetailModal.addEventListener('click', (e) => {
+                if (e.target === taskDetailModal) {
+                    this.closeTaskDetailModal();
+                }
+            });
+        }
     }
     
     showManagerSection(sectionName) {
@@ -2328,6 +2571,10 @@ class CRMApp {
                 break;
             case 'advisor-management':
                 this.updateManagerAdvisorManagement();
+                break;
+            case 'user-management':
+                console.log('Cambiando a sección de gestión de usuarios...');
+                this.updateManagerUserManagement();
                 break;
             case 'sequences':
                 console.log('Cambiando a sección de secuencias...');
@@ -3812,6 +4059,8 @@ class CRMApp {
         this.showNotification('Tarea creada exitosamente', 'success');
         this.closeModal('taskModal');
         this.updateAdvisorTasks();
+        this.updateTodayPendingTasks();
+        this.updateUpcomingTasksWidget();
     }
     
     completeTaskFromModal() {
@@ -3822,26 +4071,42 @@ class CRMApp {
             this.showNotification('Tarea completada exitosamente', 'success');
             this.closeModal('completeTaskModal');
             this.updateAdvisorTasks();
+            this.updateTodayPendingTasks();
+            this.updateUpcomingTasksWidget();
         }
     }
 
     createLeadFromModal() {
         const name = document.getElementById('leadName').value;
-        const company = document.getElementById('leadCompany').value;
-        const email = document.getElementById('leadEmail').value;
         const phone = document.getElementById('leadPhone').value;
-        const interest = document.getElementById('leadInterest').value;
-        const notes = document.getElementById('leadNotes').value;
+        const sector = document.getElementById('leadSector').value;
+        const currentCompany = document.getElementById('currentCompany').value;
+        const currentPlanValue = document.getElementById('currentPlanValue').value;
+        const serviceTime = document.getElementById('serviceTime').value;
+        const satisfactionRating = document.getElementById('satisfactionRating').value;
+        const improvementAreas = document.getElementById('improvementAreas').value;
+        const preferredPlan = document.getElementById('preferredPlan').value;
+        const interestLevel = document.getElementById('interestLevel').value;
+        const whatsMissing = document.getElementById('whatsMissing').value;
         
         const leadData = {
             name,
-            company,
-            email,
             phone,
+            sector,
+            currentCompany,
+            currentPlanValue,
+            serviceTime,
+            satisfactionRating,
+            improvementAreas,
+            preferredPlan,
+            interestLevel,
+            whatsMissing,
+            company: currentCompany, // Mantener compatibilidad
+            email: '', // Campo removido
             status: 'Calificar',
-            interest,
+            interest: interestLevel, // Usar el nuevo campo de interés
             advisor: this.currentUser.name,
-            notes
+            notes: `Sector: ${sector}\nPlan actual: ${currentPlanValue}\nTiempo con servicio: ${serviceTime}\nSatisfacción: ${satisfactionRating}\nMejoras deseadas: ${improvementAreas}\nPlan preferido: ${preferredPlan}\nInterés (1-10): ${interestLevel}\nLo que falta: ${whatsMissing}`
         };
         
         const newLead = this.createLead(leadData);
@@ -5968,7 +6233,10 @@ class CRMApp {
         const calendarGrid = document.getElementById('teamCalendar');
         const weekDisplay = document.getElementById('currentWeek');
         
-        if (!calendarGrid) return;
+        if (!calendarGrid) {
+            console.error('Elemento teamCalendar no encontrado');
+            return;
+        }
         
         // Actualizar display de la semana
         if (weekDisplay) {
@@ -5995,73 +6263,73 @@ class CRMApp {
             days.push(day);
         }
         
-        // Crear grid del calendario
+        // Crear grid del calendario con estructura correcta
+        let calendarHTML = '';
+        
         timeSlots.forEach(timeSlot => {
             // Slot de tiempo
-            const timeElement = document.createElement('div');
-            timeElement.className = 'time-slot';
-            timeElement.textContent = timeSlot;
-            calendarGrid.appendChild(timeElement);
+            calendarHTML += `<div class="time-slot">${timeSlot}</div>`;
             
             // Celdas para cada día
             days.forEach(day => {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'day-cell';
+                let dayCellClass = 'day-cell';
                 
                 // Marcar día actual
                 const today = new Date();
                 if (this.isSameDay(day, today)) {
-                    dayCell.classList.add('today');
+                    dayCellClass += ' today';
                 }
                 
                 // Marcar fines de semana
                 if (day.getDay() === 0 || day.getDay() === 6) {
-                    dayCell.classList.add('weekend');
+                    dayCellClass += ' weekend';
                 }
+                
+                calendarHTML += `<div class="${dayCellClass}" data-date="${day.toISOString().split('T')[0]}" data-time="${timeSlot}">`;
                 
                 // Agregar tareas y eventos para este día y hora
-                this.addTasksToDayCell(dayCell, day, timeSlot);
+                const dayTasks = this.getTasksForDay(day);
+                const dayEvents = this.getEventsForDay(day);
                 
-                calendarGrid.appendChild(dayCell);
+                // Agregar tareas
+                dayTasks.forEach(task => {
+                    if (this.isTaskAtTime(task, timeSlot)) {
+                        const statusClass = task.status === 'completada' ? 'completed' : '';
+                        calendarHTML += `
+                            <div class="task-item-calendar ${task.type} ${statusClass}" 
+                                 onclick="window.crm.showTaskDetail(${task.id})" 
+                                 title="${task.title || task.type} - ${task.advisor || 'Sin asignar'} - ${task.description || 'Sin descripción'}"
+                                 style="cursor: pointer;">
+                                <div style="font-weight: 600;">${task.title || task.type}</div>
+                                <div style="font-size: 0.7rem; opacity: 0.9;">${task.advisor || 'Sin asignar'}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // Agregar eventos
+                dayEvents.forEach(event => {
+                    if (this.isEventAtTime(event, timeSlot)) {
+                        calendarHTML += `
+                            <div class="event-item-calendar" 
+                                 onclick="window.crm.showEventDetail(${event.id})" 
+                                 title="${event.title} - ${event.advisor || 'Equipo'} - ${event.description || 'Sin descripción'}"
+                                 style="cursor: pointer;">
+                                <div style="font-weight: 600;">${event.title}</div>
+                                <div style="font-size: 0.7rem; opacity: 0.9;">${event.advisor || 'Equipo'}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                calendarHTML += '</div>';
             });
         });
+        
+        calendarGrid.innerHTML = calendarHTML;
+        console.log('Calendario del manager generado correctamente');
     }
     
-    addTasksToDayCell(dayCell, day, timeSlot) {
-        const dayTasks = this.getTasksForDay(day);
-        const dayEvents = this.getEventsForDay(day);
-        
-        // Agregar tareas
-        dayTasks.forEach(task => {
-            if (this.isTaskAtTime(task, timeSlot)) {
-                const taskElement = document.createElement('div');
-                taskElement.className = `task-item-calendar ${task.type}`;
-                if (task.status === 'completada') {
-                    taskElement.classList.add('completed');
-                }
-                taskElement.innerHTML = `
-                    <div style="font-weight: 600;">${task.title}</div>
-                    <div style="font-size: 0.7rem; opacity: 0.9;">${task.advisor}</div>
-                `;
-                taskElement.title = `${task.title} - ${task.advisor} - ${task.description || 'Sin descripción'}`;
-                dayCell.appendChild(taskElement);
-            }
-        });
-        
-        // Agregar eventos
-        dayEvents.forEach(event => {
-            if (this.isEventAtTime(event, timeSlot)) {
-                const eventElement = document.createElement('div');
-                eventElement.className = 'event-item-calendar';
-                eventElement.innerHTML = `
-                    <div style="font-weight: 600;">${event.title}</div>
-                    <div style="font-size: 0.7rem; opacity: 0.9;">${event.advisor || 'Equipo'}</div>
-                `;
-                eventElement.title = `${event.title} - ${event.advisor || 'Equipo'} - ${event.description || 'Sin descripción'}`;
-                dayCell.appendChild(eventElement);
-            }
-        });
-    }
     
     getTasksForDay(day) {
         return this.tasks.filter(task => {
@@ -6265,9 +6533,23 @@ class CRMApp {
                         <div class="detail-group">
                             <h4>Información Básica</h4>
                             <p><strong>Nombre:</strong> ${lead.name}</p>
-                            <p><strong>Contacto:</strong> ${lead.contact}</p>
+                            <p><strong>Teléfono:</strong> ${lead.phone || 'No especificado'}</p>
+                            <p><strong>Sector:</strong> ${lead.sector || 'No especificado'}</p>
                             <p><strong>Estado:</strong> <span class="status-${lead.status ? lead.status.toLowerCase() : 'sin-definir'}">${lead.status || 'Sin definir'}</span></p>
-                            <p><strong>Nivel de Interés:</strong> <span class="interest-${lead.interestLevel ? lead.interestLevel.toLowerCase().replace(' ', '-') : 'sin-definir'}">${lead.interestLevel || 'Sin definir'}</span></p>
+                        </div>
+                        <div class="detail-group">
+                            <h4>Servicio Actual</h4>
+                            <p><strong>Empresa actual:</strong> ${lead.currentCompany || 'No especificado'}</p>
+                            <p><strong>Valor del plan actual:</strong> ${lead.currentPlanValue || 'No especificado'}</p>
+                            <p><strong>Tiempo con el servicio:</strong> ${lead.serviceTime || 'No especificado'}</p>
+                            <p><strong>Calificación de satisfacción:</strong> ${lead.satisfactionRating || 'No especificado'}</p>
+                        </div>
+                        <div class="detail-group">
+                            <h4>Interés y Preferencias</h4>
+                            <p><strong>Nivel de interés (1-10):</strong> ${lead.interestLevel || 'No especificado'}</p>
+                            <p><strong>Mejoras deseadas:</strong> ${lead.improvementAreas || 'No especificado'}</p>
+                            <p><strong>Plan preferido:</strong> ${lead.preferredPlan || 'No especificado'}</p>
+                            <p><strong>Lo que falta para llegar a 10:</strong> ${lead.whatsMissing || 'No especificado'}</p>
                         </div>
                         <div class="detail-group">
                             <h4>Asignación</h4>
@@ -6275,10 +6557,12 @@ class CRMApp {
                             <p><strong>Fecha de Creación:</strong> ${new Date(lead.createdAt).toLocaleDateString('es-ES')}</p>
                             <p><strong>Última Actividad:</strong> ${new Date(lead.lastActivity).toLocaleDateString('es-ES')}</p>
                         </div>
+                        ${lead.notes ? `
                         <div class="detail-group">
-                            <h4>Notas</h4>
-                            <p>${lead.notes || 'Sin notas'}</p>
+                            <h4>Notas Adicionales</h4>
+                            <p>${lead.notes}</p>
                         </div>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -6644,6 +6928,112 @@ class CRMApp {
         });
         
         console.log(`Cargados ${filteredLeads.length} leads`);
+    }
+
+    createManagerLeadCard(lead) {
+        const leadCard = document.createElement('div');
+        leadCard.className = 'lead-card';
+        
+        const interestLevel = lead.interestLevel || lead.interest || 'No especificado';
+        const currentCompany = lead.currentCompany || lead.company || 'No especificado';
+        const phone = lead.phone || 'No especificado';
+        const sector = lead.sector || 'No especificado';
+        
+        // Determinar color del estado
+        let statusColor = '#007bff';
+        switch (lead.status) {
+            case 'Calificar':
+                statusColor = '#ffc107';
+                break;
+            case 'Desarrollar':
+                statusColor = '#17a2b8';
+                break;
+            case 'Proponer':
+                statusColor = '#fd7e14';
+                break;
+            case 'Cierre':
+                statusColor = '#28a745';
+                break;
+            case 'Perdido':
+                statusColor = '#dc3545';
+                break;
+        }
+        
+        leadCard.innerHTML = `
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); transition: all 0.2s ease; cursor: pointer;" 
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)'"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.1)'">
+                
+                <!-- Header del lead -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #1e293b; font-size: 1.25rem; font-weight: 600;">${lead.name}</h4>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; font-weight: 500;">
+                                ${lead.status}
+                            </span>
+                            <span style="color: #64748b; font-size: 0.875rem;">
+                                📱 ${phone}
+                            </span>
+                        </div>
+                        <div style="color: #64748b; font-size: 0.875rem;">
+                            <span style="margin-right: 1rem;">🏢 ${currentCompany}</span>
+                            <span>🏭 ${sector}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="background: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">
+                            Interés: ${interestLevel}
+                        </div>
+                        <div style="color: #64748b; font-size: 0.75rem;">
+                            ${lead.advisor || 'Sin asignar'}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información adicional -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Plan Actual</div>
+                        <div style="font-weight: 600; color: #1e293b;">${lead.currentPlanValue || 'No especificado'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Tiempo Servicio</div>
+                        <div style="font-weight: 600; color: #1e293b;">${lead.serviceTime || 'No especificado'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Satisfacción</div>
+                        <div style="font-weight: 600; color: #1e293b;">${lead.satisfactionRating || 'No especificado'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Plan Preferido</div>
+                        <div style="font-weight: 600; color: #1e293b;">${lead.preferredPlan || 'No especificado'}</div>
+                    </div>
+                </div>
+                
+                <!-- Acciones -->
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button onclick="window.crm.showManagerLeadDetails(${lead.id})" 
+                            style="flex: 1; padding: 0.75rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Ver Detalles
+                    </button>
+                    <button onclick="window.crm.editLead(${lead.id})" 
+                            style="padding: 0.75rem 1rem; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease;">
+                        ✏️ Editar
+                    </button>
+                    <button onclick="window.crm.reassignLead(${lead.id})" 
+                            style="padding: 0.75rem 1rem; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease;">
+                        🔄 Reasignar
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return leadCard;
     }
 
     // ==================== GESTIÓN DE CLIENTES ====================
@@ -7341,6 +7731,82 @@ class CRMApp {
         const modal = document.getElementById('taskDetailModal');
         if (modal) {
             modal.classList.add('show');
+        }
+    }
+    
+    showEventDetail(eventId) {
+        console.log('Buscando evento con ID:', eventId, 'Tipo:', typeof eventId);
+        const event = this.events ? this.events.find(e => e.id == eventId) : null;
+        console.log('Evento encontrado:', !!event);
+        
+        if (!event) {
+            this.showNotification('Evento no encontrado', 'error');
+            return;
+        }
+        
+        // Create detailed HTML content for the modal
+        const taskDetailContent = document.getElementById('taskDetailContent');
+        if (taskDetailContent) {
+            taskDetailContent.innerHTML = `
+                <div class="task-detail-info">
+                    <div class="task-detail-header">
+                        <h4>${event.title}</h4>
+                        <div class="task-detail-meta">
+                            <span class="task-status status-programada">Evento</span>
+                            <span class="task-priority priority-media">${event.type || 'General'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-grid">
+                        <div class="task-detail-item">
+                            <label>Título:</label>
+                            <span>${event.title}</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <label>Tipo:</label>
+                            <span>${event.type || 'General'}</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <label>Fecha:</label>
+                            <span>${this.formatDate(event.date)}</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <label>Hora:</label>
+                            <span>${event.time || 'No especificada'}</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <label>Duración:</label>
+                            <span>${event.duration || 60} minutos</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <label>Asignado a:</label>
+                            <span>${event.advisor || 'Equipo completo'}</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <label>Creado:</label>
+                            <span>${this.formatDate(event.createdAt || new Date())}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-notes">
+                        <label>Descripción:</label>
+                        <p>${event.description || 'Sin descripción'}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show the modal
+        const modal = document.getElementById('taskDetailModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+    }
+    
+    closeTaskDetailModal() {
+        const modal = document.getElementById('taskDetailModal');
+        if (modal) {
+            modal.classList.remove('show');
         }
     }
     
@@ -8164,9 +8630,24 @@ class CRMApp {
     
     getInterestShortName(interest) {
         if (!interest) return 'No definido';
+        
+        // Manejar nuevos niveles de interés (1-10)
+        if (interest.includes('10 - Super interesado')) return '10 - Super';
+        if (interest.includes('9')) return '9';
+        if (interest.includes('8')) return '8';
+        if (interest.includes('7')) return '7';
+        if (interest.includes('6')) return '6';
+        if (interest.includes('5')) return '5';
+        if (interest.includes('4')) return '4';
+        if (interest.includes('3')) return '3';
+        if (interest.includes('2')) return '2';
+        if (interest.includes('1 - No me interesa')) return '1 - No';
+        
+        // Manejar niveles antiguos
         if (interest.includes('Medianamente')) return 'Mediano';
         if (interest.includes('Poco')) return 'Poco';
         if (interest.includes('Interesado')) return 'Alto';
+        
         return interest;
     }
     
@@ -8448,6 +8929,1312 @@ class CRMApp {
         
         alert('Lead actualizado exitosamente');
         console.log('Lead actualizado y vistas refrescadas');
+    }
+
+    // User Management Functions
+    createUser(userData) {
+        // Validar que el username no exista
+        const existingUser = this.users.find(u => u.username === userData.username);
+        if (existingUser) {
+            this.showNotification('El nombre de usuario ya existe', 'error');
+            return false;
+        }
+
+        // Validar que el email no exista
+        const existingEmail = this.users.find(u => u.email === userData.email);
+        if (existingEmail) {
+            this.showNotification('El correo electrónico ya está registrado', 'error');
+            return false;
+        }
+
+        // Validar que la cédula no exista
+        const existingCedula = this.users.find(u => u.cedula === userData.cedula);
+        if (existingCedula) {
+            this.showNotification('La cédula ya está registrada', 'error');
+            return false;
+        }
+
+        const newUser = {
+            id: Date.now(),
+            username: userData.username,
+            password: userData.password,
+            name: `${userData.firstName} ${userData.lastName}`,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            cedula: userData.cedula,
+            email: userData.email,
+            phone: userData.phone,
+            address: userData.address,
+            role: userData.role,
+            isActive: true,
+            createdAt: new Date(),
+            createdBy: this.currentUser.name
+        };
+
+        this.users.push(newUser);
+        this.saveData();
+        this.showNotification(`Usuario ${newUser.name} creado exitosamente`, 'success');
+        
+        // Actualizar lista de usuarios
+        this.loadUsers();
+        
+        return newUser;
+    }
+
+    loadUsers() {
+        const roleFilter = document.getElementById('usersRoleFilter')?.value;
+        let filteredUsers = this.users;
+
+        if (roleFilter) {
+            filteredUsers = this.users.filter(user => user.role === roleFilter);
+        }
+
+        const usersList = document.getElementById('usersList');
+        const userCount = document.getElementById('userCount');
+
+        if (!usersList) return;
+
+        userCount.textContent = `${filteredUsers.length} usuarios`;
+
+        if (filteredUsers.length === 0) {
+            usersList.innerHTML = `
+                <div class="no-users-message">
+                    <div class="icon">👥</div>
+                    <h3>No hay usuarios</h3>
+                    <p>No se encontraron usuarios que coincidan con los filtros seleccionados.</p>
+                </div>
+            `;
+            return;
+        }
+
+        usersList.innerHTML = filteredUsers.map(user => this.createUserCard(user)).join('');
+    }
+
+    createUserCard(user) {
+        const roleIcon = user.role === 'admin' ? '👑' : user.role === 'manager' ? '👔' : '👤';
+        const roleName = user.role === 'admin' ? 'Administrador' : user.role === 'manager' ? 'Gerente' : 'Asesor';
+        const statusClass = user.isActive ? 'active' : 'inactive';
+        const statusText = user.isActive ? 'Activo' : 'Inactivo';
+        
+        // Función para verificar si un campo tiene valor
+        const hasValue = (value) => value && value !== 'undefined' && value !== 'null';
+        
+        // Obtener información resumida
+        const emailDisplay = hasValue(user.email) ? user.email : 'No especificado';
+        const phoneDisplay = hasValue(user.phone) ? user.phone : 'No especificado';
+        const cedulaDisplay = hasValue(user.cedula) ? user.cedula : 'No especificado';
+        const addressDisplay = hasValue(user.address) ? (user.address.length > 50 ? user.address.substring(0, 50) + '...' : user.address) : 'No especificado';
+
+        return `
+            <div class="user-card ${statusClass}">
+                <div class="user-header">
+                    <div class="user-avatar">
+                        <span class="user-icon">${roleIcon}</span>
+                    </div>
+                    <div class="user-info">
+                        <h4>${user.name}</h4>
+                        <div class="user-meta">
+                            <span class="user-role-badge role-${user.role}">${roleName}</span>
+                            <span class="user-status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="user-username">@${user.username}</div>
+                    </div>
+                    <div class="user-actions-compact">
+                        <button onclick="window.crm.viewUserDetails(${user.id})" class="btn btn-outline btn-xs" title="Ver Detalles">
+                            👁️
+                        </button>
+                        <button onclick="window.crm.editUser(${user.id})" class="btn btn-primary btn-xs" title="Editar">
+                            ✏️
+                        </button>
+                        <button onclick="window.crm.toggleUserStatus(${user.id})" class="btn btn-${user.isActive ? 'warning' : 'success'} btn-xs" title="${user.isActive ? 'Desactivar' : 'Activar'}">
+                            ${user.isActive ? '⏸️' : '▶️'}
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="user-details-compact">
+                    <div class="detail-row">
+                        <div class="detail-item-compact">
+                            <span class="icon">📧</span>
+                            <span class="value">${emailDisplay}</span>
+                        </div>
+                        <div class="detail-item-compact">
+                            <span class="icon">📱</span>
+                            <span class="value">${phoneDisplay}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item-compact">
+                            <span class="icon">🆔</span>
+                            <span class="value">${cedulaDisplay}</span>
+                        </div>
+                        <div class="detail-item-compact">
+                            <span class="icon">📅</span>
+                            <span class="value">${this.formatDate(user.createdAt)}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item-compact full-width">
+                            <span class="icon">📍</span>
+                            <span class="value">${addressDisplay}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    viewUserDetails(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) {
+            this.showNotification('Usuario no encontrado', 'error');
+            return;
+        }
+
+        const modal = document.getElementById('userDetailModal');
+        const title = document.getElementById('userDetailTitle');
+        const content = document.getElementById('userDetailContent');
+
+        if (!modal || !title || !content) {
+            console.error('Elementos del modal de detalle de usuario no encontrados:', {
+                modal: !!modal,
+                title: !!title,
+                content: !!content
+            });
+            this.showNotification('Error: Modal no encontrado', 'error');
+            return;
+        }
+
+        title.textContent = `Detalle de ${user.name}`;
+
+        const roleIcon = user.role === 'admin' ? '👑' : user.role === 'manager' ? '👔' : '👤';
+        const roleName = user.role === 'admin' ? 'Administrador' : user.role === 'manager' ? 'Gerente de Ventas' : 'Asesor';
+
+        content.innerHTML = `
+            <div class="user-detail-container">
+                <div class="user-detail-header">
+                    <div class="user-avatar-large">
+                        <span class="user-icon-large">${roleIcon}</span>
+                    </div>
+                    <div class="user-main-info">
+                        <h3>${user.name}</h3>
+                        <span class="user-role-badge">${roleName}</span>
+                        <span class="user-status-badge ${user.isActive ? 'active' : 'inactive'}">
+                            ${user.isActive ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="user-detail-grid">
+                    <div class="detail-section">
+                        <h4>📋 Información Personal</h4>
+                        <div class="detail-item">
+                            <span class="label">Nombres:</span>
+                            <span class="value">${user.firstName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Apellidos:</span>
+                            <span class="value">${user.lastName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Cédula:</span>
+                            <span class="value">${user.cedula}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>📞 Información de Contacto</h4>
+                        <div class="detail-item">
+                            <span class="label">Email:</span>
+                            <span class="value">${user.email}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Teléfono:</span>
+                            <span class="value">${user.phone}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Dirección:</span>
+                            <span class="value">${user.address}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>🔐 Información de Acceso</h4>
+                        <div class="detail-item">
+                            <span class="label">Usuario:</span>
+                            <span class="value">${user.username}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Rol:</span>
+                            <span class="value">${roleName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Estado:</span>
+                            <span class="value ${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Activo' : 'Inactivo'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>📊 Información del Sistema</h4>
+                        <div class="detail-item">
+                            <span class="label">Creado:</span>
+                            <span class="value">${this.formatDateTime(user.createdAt)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Creado por:</span>
+                            <span class="value">${user.createdBy || 'Sistema'}</span>
+                        </div>
+                        ${user.lastLogin ? `
+                        <div class="detail-item">
+                            <span class="label">Último acceso:</span>
+                            <span class="value">${this.formatDateTime(user.lastLogin)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="user-detail-actions">
+                    <button onclick="window.crm.editUser(${user.id}); document.getElementById('userDetailModal').style.display='none';" class="btn btn-primary">
+                        ✏️ Editar Usuario
+                    </button>
+                    <button onclick="window.crm.toggleUserStatus(${user.id}); document.getElementById('userDetailModal').style.display='none';" class="btn btn-${user.isActive ? 'warning' : 'success'}">
+                        ${user.isActive ? '⏸️ Desactivar' : '▶️ Activar'}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    }
+
+    editUser(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) {
+            this.showNotification('Usuario no encontrado', 'error');
+            return;
+        }
+
+        // Verificar que todos los elementos del formulario existan
+        const formElements = {
+            firstName: document.getElementById('editUserFirstName'),
+            lastName: document.getElementById('editUserLastName'),
+            cedula: document.getElementById('editUserCedula'),
+            email: document.getElementById('editUserEmail'),
+            phone: document.getElementById('editUserPhone'),
+            address: document.getElementById('editUserAddress'),
+            username: document.getElementById('editUserUsername'),
+            role: document.getElementById('editUserRole'),
+            form: document.getElementById('editUserForm'),
+            modal: document.getElementById('editUserModal')
+        };
+
+        const missingElements = Object.keys(formElements).filter(key => !formElements[key]);
+        if (missingElements.length > 0) {
+            console.error('Elementos del formulario de edición no encontrados:', missingElements);
+            this.showNotification('Error: Formulario de edición no encontrado', 'error');
+            return;
+        }
+
+        // Llenar el formulario de edición
+        formElements.firstName.value = user.firstName || '';
+        formElements.lastName.value = user.lastName || '';
+        formElements.cedula.value = user.cedula || '';
+        formElements.email.value = user.email || '';
+        formElements.phone.value = user.phone || '';
+        formElements.address.value = user.address || '';
+        formElements.username.value = user.username || '';
+        formElements.role.value = user.role || '';
+
+        // Guardar el ID del usuario para la actualización
+        formElements.form.dataset.userId = userId;
+
+        // Mostrar el modal
+        formElements.modal.style.display = 'flex';
+        formElements.modal.classList.add('show');
+        console.log('Modal de edición de usuario mostrado para:', user.name);
+    }
+
+    updateUser(userId, userData) {
+        const userIndex = this.users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            this.showNotification('Usuario no encontrado', 'error');
+            return false;
+        }
+
+        // Validar username único (excluyendo el usuario actual)
+        const existingUser = this.users.find(u => u.username === userData.username && u.id !== userId);
+        if (existingUser) {
+            this.showNotification('El nombre de usuario ya existe', 'error');
+            return false;
+        }
+
+        // Validar email único (excluyendo el usuario actual)
+        const existingEmail = this.users.find(u => u.email === userData.email && u.id !== userId);
+        if (existingEmail) {
+            this.showNotification('El correo electrónico ya está registrado', 'error');
+            return false;
+        }
+
+        // Validar cédula única (excluyendo el usuario actual)
+        const existingCedula = this.users.find(u => u.cedula === userData.cedula && u.id !== userId);
+        if (existingCedula) {
+            this.showNotification('La cédula ya está registrada', 'error');
+            return false;
+        }
+
+        // Actualizar datos del usuario
+        const user = this.users[userIndex];
+        user.firstName = userData.firstName;
+        user.lastName = userData.lastName;
+        user.name = `${userData.firstName} ${userData.lastName}`;
+        user.cedula = userData.cedula;
+        user.email = userData.email;
+        user.phone = userData.phone;
+        user.address = userData.address;
+        user.username = userData.username;
+        user.role = userData.role;
+        user.updatedAt = new Date();
+        const currentUser = this.getCurrentUser();
+        user.updatedBy = currentUser ? currentUser.name : 'Sistema';
+
+        // Actualizar contraseña solo si se proporciona una nueva
+        if (userData.password && userData.password.trim() !== '') {
+            user.password = userData.password;
+        }
+
+        this.saveData();
+        this.showNotification(`Usuario ${user.name} actualizado exitosamente`, 'success');
+        this.loadUsers();
+        this.closeEditUserModal();
+        
+        return true;
+    }
+
+    toggleUserStatus(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) {
+            this.showNotification('Usuario no encontrado', 'error');
+            return;
+        }
+
+        // No permitir desactivar al usuario actual (si se puede determinar)
+        const currentUser = this.getCurrentUser();
+        if (currentUser && user.id === currentUser.id) {
+            this.showNotification('No puedes desactivar tu propio usuario', 'warning');
+            return;
+        }
+
+        user.isActive = !user.isActive;
+        user.statusChangedAt = new Date();
+        user.statusChangedBy = currentUser ? currentUser.name : 'Sistema';
+
+        this.saveData();
+        this.showNotification(`Usuario ${user.name} ${user.isActive ? 'activado' : 'desactivado'} exitosamente`, 'success');
+        this.loadUsers();
+    }
+
+    closeEditUserModal() {
+        document.getElementById('editUserModal').style.display = 'none';
+        document.getElementById('editUserForm').reset();
+        delete document.getElementById('editUserForm').dataset.userId;
+    }
+
+    // User Management Handler Functions
+    handleUserCreation() {
+        const formData = new FormData(document.getElementById('userCreationForm'));
+        const userData = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            cedula: formData.get('cedula'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            username: formData.get('username'),
+            password: formData.get('password'),
+            role: formData.get('role')
+        };
+
+        // Validaciones básicas
+        if (!userData.firstName || !userData.lastName || !userData.cedula || !userData.email || !userData.phone || !userData.address || !userData.username || !userData.password || !userData.role) {
+            this.showNotification('Por favor complete todos los campos obligatorios', 'error');
+            return;
+        }
+
+        if (userData.password.length < 6) {
+            this.showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+
+        if (userData.cedula.length !== 10) {
+            this.showNotification('La cédula debe tener exactamente 10 dígitos', 'error');
+            return;
+        }
+
+        // Crear usuario
+        const success = this.createUser(userData);
+        if (success) {
+            document.getElementById('userCreationForm').reset();
+        }
+    }
+
+    handleUserEdit() {
+        const userId = parseInt(document.getElementById('editUserForm').dataset.userId);
+        const formData = new FormData(document.getElementById('editUserForm'));
+        const userData = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            cedula: formData.get('cedula'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            username: formData.get('username'),
+            password: formData.get('password'),
+            role: formData.get('role')
+        };
+
+        // Validaciones básicas
+        if (!userData.firstName || !userData.lastName || !userData.cedula || !userData.email || !userData.phone || !userData.address || !userData.username || !userData.role) {
+            this.showNotification('Por favor complete todos los campos obligatorios', 'error');
+            return;
+        }
+
+        if (userData.password && userData.password.length < 6) {
+            this.showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+
+        if (userData.cedula.length !== 10) {
+            this.showNotification('La cédula debe tener exactamente 10 dígitos', 'error');
+            return;
+        }
+
+        // Actualizar usuario
+        this.updateUser(userId, userData);
+    }
+
+    closeEditUserModal() {
+        const modal = document.getElementById('editUserModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            // Limpiar formulario
+            const form = document.getElementById('editUserForm');
+            if (form) {
+                form.reset();
+            }
+        }
+    }
+
+    getCurrentUser() {
+        // Obtener el usuario actual de localStorage o sesión
+        const currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            const userData = JSON.parse(currentUserData);
+            return this.users.find(u => u.username === userData.username);
+        }
+        
+        // Si no hay usuario en localStorage, intentar obtener de this.currentUser
+        if (this.currentUser) {
+            return this.currentUser;
+        }
+        
+        // Como fallback, devolver null
+        return null;
+    }
+
+
+    updateManagerUserManagement() {
+        console.log('Actualizando sección de gestión de usuarios...');
+        
+        // Cargar usuarios
+        this.loadUsers();
+        
+        // Configurar filtros
+        const usersRoleFilter = document.getElementById('usersRoleFilter');
+        if (usersRoleFilter) {
+            // Limpiar opciones existentes excepto la primera
+            usersRoleFilter.innerHTML = '<option value="">Todos los Roles</option>';
+            
+            // Agregar opciones dinámicas
+            const roles = [...new Set(this.users.map(user => user.role))];
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role;
+                option.textContent = role === 'admin' ? 'Administrador' : 
+                                   role === 'manager' ? 'Gerente de Ventas' : 'Asesor';
+                usersRoleFilter.appendChild(option);
+            });
+        }
+    }
+
+    updateTodayPendingTasks() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const todayTasks = this.tasks.filter(task => {
+            const taskDate = new Date(task.dueDate);
+            taskDate.setHours(0, 0, 0, 0);
+            
+            return taskDate.getTime() === today.getTime() && 
+                   task.status !== 'completada' &&
+                   task.advisor === this.currentUser.name;
+        });
+
+        const todayPendingTasks = document.getElementById('todayPendingTasks');
+        const todayTasksStatus = document.getElementById('todayTasksStatus');
+        
+        if (todayPendingTasks) {
+            todayPendingTasks.textContent = todayTasks.length;
+        }
+        
+        if (todayTasksStatus) {
+            if (todayTasks.length === 0) {
+                todayTasksStatus.textContent = '¡Todo al día!';
+                todayTasksStatus.className = 'stat-change positive';
+            } else if (todayTasks.length <= 3) {
+                todayTasksStatus.textContent = 'Buen ritmo';
+                todayTasksStatus.className = 'stat-change neutral';
+            } else {
+                todayTasksStatus.textContent = 'Necesitas atención';
+                todayTasksStatus.className = 'stat-change negative';
+            }
+        }
+    }
+
+    updateAdvisorTasks() {
+        console.log('Actualizando tareas del asesor...');
+        
+        const tasksContainer = document.getElementById('tasksList');
+        if (!tasksContainer) {
+            console.error('Contenedor de tareas no encontrado');
+            return;
+        }
+
+        // Obtener tareas del asesor actual
+        const advisorTasks = this.tasks.filter(task => 
+            task.advisor === this.currentUser.name
+        );
+
+        console.log('Tareas del asesor encontradas:', advisorTasks.length);
+
+        if (advisorTasks.length === 0) {
+            tasksContainer.innerHTML = `
+                <div style="text-align: center; padding: 3rem; color: #6c757d; background: #f8f9fa; border-radius: 12px; border: 2px dashed #dee2e6;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📋</div>
+                    <h3 style="margin: 0 0 1rem 0; color: #495057;">No hay tareas asignadas</h3>
+                    <p style="margin: 0; color: #6c757d;">Crea una nueva tarea para comenzar a trabajar.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Ordenar tareas según la prioridad solicitada:
+        // 1. Próximas a realizarse (fecha futura, no completadas)
+        // 2. Completadas
+        // 3. No realizadas (fecha pasada, no completadas)
+        const sortedTasks = advisorTasks.sort((a, b) => {
+            const now = new Date();
+            const dateA = new Date(a.dueDate);
+            const dateB = new Date(b.dueDate);
+            
+            const isACompleted = a.status === 'completada';
+            const isBCompleted = b.status === 'completada';
+            const isAFuture = dateA > now;
+            const isBFuture = dateB > now;
+            const isAPast = dateA < now;
+            const isBPast = dateB < now;
+            
+            // 1. Próximas a realizarse (fecha futura, no completadas) - Prioridad 1
+            if (!isACompleted && isAFuture && (isBCompleted || !isBFuture)) return -1;
+            if (!isBCompleted && isBFuture && (isACompleted || !isAFuture)) return 1;
+            
+            // Si ambas son futuras, ordenar por fecha
+            if (!isACompleted && isAFuture && !isBCompleted && isBFuture) {
+                return dateA - dateB;
+            }
+            
+            // 2. Completadas - Prioridad 2
+            if (isACompleted && !isBCompleted) return 1;
+            if (isBCompleted && !isACompleted) return -1;
+            
+            // Si ambas son completadas, ordenar por fecha (más recientes primero)
+            if (isACompleted && isBCompleted) {
+                return dateB - dateA;
+            }
+            
+            // 3. No realizadas (fecha pasada, no completadas) - Prioridad 3
+            if (!isACompleted && isAPast && !isBCompleted && isBPast) {
+                return dateA - dateB; // Más vencidas primero
+            }
+            
+            return 0;
+        });
+
+        // Generar HTML de las tareas ordenadas
+        tasksContainer.innerHTML = sortedTasks.map(task => this.createTaskCard(task)).join('');
+        
+        console.log('Tareas del asesor actualizadas y ordenadas:', sortedTasks.length);
+    }
+
+    updateUpcomingTasksWidget() {
+        const widget = document.getElementById('upcomingTasksWidget');
+        if (!widget) {
+            console.error('Widget de próximas tareas no encontrado');
+            return;
+        }
+
+        // Obtener tareas próximas del asesor actual (fecha futura, no completadas)
+        const now = new Date();
+        const upcomingTasks = this.tasks
+            .filter(task => {
+                const taskDate = new Date(task.dueDate);
+                return task.advisor === this.currentUser.name &&
+                       task.status !== 'completada' &&
+                       taskDate > now;
+            })
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .slice(0, 5); // Mostrar solo las 5 próximas
+
+        console.log('Tareas próximas encontradas:', upcomingTasks.length);
+
+        if (upcomingTasks.length === 0) {
+            widget.innerHTML = `
+                <div style="text-align: center; padding: 3rem 2rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <div style="width: 48px; height: 48px; margin: 0 auto 1rem; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #334155; font-size: 1rem; font-weight: 600;">Sin tareas pendientes</h4>
+                    <p style="margin: 0; font-size: 0.875rem; color: #64748b;">Todas las tareas están al día</p>
+                </div>
+            `;
+            return;
+        }
+
+        widget.innerHTML = upcomingTasks.map(task => {
+            const taskDate = new Date(task.dueDate);
+            const isToday = this.isToday(taskDate);
+            const isTomorrow = this.isTomorrow(taskDate);
+            
+            let dateLabel = '';
+            let priorityColor = '#3b82f6';
+            let priorityBg = '#dbeafe';
+            
+            if (isToday) {
+                dateLabel = 'Hoy';
+                priorityColor = '#dc2626';
+                priorityBg = '#fee2e2';
+            } else if (isTomorrow) {
+                dateLabel = 'Mañana';
+                priorityColor = '#ea580c';
+                priorityBg = '#fed7aa';
+            } else {
+                dateLabel = taskDate.toLocaleDateString('es-ES', { 
+                    day: '2-digit', 
+                    month: 'short' 
+                });
+            }
+
+            return `
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); transition: all 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                <div style="width: 8px; height: 8px; background: ${priorityColor}; border-radius: 50%; flex-shrink: 0;"></div>
+                                <h4 style="margin: 0; color: #1e293b; font-size: 1rem; font-weight: 600; line-height: 1.4;">${task.type}</h4>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem; color: #64748b; font-size: 0.875rem;">
+                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>${dateLabel}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>${taskDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span style="background: ${priorityBg}; color: ${priorityColor}; padding: 0.375rem 0.75rem; border-radius: 8px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                            ${dateLabel}
+                        </span>
+                    </div>
+                    
+                    ${task.notes ? `
+                        <div style="margin-bottom: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                            <p style="margin: 0; color: #475569; font-size: 0.875rem; line-height: 1.5;">${task.notes}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button onclick="window.crm.showTaskDetail(${task.id})" style="flex: 1; padding: 0.75rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Ver Detalle
+                        </button>
+                        <button onclick="window.crm.showCompleteTaskModal(${task.id})" style="flex: 1; padding: 0.75rem 1rem; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Completar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    isTomorrow(date) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        
+        const taskDate = new Date(date);
+        taskDate.setHours(0, 0, 0, 0);
+        
+        return taskDate.getTime() === tomorrow.getTime();
+    }
+
+    createTaskCard(task) {
+        const taskDate = new Date(task.dueDate);
+        const isOverdue = taskDate < new Date() && task.status !== 'completada';
+        const isToday = this.isToday(taskDate);
+        const isFuture = taskDate > new Date();
+        
+        // Determinar el color del borde izquierdo según el estado
+        let borderColor = '#007bff'; // Azul por defecto
+        if (task.status === 'completada') {
+            borderColor = '#28a745'; // Verde para completadas
+        } else if (isOverdue) {
+            borderColor = '#dc3545'; // Rojo para vencidas
+        } else if (isToday) {
+            borderColor = '#ffc107'; // Amarillo para hoy
+        } else if (isFuture) {
+            borderColor = '#17a2b8'; // Azul claro para futuras
+        }
+
+        // Determinar el color del badge de estado
+        let statusBadgeColor = '#007bff';
+        let statusText = task.status;
+        
+        switch (task.status) {
+            case 'completada':
+                statusBadgeColor = '#28a745';
+                statusText = 'COMPLETADA';
+                break;
+            case 'abierto':
+                statusBadgeColor = '#007bff';
+                statusText = 'ABIERTO';
+                break;
+            case 'programada':
+                statusBadgeColor = '#6f42c1';
+                statusText = 'PROGRAMADA';
+                break;
+            case 'en_progreso':
+                statusBadgeColor = '#fd7e14';
+                statusText = 'EN PROGRESO';
+                break;
+            default:
+                statusBadgeColor = '#6c757d';
+                statusText = task.status.toUpperCase();
+        }
+
+        // Determinar el color del badge de prioridad
+        let priorityBadgeColor = '#ffc107';
+        let priorityText = task.priority || 'Media';
+        
+        switch (task.priority) {
+            case 'Alta':
+                priorityBadgeColor = '#dc3545';
+                priorityText = 'ALTA';
+                break;
+            case 'Media':
+                priorityBadgeColor = '#ffc107';
+                priorityText = 'MEDIA';
+                break;
+            case 'Baja':
+                priorityBadgeColor = '#28a745';
+                priorityText = 'BAJA';
+                break;
+        }
+
+        return `
+            <div class="task-card" style="border-left: 4px solid ${borderColor};">
+                <div class="task-header">
+                    <div class="task-title-section">
+                        <h4 class="task-title">${task.type} - ${this.getLeadName(task.leadId)}</h4>
+                        <div class="task-meta">
+                            <span class="task-meta-item">
+                                <strong>Cliente:</strong> ${this.getLeadName(task.leadId)}
+                            </span>
+                            <span class="task-meta-item">
+                                <strong>Tipo:</strong> ${task.type}
+                            </span>
+                            <span class="task-meta-item">
+                                <strong>Fecha límite:</strong> ${taskDate.toLocaleDateString('es-ES', { 
+                                    day: '2-digit', 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                })}
+                            </span>
+                            <span class="task-meta-item">
+                                <strong>Duración:</strong> ${task.duration} min
+                            </span>
+                            <span class="task-meta-item">
+                                <strong>Notas:</strong> ${task.notes || 'Sin descripción'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-badges">
+                        <span class="task-badge status-badge" style="background-color: ${statusBadgeColor};">
+                            ${statusText}
+                        </span>
+                        <span class="task-badge priority-badge" style="background-color: ${priorityBadgeColor};">
+                            ${priorityText}
+                        </span>
+                    </div>
+                </div>
+                <div class="task-actions">
+                    ${task.status !== 'completada' ? `
+                        <button class="btn btn-success btn-sm" onclick="window.crm.showCompleteTaskModal(${task.id})">
+                            Completar
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-primary btn-sm" onclick="window.crm.showTaskDetail(${task.id})">
+                        Ver Detalle
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="window.crm.deleteTask(${task.id})">
+                        🗑️ Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ==================== FUNCIONES DEL CALENDARIO DEL MANAGER/ADMIN ====================
+
+    updateManagerCalendar() {
+        console.log('Actualizando calendario del manager...');
+        
+        // Configurar controles del calendario
+        this.setupManagerCalendarControls();
+        
+        // Generar calendario semanal
+        this.generateManagerWeeklyCalendar();
+        
+        // Actualizar resumen de tareas
+        this.updateManagerTasksSummary();
+    }
+
+    setupManagerCalendarControls() {
+        const prevWeekBtn = document.getElementById('prevWeek');
+        const nextWeekBtn = document.getElementById('nextWeek');
+        const todayBtn = document.getElementById('todayBtn');
+        const createEventBtn = document.getElementById('createEventBtn');
+        
+        if (prevWeekBtn) {
+            prevWeekBtn.onclick = () => this.navigateManagerWeek(-1);
+        }
+        
+        if (nextWeekBtn) {
+            nextWeekBtn.onclick = () => this.navigateManagerWeek(1);
+        }
+        
+        if (todayBtn) {
+            todayBtn.onclick = () => this.goToTodayManager();
+        }
+        
+        if (createEventBtn) {
+            createEventBtn.onclick = () => this.showCreateEventModal();
+        }
+        
+        // Inicializar fecha actual
+        if (!this.currentManagerWeek) {
+            this.currentManagerWeek = new Date();
+        }
+    }
+
+    navigateManagerWeek(direction) {
+        this.currentManagerWeek.setDate(this.currentManagerWeek.getDate() + (direction * 7));
+        this.generateManagerWeeklyCalendar();
+        this.updateManagerTasksSummary();
+    }
+
+    goToTodayManager() {
+        this.currentManagerWeek = new Date();
+        this.generateManagerWeeklyCalendar();
+        this.updateManagerTasksSummary();
+    }
+
+
+    updateManagerTasksSummary() {
+        const tasksSummary = document.getElementById('tasksSummary');
+        if (!tasksSummary) return;
+
+        // Obtener todas las tareas del equipo
+        const teamTasks = this.tasks.filter(task => {
+            const taskDate = new Date(task.dueDate);
+            const weekStart = this.getStartOfWeek(this.currentManagerWeek);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            return taskDate >= weekStart && taskDate <= weekEnd;
+        });
+
+        // Agrupar por asesor
+        const tasksByAdvisor = {};
+        teamTasks.forEach(task => {
+            if (!tasksByAdvisor[task.advisor]) {
+                tasksByAdvisor[task.advisor] = [];
+            }
+            tasksByAdvisor[task.advisor].push(task);
+        });
+
+        let summaryHTML = '';
+        Object.keys(tasksByAdvisor).forEach(advisor => {
+            const advisorTasks = tasksByAdvisor[advisor];
+            const completedTasks = advisorTasks.filter(task => task.status === 'completada').length;
+            const pendingTasks = advisorTasks.length - completedTasks;
+            
+            summaryHTML += `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">${advisor}</h4>
+                        <span style="background: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 500;">
+                            ${advisorTasks.length} tareas
+                        </span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #16a34a; margin-bottom: 0.25rem;">${completedTasks}</div>
+                            <div style="font-size: 0.875rem; color: #15803d; font-weight: 500;">Completadas</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #fef3c7; border-radius: 8px; border: 1px solid #fde68a;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #d97706; margin-bottom: 0.25rem;">${pendingTasks}</div>
+                            <div style="font-size: 0.875rem; color: #b45309; font-weight: 500;">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (summaryHTML === '') {
+            summaryHTML = `
+                <div style="text-align: center; padding: 3rem; color: #6c757d; background: #f8f9fa; border-radius: 12px; border: 2px dashed #dee2e6;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📅</div>
+                    <h3 style="margin: 0 0 1rem 0; color: #495057;">No hay tareas esta semana</h3>
+                    <p style="margin: 0; color: #6c757d;">Crea eventos para planificar las actividades del equipo.</p>
+                </div>
+            `;
+        }
+
+        tasksSummary.innerHTML = summaryHTML;
+    }
+
+    getStartOfWeek(date) {
+        const start = new Date(date);
+        const day = start.getDay();
+        const diff = start.getDate() - day + (day === 0 ? -6 : 1); // Ajustar para que el lunes sea el primer día
+        start.setDate(diff);
+        start.setHours(0, 0, 0, 0);
+        return start;
+    }
+
+    getWeekDays(weekStart) {
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(weekStart);
+            day.setDate(weekStart.getDate() + i);
+            days.push(day);
+        }
+        return days;
+    }
+
+    getTasksForDay(date) {
+        return this.tasks.filter(task => {
+            const taskDate = new Date(task.dueDate);
+            return this.isSameDay(taskDate, date);
+        });
+    }
+
+    isTaskAtTime(task, time) {
+        const taskTime = new Date(task.dueDate);
+        const taskHour = taskTime.getHours();
+        const taskMinute = taskTime.getMinutes();
+        const [hour, minute] = time.split(':').map(Number);
+        
+        return taskHour === hour && Math.abs(taskMinute - minute) < 30;
+    }
+
+    getClientNameFromTask(task) {
+        // Intentar obtener el nombre del cliente desde el lead
+        if (task.leadId) {
+            const lead = this.leads.find(l => l.id == task.leadId);
+            if (lead) return lead.name;
+        }
+        return task.clientName || 'Sin cliente';
+    }
+
+    isSameDay(date1, date2) {
+        return date1.toDateString() === date2.toDateString();
+    }
+
+    // ==================== FUNCIONES DEL MODAL DE CREAR EVENTO ====================
+
+    showCreateEventModal() {
+        const modal = document.getElementById('createEventModal');
+        if (!modal) {
+            console.error('Modal createEventModal no encontrado');
+            return;
+        }
+
+        // Limpiar formulario
+        const form = document.getElementById('createEventForm');
+        if (form) {
+            form.reset();
+        }
+
+        // Configurar fecha por defecto para hoy
+        const eventDateField = document.getElementById('eventDate');
+        if (eventDateField) {
+            const today = new Date();
+            eventDateField.value = today.toISOString().split('T')[0];
+        }
+
+        // Configurar hora por defecto
+        const eventTimeField = document.getElementById('eventTime');
+        if (eventTimeField) {
+            eventTimeField.value = '09:00';
+        }
+
+        // Poblar lista de asesores
+        this.populateEventAdvisors();
+
+        // Mostrar modal
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    }
+
+    closeCreateEventModal() {
+        const modal = document.getElementById('createEventModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    }
+
+    populateEventAdvisors() {
+        const advisorSelect = document.getElementById('eventAdvisor');
+        if (!advisorSelect) return;
+
+        // Limpiar opciones existentes excepto la primera
+        advisorSelect.innerHTML = '<option value="">Todos los asesores</option>';
+
+        // Obtener asesores únicos
+        const advisors = [...new Set(this.tasks.map(task => task.advisor).filter(advisor => advisor))];
+        advisors.forEach(advisor => {
+            const option = document.createElement('option');
+            option.value = advisor;
+            option.textContent = advisor;
+            advisorSelect.appendChild(option);
+        });
+    }
+
+    saveEvent() {
+        const form = document.getElementById('createEventForm');
+        if (!form) {
+            this.showNotification('Formulario no encontrado', 'error');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const eventData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+            duration: parseInt(formData.get('duration')),
+            advisor: formData.get('advisor'),
+            type: formData.get('type')
+        };
+
+        // Validar campos obligatorios
+        if (!eventData.title || !eventData.date || !eventData.time) {
+            this.showNotification('Por favor complete todos los campos obligatorios', 'error');
+            return;
+        }
+
+        // Crear fecha y hora combinadas
+        const eventDateTime = new Date(`${eventData.date}T${eventData.time}`);
+        
+        // Crear nueva tarea/evento
+        const newTask = {
+            id: `event_${Date.now()}`,
+            type: eventData.title,
+            leadId: null,
+            clientName: eventData.description || 'Evento del equipo',
+            dueDate: eventDateTime,
+            status: 'programada',
+            notes: eventData.description,
+            advisor: eventData.advisor || 'Todos',
+            duration: eventData.duration,
+            priority: 'Media',
+            createdAt: new Date(),
+            isEvent: true
+        };
+
+        // Agregar a la lista de tareas
+        this.tasks.push(newTask);
+        this.saveData();
+
+        // Cerrar modal
+        this.closeCreateEventModal();
+
+        // Actualizar calendario
+        this.generateManagerWeeklyCalendar();
+        this.updateManagerTasksSummary();
+
+        this.showNotification('Evento creado exitosamente', 'success');
+    }
+
+    // ==================== FUNCIONES DE DETALLES DE LEADS PARA MANAGER/ADMIN ====================
+
+    showManagerLeadDetails(leadId) {
+        console.log('Mostrando detalles del lead para manager:', leadId);
+        const lead = this.leads.find(l => l.id == leadId);
+        if (!lead) {
+            this.showNotification('Lead no encontrado', 'error');
+            return;
+        }
+
+        const modal = document.getElementById('leadDetailModal');
+        const title = document.getElementById('leadDetailTitle');
+        const content = document.getElementById('leadDetailContent');
+
+        if (!modal || !title || !content) {
+            console.error('Elementos del modal de detalle de lead no encontrados');
+            this.showNotification('Error: Modal no encontrado', 'error');
+            return;
+        }
+
+        title.textContent = `Detalle del Lead: ${lead.name}`;
+
+        // Obtener información adicional del lead
+        const interestLevel = lead.interestLevel || lead.interest || 'No especificado';
+        const currentCompany = lead.currentCompany || lead.company || 'No especificado';
+        const phone = lead.phone || 'No especificado';
+        const email = lead.email || 'No especificado';
+        const sector = lead.sector || 'No especificado';
+        const currentPlanValue = lead.currentPlanValue || 'No especificado';
+        const serviceTime = lead.serviceTime || 'No especificado';
+        const satisfactionRating = lead.satisfactionRating || 'No especificado';
+        const improvementAreas = lead.improvementAreas || 'No especificado';
+        const preferredPlan = lead.preferredPlan || 'No especificado';
+        const whatsMissing = lead.whatsMissing || 'No especificado';
+        const notes = lead.notes || 'Sin notas adicionales';
+
+        content.innerHTML = `
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div>
+                        <h4 style="color: #495057; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">📋 Información Básica</h4>
+                        <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Nombre:</strong> ${lead.name}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Empresa Actual:</strong> ${currentCompany}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Teléfono:</strong> ${phone}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Email:</strong> ${email}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Sector:</strong> ${sector}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #495057; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">🎯 Servicio Actual</h4>
+                        <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Valor del Plan Actual:</strong> ${currentPlanValue}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Tiempo de Servicio:</strong> ${serviceTime}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Nivel de Satisfacción:</strong> ${satisfactionRating}
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: #495057;">Áreas de Mejora:</strong> ${improvementAreas}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: #495057; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">💡 Interés y Preferencias</h4>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">Nivel de Interés:</strong> 
+                            <span style="background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.875rem; font-weight: 500;">
+                                ${interestLevel}
+                            </span>
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">Plan Preferido:</strong> ${preferredPlan}
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">¿Qué le falta?:</strong> ${whatsMissing}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: #495057; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">👤 Asignación</h4>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">Estado:</strong> 
+                            <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.875rem; font-weight: 500;">
+                                ${lead.status}
+                            </span>
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">Asesor Asignado:</strong> ${lead.advisor || 'Sin asignar'}
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">Fecha de Creación:</strong> ${new Date(lead.createdAt).toLocaleDateString('es-ES')}
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong style="color: #495057;">Última Actividad:</strong> ${lead.lastActivity ? new Date(lead.lastActivity).toLocaleDateString('es-ES') : 'Sin actividad'}
+                        </div>
+                    </div>
+                </div>
+                
+                ${notes !== 'Sin notas adicionales' ? `
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: #495057; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">📝 Notas Adicionales</h4>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <p style="margin: 0; color: #495057; line-height: 1.6;">${notes}</p>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+
+        // Mostrar modal
+        modal.style.display = 'flex';
+        modal.classList.add('show');
     }
 }
 

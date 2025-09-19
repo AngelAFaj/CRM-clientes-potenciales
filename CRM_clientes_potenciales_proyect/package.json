@@ -1,0 +1,22 @@
+{
+  "name": "crm-clientes-potenciales",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión de Clientes Potenciales",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'No build step required for static site'",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "crm",
+    "clientes",
+    "gestion",
+    "ventas"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

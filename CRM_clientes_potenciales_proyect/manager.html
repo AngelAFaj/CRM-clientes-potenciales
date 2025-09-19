@@ -552,5 +552,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para Detalles de Tarea/Evento -->
+    <div id="taskDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="taskDetailTitle">Detalle de Tarea/Evento</h3>
+                <span class="close" onclick="window.crm.closeTaskDetailModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="taskDetailContent">
+                <!-- Los detalles se cargarán dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.crm.closeTaskDetailModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

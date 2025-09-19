@@ -24,7 +24,7 @@
         <nav class="main-nav advisor-nav">
             <ul>
                 <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
-                <li><a href="#kanban" class="nav-link" data-section="kanban">Kanban</a></li>
+                <li><a href="#kanban" class="nav-link" data-section="kanban">Kanban clientes</a></li>
                 <li><a href="#tasks" class="nav-link" data-section="tasks">Tareas</a></li>
                 <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
                 <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
@@ -58,6 +58,11 @@
                         <div class="stat-number" id="myConversionRate">0%</div>
                         <div class="stat-change positive">+5% vs semana anterior</div>
                     </div>
+                    <div class="stat-card">
+                        <h3>Tareas Pendientes Hoy</h3>
+                        <div class="stat-number" id="todayPendingTasks">0</div>
+                        <div class="stat-change neutral" id="todayTasksStatus">Para el día de hoy</div>
+                    </div>
                 </div>
 
                 <div class="dashboard-widgets">
@@ -79,8 +84,8 @@
             <!-- Kanban Section -->
             <section id="kanban" class="content-section">
                 <div class="kanban-header">
-                    <h2>Tablero Kanban - Mis Leads</h2>
-                    <button id="createLeadBtn" class="btn btn-primary">+ Nuevo Lead</button>
+                    <h2>Tablero Kanban - Mis clientes</h2>
+                    <button id="createLeadBtn" class="btn btn-primary">+ Nuevo cliente</button>
                 </div>
                 <div class="kanban-board">
                     <!-- Calificar Column -->
@@ -384,29 +389,88 @@
                         <input type="text" id="leadName" required placeholder="Ej: Juan Pérez">
                     </div>
                     <div class="form-group">
-                        <label for="leadCompany">Empresa:</label>
-                        <input type="text" id="leadCompany" required placeholder="Ej: Empresa ABC">
-                    </div>
-                    <div class="form-group">
-                        <label for="leadEmail">Email:</label>
-                        <input type="email" id="leadEmail" required placeholder="Ej: juan@empresa.com">
-                    </div>
-                    <div class="form-group">
                         <label for="leadPhone">Teléfono:</label>
                         <input type="tel" id="leadPhone" required placeholder="Ej: +1234567890">
                     </div>
                     <div class="form-group">
-                        <label for="leadInterest">Nivel de Interés:</label>
-                        <select id="leadInterest" required>
-                            <option value="">Seleccionar nivel...</option>
-                            <option value="Poco interesado">Poco interesado</option>
-                            <option value="Interesado">Interesado</option>
-                            <option value="Medianamente interesado">Medianamente interesado</option>
+                        <label for="leadSector">Sector:</label>
+                        <input type="text" id="leadSector" required placeholder="Ej: Tecnología, Salud, Educación">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentCompany">Nombre de la empresa con la que cuenta actualmente el servicio:</label>
+                        <input type="text" id="currentCompany" required placeholder="Ej: Empresa ABC">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentPlanValue">Valor del plan que paga actualmente:</label>
+                        <select id="currentPlanValue" required>
+                            <option value="">Seleccionar valor...</option>
+                            <option value="15-20 USD">15-20 USD</option>
+                            <option value="21-25 USD">21-25 USD</option>
+                            <option value="26-30 USD">26-30 USD</option>
+                            <option value="MAYOR A 30 USD">MAYOR A 30 USD</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="leadNotes">Notas:</label>
-                        <textarea id="leadNotes" rows="3" placeholder="Información adicional sobre el cliente..."></textarea>
+                        <label for="serviceTime">¿Qué tiempo lleva actualmente con el servicio?</label>
+                        <select id="serviceTime" required>
+                            <option value="">Seleccionar tiempo...</option>
+                            <option value="1 a 6 Meses">1 a 6 Meses</option>
+                            <option value="7 a 12 Meses">7 a 12 Meses</option>
+                            <option value="13 a 18 Meses">13 a 18 Meses</option>
+                            <option value="25 a 36 meses">25 a 36 meses</option>
+                            <option value="Mas de 3 Años">Mas de 3 Años</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="satisfactionRating">Califique de 1 a 5 (siendo 1 la calificación más baja) qué tan satisfecho está con el servicio:</label>
+                        <select id="satisfactionRating" required>
+                            <option value="">Seleccionar calificación...</option>
+                            <option value="1 - Malo">1 - Malo</option>
+                            <option value="2 - Regular">2 - Regular</option>
+                            <option value="3 - Bueno">3 - Bueno</option>
+                            <option value="4 - Muy Bueno">4 - Muy Bueno</option>
+                            <option value="5 - Excelente">5 - Excelente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="improvementAreas">¿Qué le gustaría mejorar en el servicio que tiene actualmente?</label>
+                        <select id="improvementAreas" required>
+                            <option value="">Seleccionar área...</option>
+                            <option value="Velocidad">Velocidad</option>
+                            <option value="Precio">Precio</option>
+                            <option value="Atención">Atención</option>
+                            <option value="Calidad del Servicio">Calidad del Servicio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferredPlan">¿Qué plan le gustó más?</label>
+                        <select id="preferredPlan" required>
+                            <option value="">Seleccionar plan...</option>
+                            <option value="250 megas">250 megas</option>
+                            <option value="300 megas">300 megas</option>
+                            <option value="400 megas">400 megas</option>
+                            <option value="otro">otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="interestLevel">Del 1 al 10 ¿qué tan interesado está para adquirir el nuevo servicio?</label>
+                        <select id="interestLevel" required>
+                            <option value="">Seleccionar nivel...</option>
+                            <option value="1 - No me interesa">1 - No me interesa</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10 - Super interesado">10 - Super interesado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="whatsMissing">¿Qué le faltaría para llegar a 10?</label>
+                        <textarea id="whatsMissing" rows="3" placeholder="Describe qué necesitaría para estar completamente interesado..."></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="cancelLead">Cancelar</button>

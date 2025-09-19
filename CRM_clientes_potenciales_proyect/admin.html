@@ -25,10 +25,13 @@
         <nav class="main-nav admin-nav">
             <ul>
                 <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
-                <li><a href="#statistics" class="nav-link" data-section="statistics">Estadísticas</a></li>
-                <li><a href="#kpis" class="nav-link" data-section="kpis">KPIs</a></li>
-                <li><a href="#ai-analysis" class="nav-link" data-section="ai-analysis">Análisis IA</a></li>
-                <li><a href="#team-overview" class="nav-link" data-section="team-overview">Equipo</a></li>
+                <li><a href="#team-stats" class="nav-link" data-section="team-stats">Estadísticas</a></li>
+                <li><a href="#advisor-management" class="nav-link" data-section="advisor-management">Asesores</a></li>
+                <li><a href="#user-management" class="nav-link" data-section="user-management">Usuarios</a></li>
+                <li><a href="#sequences" class="nav-link" data-section="sequences">Secuencias</a></li>
+                <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
+                <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
+                <li><a href="#clients" class="nav-link" data-section="clients">Clientes</a></li>
             </ul>
         </nav>
 
@@ -37,47 +40,9 @@
             <!-- Dashboard Section -->
             <section id="dashboard" class="content-section active">
                 <h2>Dashboard Administrativo</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total Leads</h3>
-                        <div class="stat-number" id="totalLeads">0</div>
-                        <div class="stat-change positive">+12% vs mes anterior</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Conversiones</h3>
-                        <div class="stat-number" id="totalConversions">0</div>
-                        <div class="stat-change positive">+8% vs mes anterior</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Asesores Activos</h3>
-                        <div class="stat-number" id="activeAdvisors">0</div>
-                        <div class="stat-change neutral">Sin cambios</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Tasa Conversión</h3>
-                        <div class="stat-number" id="conversionRate">0%</div>
-                        <div class="stat-change positive">+2% vs mes anterior</div>
-                    </div>
-                </div>
-
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <h3>Rendimiento por Asesor</h3>
-                        <canvas id="advisorPerformanceChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Conversiones por Mes</h3>
-                        <canvas id="monthlyConversionsChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Statistics Section -->
-            <section id="statistics" class="content-section">
-                <h2>Estadísticas Detalladas</h2>
                 <div class="period-selector">
-                    <label for="statsPeriod">Período:</label>
-                    <select id="statsPeriod">
+                    <label for="periodSelect">Período:</label>
+                    <select id="periodSelect">
                         <option value="daily">Diario</option>
                         <option value="weekly">Semanal</option>
                         <option value="monthly" selected>Mensual</option>
@@ -85,6 +50,59 @@
                     </select>
                 </div>
 
+                <div class="team-stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Leads</h3>
+                        <div class="stat-number" id="teamTotalLeads">0</div>
+                        <div class="stat-change positive">+15% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Acciones Realizadas</h3>
+                        <div class="stat-number" id="teamTotalActions">0</div>
+                        <div class="stat-change positive">+22% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Conversiones</h3>
+                        <div class="stat-number" id="teamConversions">0</div>
+                        <div class="stat-change positive">+8% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tasa Conversión</h3>
+                        <div class="stat-number" id="teamConversionRate">0%</div>
+                        <div class="stat-change positive">+3% vs período anterior</div>
+                    </div>
+                </div>
+
+                <!-- Resumen de Cumplimiento de KPIs -->
+                <div class="kpis-summary-section">
+                    <h3>📊 Resumen de Cumplimiento de KPIs</h3>
+                    <div class="kpis-summary-grid" id="kpisSummaryGrid">
+                        <!-- Los KPIs se cargarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Análisis de IA del Equipo -->
+                <div class="ai-analysis-section">
+                    <div class="ai-analysis-header">
+                        <h3>🤖 Análisis de IA del Equipo</h3>
+                        <button id="generateTeamAIAnalysis" class="btn btn-ai">
+                            <span class="ai-icon">🧠</span>
+                            Generar Análisis
+                        </button>
+                    </div>
+                    <div class="ai-analysis-content" id="teamAIAnalysisContent">
+                        <div class="ai-analysis-placeholder">
+                            <div class="ai-placeholder-icon">🤖</div>
+                            <h4>Análisis de IA Disponible</h4>
+                            <p>Haz click en "Generar Análisis" para obtener insights inteligentes sobre el rendimiento del equipo, tendencias de ventas y recomendaciones estratégicas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team Stats Section -->
+            <section id="team-stats" class="content-section">
+                <h2>Estadísticas del Equipo</h2>
                 <div class="team-stats-table">
                     <table>
                         <thead>
@@ -94,8 +112,8 @@
                                 <th>Acciones Realizadas</th>
                                 <th>Conversiones</th>
                                 <th>Tasa Conversión</th>
-                                <th>Tiempo Medio (días)</th>
-                                <th>Estado</th>
+                                <th>Leads Activos</th>
+                                <th>Última Actividad</th>
                             </tr>
                         </thead>
                         <tbody id="teamStatsTable">
@@ -105,62 +123,366 @@
                 </div>
             </section>
 
-            <!-- KPIs Section -->
-            <section id="kpis" class="content-section">
-                <h2>Gestión de KPIs</h2>
-                <div class="kpi-tabs">
-                    <button class="tab-btn active" data-tab="global-kpis">KPIs Globales</button>
-                    <button class="tab-btn" data-tab="manager-kpis">KPIs por Gerente</button>
+            <!-- Advisor Management Section -->
+            <section id="advisor-management" class="content-section">
+                <h2>Gestión de Asesores</h2>
+                
+                <!-- Navegación de Pantallas -->
+                <div class="screen-navigation">
+                    <button class="screen-nav-btn active" data-screen="advisor-stats-screen">Estadísticas por Asesor</button>
+                    <button class="screen-nav-btn" data-screen="advisor-kpis-screen">Definir KPIs</button>
+                    <button class="screen-nav-btn" data-screen="lead-assignment-screen">Asignación de Leads</button>
                 </div>
 
-                <!-- Global KPIs -->
-                <div id="global-kpis" class="tab-content active">
-                    <div class="kpi-form">
-                        <h3>Configurar KPIs Globales</h3>
-                        <form id="globalKPIForm">
-                            <div class="form-group">
-                                <label for="dailyTargetClients">Clientes Objetivo Diarios:</label>
-                                <input type="number" id="dailyTargetClients" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="weeklyConversionTarget">Objetivo Conversión Semanal (%):</label>
-                                <input type="number" id="weeklyConversionTarget" min="1" max="100" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="maxDaysPerState">Máximo Días por Estado:</label>
-                                <input type="number" id="maxDaysPerState" min="1" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Guardar KPIs Globales</button>
-                        </form>
+                <!-- Pantalla 1: Estadísticas por Asesor -->
+                <div id="advisor-stats-screen" class="advisor-screen active">
+                    <h3>Estadísticas por Asesor</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>Total de Asesores</h4>
+                            <div class="stat-value" id="totalAdvisors">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Leads Asignados</h4>
+                            <div class="stat-value" id="totalAssignedLeads">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Conversiones del Equipo</h4>
+                            <div class="stat-value" id="teamConversions">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Tasa de Conversión</h4>
+                            <div class="stat-value" id="teamConversionRate">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <h4>Estadísticas Detalladas por Asesor</h4>
+                        <table class="data-table" id="teamStatsTable">
+                            <thead>
+                                <tr>
+                                    <th>Asesor</th>
+                                    <th>Leads Asignados</th>
+                                    <th>Acciones Realizadas</th>
+                                    <th>Conversiones</th>
+                                    <th>Tasa Conversión</th>
+                                    <th>Leads Activos</th>
+                                    <th>Última Actividad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Manager KPIs -->
-                <div id="manager-kpis" class="tab-content">
-                    <div class="manager-kpis-list">
-                        <h3>KPIs Definidos por Gerentes</h3>
-                        <div id="managerKPIsList">
-                            <!-- Manager KPIs will be populated here -->
+                <!-- Pantalla 2: Definir KPIs por Asesor -->
+                <div id="advisor-kpis-screen" class="advisor-screen">
+                    <h3>Definir KPIs por Asesor</h3>
+                    <form id="advisorKPIForm" class="form-container">
+                        <div class="form-group">
+                            <label for="advisorSelect">Seleccionar Asesor:</label>
+                            <select id="advisorSelect" name="advisor" required>
+                                <option value="">Seleccionar asesor...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dailyLeadsGoal">Meta Diaria de Leads:</label>
+                            <input type="number" id="dailyLeadsGoal" name="dailyLeadsGoal" min="0" placeholder="Ej: 5">
+                        </div>
+                        <div class="form-group">
+                            <label for="weeklyConversionsGoal">Meta Semanal de Conversiones:</label>
+                            <input type="number" id="weeklyConversionsGoal" name="weeklyConversionsGoal" min="0" placeholder="Ej: 2">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxActionsPerDay">Máximo Acciones por Día:</label>
+                            <input type="number" id="maxActionsPerDay" name="maxActionsPerDay" min="0" placeholder="Ej: 10">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar KPIs</button>
+                    </form>
+                </div>
+
+                <!-- Pantalla 3: Asignación de Leads -->
+                <div id="lead-assignment-screen" class="advisor-screen">
+                    <h3>Asignar Lead a Asesor</h3>
+                    <form id="leadAssignmentForm" class="form-container">
+                        <div class="form-group">
+                            <label for="leadSelect">Seleccionar Lead:</label>
+                            <select id="leadSelect" name="leadId" required>
+                                <option value="">Seleccionar lead...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignToAdvisor">Asignar a Asesor:</label>
+                            <select id="assignToAdvisor" name="advisor" required>
+                                <option value="">Seleccionar asesor...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sequenceAssign">Asignar Secuencia:</label>
+                            <select id="sequenceAssign" name="sequenceId">
+                                <option value="">Sin secuencia específica</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Asignar Lead</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="user-management" class="content-section">
+                <h2>Gestión de Usuarios</h2>
+                
+                <div class="user-management-container">
+                    <!-- Formulario de Creación de Usuario -->
+                    <div class="user-form-card">
+                        <div class="card-header">
+                            <h3>Crear Nuevo Usuario</h3>
+                            <p>Registra nuevos gerentes de ventas y asesores en el sistema</p>
+                        </div>
+                        
+                        <form id="userCreationForm" class="user-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="userFirstName">Nombres:</label>
+                                    <input type="text" id="userFirstName" name="firstName" required placeholder="Ej: Juan Carlos">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="userLastName">Apellidos:</label>
+                                    <input type="text" id="userLastName" name="lastName" required placeholder="Ej: Pérez García">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="userCedula">Número de Cédula:</label>
+                                    <input type="text" id="userCedula" name="cedula" required placeholder="Ej: 1234567890" maxlength="10">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="userRole">Rol del Usuario:</label>
+                                    <select id="userRole" name="role" required>
+                                        <option value="">Seleccionar rol...</option>
+                                        <option value="manager">Gerente de Ventas</option>
+                                        <option value="advisor">Asesor</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="userEmail">Correo Electrónico:</label>
+                                    <input type="email" id="userEmail" name="email" required placeholder="Ej: juan.perez@empresa.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="userPhone">Teléfono:</label>
+                                    <input type="tel" id="userPhone" name="phone" required placeholder="Ej: +57 300 123 4567">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="userAddress">Dirección:</label>
+                                <textarea id="userAddress" name="address" required placeholder="Ej: Calle 123 #45-67, Barrio Centro, Ciudad" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="userUsername">Nombre de Usuario:</label>
+                                    <input type="text" id="userUsername" name="username" required placeholder="Ej: jperez" minlength="3">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="userPassword">Contraseña Temporal:</label>
+                                    <input type="password" id="userPassword" name="password" required placeholder="Mínimo 6 caracteres" minlength="6">
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="resetUserForm">Limpiar Formulario</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="icon">👤</span>
+                                    Crear Usuario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Lista de Usuarios Existentes -->
+                    <div class="users-list-card">
+                        <div class="card-header">
+                            <h3>Usuarios Registrados</h3>
+                            <span class="user-count" id="userCount">0 usuarios</span>
+                        </div>
+                        
+                        <!-- Filtros de Usuarios -->
+                        <div class="users-filters">
+                            <select id="usersRoleFilter">
+                                <option value="">Todos los Roles</option>
+                                <option value="admin">Administrador</option>
+                                <option value="manager">Gerente de Ventas</option>
+                                <option value="advisor">Asesor</option>
+                            </select>
+                            <button onclick="window.crm.loadUsers()" class="btn btn-primary">Actualizar Lista</button>
+                        </div>
+                        
+                        <div id="usersList" class="users-grid">
+                            <!-- Los usuarios se cargarán dinámicamente -->
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- AI Analysis Section -->
-            <section id="ai-analysis" class="content-section">
-                <h2>Análisis con Inteligencia Artificial</h2>
-                <div class="ai-controls">
-                    <button id="runAIAnalysis" class="btn btn-primary">Generar Análisis IA</button>
-                    <button id="exportReport" class="btn btn-success">Exportar Reporte CSV</button>
-                </div>
-                <div id="aiResults" class="ai-results">
-                    <!-- AI analysis results will appear here -->
+            <!-- Sequences Section -->
+            <section id="sequences" class="content-section">
+                <h2>Gestión de Secuencias</h2>
+                
+                <div class="sequences-container">
+                    <div class="sequence-form-card">
+                        <div class="card-header">
+                            <h3>Crear Nueva Secuencia</h3>
+                            <p>Define las acciones automáticas para cada estado del lead</p>
+                        </div>
+                        
+                        <form id="sequenceForm" class="sequence-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sequenceName">Nombre de la Secuencia</label>
+                                    <input type="text" id="sequenceName" placeholder="Ej: Secuencia de Calificación" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sequenceState">Estado del Lead</label>
+                                    <select id="sequenceState" required>
+                                        <option value="">Seleccionar estado...</option>
+                                        <option value="Calificar">Calificar</option>
+                                        <option value="Desarrollar">Desarrollar</option>
+                                        <option value="Proponer">Proponer</option>
+                                        <option value="Cierre">Cierre</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sequenceInterest">Nivel de Interés</label>
+                                    <select id="sequenceInterest">
+                                        <option value="">Todos los niveles</option>
+                                        <option value="Poco interesado">Poco interesado</option>
+                                        <option value="Interesado">Interesado</option>
+                                        <option value="Medianamente interesado">Medianamente interesado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="sequence-actions-section">
+                                <div class="section-header">
+                                    <h4>Acciones de la Secuencia</h4>
+                                    <button type="button" id="addSequenceAction" class="btn btn-outline">
+                                        + Agregar Acción
+                                    </button>
+                                </div>
+                                
+                                <div id="sequenceActions" class="actions-list">
+                                    <div class="sequence-action">
+                                        <div class="action-type-group">
+                                            <label>Tipo de Acción</label>
+                                            <select class="action-type">
+                                                <option value="Llamada">Llamada</option>
+                                                <option value="Mensaje">Mensaje</option>
+                                                <option value="Correo">Correo</option>
+                                                <option value="Reunión presencial">Reunión presencial</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="action-count-group">
+                                            <label>Cantidad</label>
+                                            <input type="number" class="action-repetitions" placeholder="1" min="1" value="1">
+                                        </div>
+                                        
+                                        <div class="action-delay-group">
+                                            <label>Delay (horas)</label>
+                                            <input type="number" class="action-delay" placeholder="0" min="0" value="0">
+                                        </div>
+                                        
+                                        <div class="action-max-time-group">
+                                            <label>Tiempo máx (días)</label>
+                                            <input type="number" class="action-max-time" placeholder="7" min="1" value="7">
+                                        </div>
+                                        
+                                        <div class="action-remove-group">
+                                            <button type="button" class="btn btn-danger btn-sm remove-action">
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="resetSequence">Limpiar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    Crear Secuencia
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="sequences-list-card">
+                        <div class="card-header">
+                            <h3>Secuencias Existentes</h3>
+                            <span class="sequence-count" id="sequenceCount">0 secuencias</span>
+                        </div>
+                        
+                        <div id="sequencesList" class="sequences-grid">
+                            <!-- Sequences will be populated here -->
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Team Overview Section -->
-            <section id="team-overview" class="content-section">
-                <h2>Vista General del Equipo</h2>
+            <!-- Calendar Section -->
+            <section id="calendar" class="content-section">
+                <h2>Calendario del Equipo</h2>
+                
+                <!-- Controles del Calendario -->
+                <div class="calendar-controls">
+                    <button id="prevWeek" class="btn btn-secondary">‹ Semana Anterior</button>
+                    <button id="todayBtn" class="btn btn-outline">Hoy</button>
+                    <span id="currentWeek" class="week-display"></span>
+                    <button id="nextWeek" class="btn btn-secondary">Siguiente Semana ›</button>
+                    <button id="createEventBtn" class="btn btn-primary">+ Crear Evento</button>
+                </div>
+                
+                <!-- Calendario Semanal -->
+                <div class="weekly-calendar-container">
+                    <div class="calendar-header">
+                        <div class="day-header">Hora</div>
+                        <div class="day-header">Lunes</div>
+                        <div class="day-header">Martes</div>
+                        <div class="day-header">Miércoles</div>
+                        <div class="day-header">Jueves</div>
+                        <div class="day-header">Viernes</div>
+                        <div class="day-header">Sábado</div>
+                        <div class="day-header">Domingo</div>
+                    </div>
+                    <div class="calendar-grid" id="teamCalendar">
+                        <!-- El calendario se generará dinámicamente -->
+                    </div>
+                </div>
+                
+                <!-- Resumen de Tareas del Equipo -->
+                <div class="team-tasks-summary">
+                    <h3>Resumen de Tareas del Equipo</h3>
+                    <div class="tasks-summary-grid" id="tasksSummary">
+                        <!-- Las tareas se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leads Section -->
+            <section id="leads" class="content-section">
+                <h2>Gestión de Leads</h2>
                 <div class="leads-filters">
                     <select id="leadsStatusFilter">
                         <option value="">Todos los Estados</option>
@@ -178,9 +500,28 @@
                     <select id="leadsAdvisorFilter">
                         <option value="">Todos los Asesores</option>
                     </select>
+                    <button onclick="window.crm.loadManagerLeads()" class="btn btn-primary">Cargar Leads</button>
                 </div>
                 <div class="leads-grid" id="leadsGrid">
                     <!-- Leads will be populated here -->
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section id="clients" class="content-section">
+                <h2>Lista de Clientes</h2>
+                <div class="clients-filters">
+                    <select id="clientsAdvisorFilter">
+                        <option value="">Todos los Asesores</option>
+                    </select>
+                    <select id="clientsTypeFilter">
+                        <option value="">Todos los Tipos</option>
+                        <option value="potencial">Cliente Potencial</option>
+                        <option value="fidelizado">Cliente Fidelizado</option>
+                    </select>
+                </div>
+                <div class="clients-list" id="clientsList">
+                    <!-- Clients will be populated here -->
                 </div>
             </section>
         </main>
@@ -199,13 +540,235 @@
         </div>
     </div>
 
+    <div id="advisorDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="advisorDetailTitle">Detalle del Asesor</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="advisorDetailContent">
+                <!-- Advisor details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="sequenceDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="sequenceDetailTitle">Detalle de Secuencia</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="sequenceDetailContent">
+                <!-- Sequence details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Asignación Múltiple de Asesores -->
+    <div id="assignAdvisorsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Asignar Secuencia a Asesores</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="assignment-info">
+                    <h4 id="assignmentSequenceName"></h4>
+                    <p>Selecciona los asesores a los que quieres asignar esta secuencia:</p>
+                </div>
+                
+                <div class="advisors-selection">
+                    <div class="selection-controls">
+                        <button type="button" id="selectAllAdvisors" class="btn btn-outline btn-sm">Seleccionar Todos</button>
+                        <button type="button" id="deselectAllAdvisors" class="btn btn-outline btn-sm">Deseleccionar Todos</button>
+                    </div>
+                    
+                    <div id="advisorsList" class="advisors-checkbox-list">
+                        <!-- Lista de asesores con checkboxes -->
+                    </div>
+                </div>
+                
+                <div class="current-assignments">
+                    <h5>Asignaciones Actuales:</h5>
+                    <div id="currentAssignmentsList" class="current-assignments-list">
+                        <!-- Lista de asesores actualmente asignados -->
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAssignment">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveAssignments">Guardar Asignaciones</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Crear Evento -->
+    <div id="createEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Nuevo Evento</h3>
+                <span class="close" onclick="window.crm.closeCreateEventModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="createEventForm">
+                    <div class="form-group">
+                        <label for="eventTitle">Título del Evento:</label>
+                        <input type="text" id="eventTitle" name="title" required placeholder="Ej: Reunión de equipo">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDescription">Descripción:</label>
+                        <textarea id="eventDescription" name="description" placeholder="Descripción del evento..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventDate">Fecha:</label>
+                            <input type="date" id="eventDate" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventTime">Hora:</label>
+                            <input type="time" id="eventTime" name="time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDuration">Duración (minutos):</label>
+                        <input type="number" id="eventDuration" name="duration" min="15" max="480" value="60" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventAdvisor">Asignar a Asesor:</label>
+                        <select id="eventAdvisor" name="advisor">
+                            <option value="">Todos los asesores</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventType">Tipo de Evento:</label>
+                        <select id="eventType" name="type" required>
+                            <option value="meeting">Reunión</option>
+                            <option value="call">Llamada</option>
+                            <option value="task">Tarea</option>
+                            <option value="reminder">Recordatorio</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.crm.closeCreateEventModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="window.crm.saveEvent()">Crear Evento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalle de Usuario -->
+    <div id="userDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userDetailTitle">Detalle del Usuario</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="userDetailContent">
+                <!-- User details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición de Usuario -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Usuario</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editUserFirstName">Nombres:</label>
+                            <input type="text" id="editUserFirstName" name="firstName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editUserLastName">Apellidos:</label>
+                            <input type="text" id="editUserLastName" name="lastName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editUserCedula">Número de Cédula:</label>
+                            <input type="text" id="editUserCedula" name="cedula" required maxlength="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editUserRole">Rol del Usuario:</label>
+                            <select id="editUserRole" name="role" required>
+                                <option value="manager">Gerente de Ventas</option>
+                                <option value="advisor">Asesor</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editUserEmail">Correo Electrónico:</label>
+                            <input type="email" id="editUserEmail" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editUserPhone">Teléfono:</label>
+                            <input type="tel" id="editUserPhone" name="phone" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editUserAddress">Dirección:</label>
+                        <textarea id="editUserAddress" name="address" required rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editUserUsername">Nombre de Usuario:</label>
+                            <input type="text" id="editUserUsername" name="username" required minlength="3">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editUserPassword">Nueva Contraseña (opcional):</label>
+                            <input type="password" id="editUserPassword" name="password" placeholder="Dejar vacío para mantener la actual" minlength="6">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.crm.closeEditUserModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalles de Tarea/Evento -->
+    <div id="taskDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="taskDetailTitle">Detalle de Tarea/Evento</h3>
+                <span class="close" onclick="window.crm.closeTaskDetailModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="taskDetailContent">
+                <!-- Los detalles se cargarán dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.crm.closeTaskDetailModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
     <script>
         // Initialize admin interface
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM cargado, inicializando admin...');
-            if (window.crm && typeof window.crm.initAdmin === 'function') {
-                window.crm.initAdmin();
+            if (window.crm && typeof window.crm.initManager === 'function') {
+                // Llamar initManager pero permitir que funcione para admin también
+                window.crm.initManagerForAdmin();
             } else {
                 console.error('CRM App no está disponible');
             }
@@ -213,3 +776,4 @@
     </script>
 </body>
 </html>
+
