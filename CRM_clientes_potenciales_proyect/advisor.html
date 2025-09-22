@@ -35,23 +35,28 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- Dashboard Section -->
-            <section id="dashboard" class="content-section active">
+            <section id="dashboard" class="content-section active advisor-theme">
                 <h2>Mi Dashboard</h2>
                 <div class="personal-stats-grid">
                     <div class="stat-card">
-                        <h3>Mis Leads</h3>
+                        <h3>Clientes</h3>
                         <div class="stat-number" id="myLeadsCount">0</div>
                         <div class="stat-change positive">+3 esta semana</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Tareas Completadas</h3>
-                        <div class="stat-number" id="myCompletedTasks">0</div>
-                        <div class="stat-change positive">+12 esta semana</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Conversiones</h3>
+                        <h3>Cliente Ganado</h3>
                         <div class="stat-number" id="myConversions">0</div>
                         <div class="stat-change positive">+2 esta semana</div>
+                    </div>
+                    <div class="stat-card leads-lost">
+                        <h3>Cliente Perdido</h3>
+                        <div class="stat-number" id="leadsLostCount">0</div>
+                        <div class="stat-change negative" id="leadsLostChange">Perdidos</div>
+                    </div>
+                    <div class="stat-card leads-in-process">
+                        <h3>Cliente Prospecto</h3>
+                        <div class="stat-number" id="leadsInProcessCount">0</div>
+                        <div class="stat-change neutral" id="leadsInProcessChange">En proceso</div>
                     </div>
                     <div class="stat-card">
                         <h3>Tasa Conversión</h3>
@@ -59,9 +64,14 @@
                         <div class="stat-change positive">+5% vs semana anterior</div>
                     </div>
                     <div class="stat-card">
+                        <h3>Tareas Completadas</h3>
+                        <div class="stat-number" id="myCompletedTasks">0</div>
+                        <div class="stat-change positive">+12 esta semana</div>
+                    </div>
+                    <div class="stat-card">
                         <h3>Tareas Pendientes Hoy</h3>
                         <div class="stat-number" id="todayPendingTasks">0</div>
-                        <div class="stat-change neutral" id="todayTasksStatus">Para el día de hoy</div>
+                        <div class="stat-change neutral" id="todayTasksStatus">¡Todo al día!</div>
                     </div>
                 </div>
 
@@ -495,3 +505,4 @@
     </script>
 </body>
 </html>
+    

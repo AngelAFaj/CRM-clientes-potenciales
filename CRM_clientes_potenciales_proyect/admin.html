@@ -21,55 +21,57 @@
             </div>
         </header>
 
-        <!-- Navigation -->
-        <nav class="main-nav admin-nav">
-            <ul>
-                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
-                <li><a href="#team-stats" class="nav-link" data-section="team-stats">Estadísticas</a></li>
-                <li><a href="#advisor-management" class="nav-link" data-section="advisor-management">Asesores</a></li>
-                <li><a href="#user-management" class="nav-link" data-section="user-management">Usuarios</a></li>
-                <li><a href="#sequences" class="nav-link" data-section="sequences">Secuencias</a></li>
-                <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
-                <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
-                <li><a href="#clients" class="nav-link" data-section="clients">Clientes</a></li>
-            </ul>
-        </nav>
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h3>Panel Admin</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="sidebar-btn active" data-section="crm-section">
+                    <span class="sidebar-icon">📊</span>
+                    <span class="sidebar-text">CRM</span>
+                </button>
+                <button class="sidebar-btn" data-section="user-section">
+                    <span class="sidebar-icon">👥</span>
+                    <span class="sidebar-text">Usuarios</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- CRM Section -->
+        <div id="crm-section" class="main-section active">
+            <!-- Navigation -->
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                    <li><a href="#team-stats" class="nav-link" data-section="team-stats">Estadísticas</a></li>
+                    <li><a href="#advisor-management" class="nav-link" data-section="advisor-management">Asesores</a></li>
+                    <li><a href="#sequences" class="nav-link" data-section="sequences">Secuencias</a></li>
+                    <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
+                    <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
+                    <li><a href="#clients" class="nav-link" data-section="clients">Clientes</a></li>
+                </ul>
+            </nav>
 
         <!-- Main Content -->
         <main class="main-content">
             <!-- Dashboard Section -->
             <section id="dashboard" class="content-section active">
                 <h2>Dashboard Administrativo</h2>
-                <div class="period-selector">
-                    <label for="periodSelect">Período:</label>
-                    <select id="periodSelect">
-                        <option value="daily">Diario</option>
-                        <option value="weekly">Semanal</option>
-                        <option value="monthly" selected>Mensual</option>
-                        <option value="yearly">Anual</option>
-                    </select>
+                <div class="dashboard-controls">
+                    <div class="manager-filter">
+                        <label for="managerFilter">Filtrar por Gerente:</label>
+                        <select id="managerFilter">
+                            <option value="all">Todos los Gerentes</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="team-stats-grid">
-                    <div class="stat-card">
-                        <h3>Total Leads</h3>
-                        <div class="stat-number" id="teamTotalLeads">0</div>
-                        <div class="stat-change positive">+15% vs período anterior</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Acciones Realizadas</h3>
-                        <div class="stat-number" id="teamTotalActions">0</div>
-                        <div class="stat-change positive">+22% vs período anterior</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Conversiones</h3>
-                        <div class="stat-number" id="teamConversions">0</div>
-                        <div class="stat-change positive">+8% vs período anterior</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Tasa Conversión</h3>
-                        <div class="stat-number" id="teamConversionRate">0%</div>
-                        <div class="stat-change positive">+3% vs período anterior</div>
+                <!-- Vista por Gerentes -->
+                <div id="managersDashboard" class="managers-dashboard">
+                    <h3>📈 Rendimiento por Gerente de Ventas</h3>
+                    <div class="managers-grid" id="managersGrid">
+                        <!-- Los indicadores por gerente se cargarán dinámicamente -->
                     </div>
                 </div>
 
@@ -77,7 +79,7 @@
                 <div class="kpis-summary-section">
                     <h3>📊 Resumen de Cumplimiento de KPIs</h3>
                     <div class="kpis-summary-grid" id="kpisSummaryGrid">
-                        <!-- Los KPIs se cargarán dinámicamente -->
+                        <!-- Los KPIs de asesores se cargarán dinámicamente -->
                     </div>
                 </div>
 
@@ -230,110 +232,6 @@
                 </div>
             </section>
 
-            <!-- User Management Section -->
-            <section id="user-management" class="content-section">
-                <h2>Gestión de Usuarios</h2>
-                
-                <div class="user-management-container">
-                    <!-- Formulario de Creación de Usuario -->
-                    <div class="user-form-card">
-                        <div class="card-header">
-                            <h3>Crear Nuevo Usuario</h3>
-                            <p>Registra nuevos gerentes de ventas y asesores en el sistema</p>
-                        </div>
-                        
-                        <form id="userCreationForm" class="user-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="userFirstName">Nombres:</label>
-                                    <input type="text" id="userFirstName" name="firstName" required placeholder="Ej: Juan Carlos">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="userLastName">Apellidos:</label>
-                                    <input type="text" id="userLastName" name="lastName" required placeholder="Ej: Pérez García">
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="userCedula">Número de Cédula:</label>
-                                    <input type="text" id="userCedula" name="cedula" required placeholder="Ej: 1234567890" maxlength="10">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="userRole">Rol del Usuario:</label>
-                                    <select id="userRole" name="role" required>
-                                        <option value="">Seleccionar rol...</option>
-                                        <option value="manager">Gerente de Ventas</option>
-                                        <option value="advisor">Asesor</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="userEmail">Correo Electrónico:</label>
-                                    <input type="email" id="userEmail" name="email" required placeholder="Ej: juan.perez@empresa.com">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="userPhone">Teléfono:</label>
-                                    <input type="tel" id="userPhone" name="phone" required placeholder="Ej: +57 300 123 4567">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="userAddress">Dirección:</label>
-                                <textarea id="userAddress" name="address" required placeholder="Ej: Calle 123 #45-67, Barrio Centro, Ciudad" rows="3"></textarea>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="userUsername">Nombre de Usuario:</label>
-                                    <input type="text" id="userUsername" name="username" required placeholder="Ej: jperez" minlength="3">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="userPassword">Contraseña Temporal:</label>
-                                    <input type="password" id="userPassword" name="password" required placeholder="Mínimo 6 caracteres" minlength="6">
-                                </div>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" id="resetUserForm">Limpiar Formulario</button>
-                                <button type="submit" class="btn btn-primary">
-                                    <span class="icon">👤</span>
-                                    Crear Usuario
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Lista de Usuarios Existentes -->
-                    <div class="users-list-card">
-                        <div class="card-header">
-                            <h3>Usuarios Registrados</h3>
-                            <span class="user-count" id="userCount">0 usuarios</span>
-                        </div>
-                        
-                        <!-- Filtros de Usuarios -->
-                        <div class="users-filters">
-                            <select id="usersRoleFilter">
-                                <option value="">Todos los Roles</option>
-                                <option value="admin">Administrador</option>
-                                <option value="manager">Gerente de Ventas</option>
-                                <option value="advisor">Asesor</option>
-                            </select>
-                            <button onclick="window.crm.loadUsers()" class="btn btn-primary">Actualizar Lista</button>
-                        </div>
-                        
-                        <div id="usersList" class="users-grid">
-                            <!-- Los usuarios se cargarán dinámicamente -->
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <!-- Sequences Section -->
             <section id="sequences" class="content-section">
@@ -525,6 +423,135 @@
                 </div>
             </section>
         </main>
+        </div>
+
+        <!-- User Management Section -->
+        <div id="user-section" class="main-section">
+            <div class="user-section-header">
+                <h2>Gestión de Usuarios</h2>
+                <p>Administra usuarios, roles y permisos del sistema</p>
+            </div>
+            
+            <div class="user-management-container">
+                <!-- Formulario de Creación de Usuario -->
+                <div class="user-form-card">
+                    <div class="card-header">
+                        <h3>Crear Nuevo Usuario</h3>
+                        <p>Registra nuevos gerentes de ventas y asesores en el sistema</p>
+                    </div>
+                    
+                    <form id="userCreationForm" class="user-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="userFirstName">Nombres:</label>
+                                <input type="text" id="userFirstName" name="firstName" required placeholder="Ej: Juan Carlos">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="userLastName">Apellidos:</label>
+                                <input type="text" id="userLastName" name="lastName" required placeholder="Ej: Pérez García">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="userCedula">Número de Cédula:</label>
+                                <input type="text" id="userCedula" name="cedula" required placeholder="Ej: 1234567890" maxlength="10">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="userRole">Rol del Usuario:</label>
+                                <select id="userRole" name="role" required onchange="window.crm.toggleManagerSelection()">
+                                    <option value="">Seleccionar rol...</option>
+                                    <option value="manager">Gerente de Ventas</option>
+                                    <option value="advisor">Asesor</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="userEmail">Correo Electrónico:</label>
+                                <input type="email" id="userEmail" name="email" required placeholder="Ej: juan.perez@empresa.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="userPhone">Teléfono:</label>
+                                <input type="tel" id="userPhone" name="phone" required placeholder="Ej: +57 300 123 4567">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userAddress">Dirección:</label>
+                            <textarea id="userAddress" name="address" required placeholder="Ej: Calle 123 #45-67, Barrio Centro, Ciudad" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group" id="managerSelectionGroup" style="display: none;">
+                            <label for="userManager">Asignar a Gerente de Ventas:</label>
+                            <select id="userManager" name="managerId">
+                                <option value="">Seleccionar gerente...</option>
+                            </select>
+                            <small style="color: #6c757d; margin-top: 0.25rem; display: block;">
+                                Selecciona el gerente de ventas que supervisará a este asesor
+                            </small>
+                        </div>
+                        
+                        <div class="form-group" id="advisorSelectionGroup" style="display: none;">
+                            <label for="userAdvisors">Asignar Asesores:</label>
+                            <div id="availableAdvisorsList" class="advisors-checkbox-list">
+                                <!-- Los asesores disponibles se cargarán dinámicamente -->
+                            </div>
+                            <small style="color: #6c757d; margin-top: 0.25rem; display: block;">
+                                Selecciona los asesores que estarán bajo tu supervisión
+                            </small>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="userUsername">Nombre de Usuario:</label>
+                                <input type="text" id="userUsername" name="username" required placeholder="Ej: jperez" minlength="3">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="userPassword">Contraseña Temporal:</label>
+                                <input type="password" id="userPassword" name="password" required placeholder="Mínimo 6 caracteres" minlength="6">
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="resetUserForm">Limpiar Formulario</button>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">👤</span>
+                                Crear Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Lista de Usuarios Existentes -->
+                <div class="users-list-card">
+                    <div class="card-header">
+                        <h3>Usuarios Registrados</h3>
+                        <span class="user-count" id="userCount">0 usuarios</span>
+                    </div>
+                    
+                    <!-- Filtros de Usuarios -->
+                    <div class="users-filters">
+                        <select id="usersRoleFilter">
+                            <option value="">Todos los Roles</option>
+                            <option value="admin">Administrador</option>
+                            <option value="manager">Gerente de Ventas</option>
+                            <option value="advisor">Asesor</option>
+                        </select>
+                        <button onclick="window.crm.loadUsers()" class="btn btn-primary">Actualizar Lista</button>
+                    </div>
+                    
+                    <div id="usersList" class="users-grid">
+                        <!-- Los usuarios se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modals -->
@@ -700,7 +727,7 @@
                         
                         <div class="form-group">
                             <label for="editUserRole">Rol del Usuario:</label>
-                            <select id="editUserRole" name="role" required>
+                            <select id="editUserRole" name="role" required onchange="window.crm.toggleEditManagerSelection()">
                                 <option value="manager">Gerente de Ventas</option>
                                 <option value="advisor">Asesor</option>
                             </select>
@@ -722,6 +749,16 @@
                     <div class="form-group">
                         <label for="editUserAddress">Dirección:</label>
                         <textarea id="editUserAddress" name="address" required rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group" id="editManagerSelectionGroup" style="display: none;">
+                        <label for="editUserManager">Asignar a Gerente de Ventas:</label>
+                        <select id="editUserManager" name="managerId">
+                            <option value="">Seleccionar gerente...</option>
+                        </select>
+                        <small style="color: #6c757d; margin-top: 0.25rem; display: block;">
+                            Selecciona el gerente de ventas que supervisará a este asesor
+                        </small>
                     </div>
                     
                     <div class="form-row">

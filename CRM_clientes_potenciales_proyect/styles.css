@@ -354,6 +354,353 @@ body {
     margin-bottom: 2rem;
 }
 
+/* Admin Dashboard - Team Stats Grid Specific (6 columns in one row) */
+.team-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Compact stat cards for admin dashboard */
+.team-stats-grid .stat-card {
+    padding: 0.75rem;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.team-stats-grid .stat-card h3 {
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.team-stats-grid .stat-card .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--primary-color);
+}
+
+.team-stats-grid .stat-card .stat-change {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* KPIs Summary Section */
+.kpis-summary-section {
+    margin: 2rem 0;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.kpis-summary-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.kpis-summary-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.advisor-kpi-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.advisor-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.advisor-kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.advisor-kpi-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.advisor-kpi-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.advisor-kpi-status.needs-improvement {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.advisor-kpi-status.good {
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.advisor-kpi-status.excellent {
+    background: #dbeafe;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.advisor-kpi-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.advisor-kpi-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.advisor-kpi-metric-icon {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.advisor-kpi-metric-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.advisor-kpi-metric-progress {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.advisor-kpi-metric-percentage {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+}
+
+.advisor-kpi-metric-percentage.low {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.advisor-kpi-metric-percentage.medium {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.advisor-kpi-metric-percentage.high {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* Responsive design for team stats grid */
+@media (max-width: 1200px) {
+    .team-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .team-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.3rem;
+    }
+    
+    .team-stats-grid .stat-card {
+        padding: 0.5rem;
+        min-height: 70px;
+    }
+    
+    .team-stats-grid .stat-card h3 {
+        font-size: 0.6rem;
+    }
+    
+    .team-stats-grid .stat-card .stat-number {
+        font-size: 1.2rem;
+    }
+    
+    .team-stats-grid .stat-card .stat-change {
+        font-size: 0.5rem;
+        padding: 0.1rem 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    /* Responsive for KPIs summary */
+    .advisor-kpi-metrics {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .advisor-kpi-metric {
+        padding: 0.5rem;
+    }
+    
+    .advisor-kpi-metric-title {
+        font-size: 0.6rem;
+    }
+    
+    .advisor-kpi-metric-progress {
+        font-size: 0.8rem;
+    }
+    
+    .advisor-kpi-metric-percentage {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.3rem;
+    }
+}
+
+/* Estilos específicos solo para el advisor */
+.advisor-theme .personal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+}
+
+.advisor-theme .stat-card {
+    padding: var(--spacing-md);
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px;
+}
+
+/* Estilos específicos para las tarjetas del advisor */
+/* Cliente Ganado (2da tarjeta) - Verde */
+.advisor-theme .stat-card:nth-child(2) {
+    border-left-color: var(--success-color);
+}
+
+.advisor-theme .stat-card:nth-child(2)::before {
+    background: linear-gradient(90deg, var(--success-color), var(--success-light));
+}
+
+.advisor-theme .stat-card:nth-child(2):hover {
+    border-color: var(--success-light);
+}
+
+.advisor-theme .stat-card:nth-child(2) .stat-number {
+    background: linear-gradient(135deg, var(--success-color), var(--success-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Cliente Perdido - Rojo */
+.advisor-theme .stat-card.leads-lost {
+    border-left-color: var(--danger-color);
+}
+
+.advisor-theme .stat-card.leads-lost::before {
+    background: linear-gradient(90deg, var(--danger-color), var(--danger-light));
+}
+
+.advisor-theme .stat-card.leads-lost:hover {
+    border-color: var(--danger-light);
+}
+
+.advisor-theme .stat-card.leads-lost .stat-number {
+    background: linear-gradient(135deg, var(--danger-color), var(--danger-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Cliente Prospecto - Naranja */
+.advisor-theme .stat-card.leads-in-process {
+    border-left-color: var(--warning-color);
+}
+
+.advisor-theme .stat-card.leads-in-process::before {
+    background: linear-gradient(90deg, var(--warning-color), var(--warning-light));
+}
+
+.advisor-theme .stat-card.leads-in-process:hover {
+    border-color: var(--warning-light);
+}
+
+.advisor-theme .stat-card.leads-in-process .stat-number {
+    background: linear-gradient(135deg, var(--warning-color), var(--warning-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.advisor-theme .stat-change.negative {
+    color: var(--danger-dark);
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+/* Ajustes de tipografía para tarjetas cuadradas del advisor */
+.advisor-theme .stat-card h3 {
+    font-size: 0.7rem;
+    margin-bottom: 0.3rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.advisor-theme .stat-card .stat-number {
+    font-size: 1.6rem;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+
+.advisor-theme .stat-card .stat-change {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+    margin-top: 0.2rem;
+    text-align: center;
+}
+
 .stat-card {
     background: var(--surface-color);
     padding: var(--spacing-xl);
@@ -5747,6 +6094,83 @@ tr:hover {
     }
 }
 
+/* Estilos para checkboxes de asesores */
+.advisors-checkbox-list {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.advisor-checkbox-item {
+    margin-bottom: 0.75rem;
+}
+
+.advisor-checkbox-item:last-child {
+    margin-bottom: 0;
+}
+
+.advisor-checkbox-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.advisor-checkbox-item label:hover {
+    background: #e9ecef;
+}
+
+.advisor-checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #007bff;
+}
+
+.advisor-name {
+    font-weight: 600;
+    color: #495057;
+}
+
+.advisor-username {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.no-advisors-message {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+/* Estilos para información de asociación */
+.user-association {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--info-light);
+    border-radius: var(--radius-sm);
+    margin-top: 0.5rem;
+}
+
+.association-label {
+    font-size: 0.75rem;
+    color: var(--info-dark);
+    font-weight: 500;
+}
+
+.association-value {
+    font-size: 0.75rem;
+    color: var(--info-dark);
+    font-weight: 600;
+}
+
 @media (max-width: 480px) {
     .task-header {
         padding: 1rem;
@@ -5762,5 +6186,381 @@ tr:hover {
     
     .task-badges {
         justify-content: center;
+    }
+}
+
+/* Admin Sidebar Styles */
+.admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+    color: white;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.sidebar-header h3 {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+.sidebar-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-btn.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-left-color: #fbbf24;
+    font-weight: 600;
+}
+
+.sidebar-icon {
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-text {
+    flex: 1;
+}
+
+/* Main Section Styles */
+.main-section {
+    margin-left: 250px;
+    min-height: 100vh;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.main-section.active {
+    display: block;
+}
+
+/* User Section Header */
+.user-section-header {
+    background: white;
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.user-section-header h2 {
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.user-section-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Dashboard Controls */
+.dashboard-controls {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+}
+
+.manager-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.manager-filter label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.manager-filter select {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    min-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.manager-filter select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.view-toggle {
+    display: flex;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 4px;
+    margin-left: auto;
+}
+
+.view-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.view-btn.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.view-btn:hover:not(.active) {
+    color: var(--text-primary);
+}
+
+/* Managers Dashboard */
+.managers-dashboard {
+    margin: 2rem 0;
+}
+
+.managers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.manager-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.manager-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.manager-info h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.manager-info p {
+    margin: 0.25rem 0 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.manager-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.manager-status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.manager-status.inactive {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.manager-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.manager-stat {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.manager-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.manager-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.advisor-list {
+    margin-top: 1rem;
+}
+
+.advisor-list h5 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.advisor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.advisor-item:hover {
+    background: #e2e8f0;
+}
+
+.advisor-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.advisor-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.advisor-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.advisor-stat-value {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.advisor-stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments for sidebar */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        width: 200px;
+    }
+    
+    .main-section {
+        margin-left: 200px;
+    }
+    
+    .dashboard-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .view-toggle {
+        margin-left: 0;
+        justify-content: center;
+    }
+    
+    .managers-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 200px;
+    }
+    
+    .main-section {
+        margin-left: 200px;
+    }
+    
+    .sidebar-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-text {
+        display: none;
+    }
+    
+    .sidebar-icon {
+        font-size: 1.5rem;
+        width: 100%;
     }
 }

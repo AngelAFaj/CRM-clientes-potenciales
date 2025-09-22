@@ -39,9 +39,10 @@ class CRMApp {
                 phone: '+1234567891',
                 cedula: '1234567891',
                 address: 'Oficina Gerencia, Ciudad',
-                isActive: false,
+                isActive: true,
                 createdAt: new Date('2024-01-01'),
-                createdBy: 'Sistema'
+                createdBy: 'Sistema',
+                assignedAdvisors: ['Asesor', 'Asesor 2', 'Asesor 3'] // Asesores asignados a este gerente
             },
             { 
                 id: 3, 
@@ -57,7 +58,8 @@ class CRMApp {
                 address: 'Oficina Ventas, Ciudad',
                 isActive: true,
                 createdAt: new Date('2024-01-01'),
-                createdBy: 'Sistema'
+                createdBy: 'Sistema',
+                managerId: 2 // ID del gerente asignado
             },
             { 
                 id: 4, 
@@ -74,7 +76,8 @@ class CRMApp {
                 address: 'Oficina Ventas 2, Ciudad',
                 isActive: true,
                 createdAt: new Date('2024-01-01'),
-                createdBy: 'Sistema'
+                createdBy: 'Sistema',
+                managerId: 2 // ID del gerente asignado
             },
             { 
                 id: 5, 
@@ -91,7 +94,8 @@ class CRMApp {
                 address: 'Oficina Ventas 3, Ciudad',
                 isActive: true,
                 createdAt: new Date('2024-01-01'),
-                createdBy: 'Sistema'
+                createdBy: 'Sistema',
+                managerId: 2 // ID del gerente asignado
             }
         ];
         
@@ -2000,6 +2004,10 @@ class CRMApp {
         
         this.setupAdminEventListeners();
         this.updateAdminDashboard();
+        
+        // Verificar si hay gerentes de ventas disponibles al inicializar
+        this.createDefaultManager();
+        this.showManagersStatus();
     }
     
     initManager() {
@@ -2030,7 +2038,10 @@ class CRMApp {
         }
         
         this.setupManagerEventListeners();
-        this.updateManagerDashboard();
+        this.setupAdminSidebarNavigation();
+        this.setupAdminDashboardControls();
+        this.updateManagersDashboard();
+        this.updateAdvisorsKPIs();
         
         // Initialize sequences display
         setTimeout(() => {
@@ -2148,12 +2159,41 @@ class CRMApp {
     }
     
     updateAdminDashboard() {
-        const stats = this.getStatistics();
+        console.log('Actualizando dashboard del admin...');
         
-        document.getElementById('totalLeads').textContent = stats.totalLeads;
-        document.getElementById('totalConversions').textContent = stats.conversions;
-        document.getElementById('activeAdvisors').textContent = 3; // Mock data
-        document.getElementById('conversionRate').textContent = `${stats.conversionRate}%`;
+        // Get all leads
+        const allLeads = this.leads;
+        const totalLeads = allLeads.length;
+        
+        // Calculate different lead categories
+        const convertedLeads = allLeads.filter(lead => lead.status === 'Cerrado').length;
+        const prospectLeads = allLeads.filter(lead => 
+            ['Calificar', 'Desarrollar', 'Proponer', 'Cierre'].includes(lead.status)
+        ).length;
+        const lostLeads = allLeads.filter(lead => lead.status === 'Perdido').length;
+        
+        // Calculate conversion rate
+        const conversionRate = totalLeads > 0 ? (convertedLeads / totalLeads * 100).toFixed(1) : 0;
+        
+        // Get total actions
+        const totalActions = this.tasks.length;
+        
+        // Update DOM elements
+        this.updateElement('teamTotalLeads', totalLeads);
+        this.updateElement('teamConversions', convertedLeads);
+        this.updateElement('teamProspects', prospectLeads);
+        this.updateElement('teamLostLeads', lostLeads);
+        this.updateElement('teamConversionRate', `${conversionRate}%`);
+        this.updateElement('teamTotalActions', totalActions);
+        
+        console.log('Dashboard del admin actualizado:', {
+            totalLeads,
+            convertedLeads,
+            prospectLeads,
+            lostLeads,
+            conversionRate,
+            totalActions
+        });
         
         this.updateAdminCharts();
     }
@@ -3237,7 +3277,7 @@ class CRMApp {
                     dueDate.setHours(dueDate.getHours() + delayHours);
                     
                     // Crear múltiples tareas según la cantidad especificada
-                    for (let i = 0; i < (action.count || 1); i++) {
+                    for (let i = 0; i < (action.repetitions || 1); i++) {
                         const taskId = Date.now() + Math.random();
                         const task = {
                             id: taskId,
@@ -3246,7 +3286,7 @@ class CRMApp {
                             dueDate: dueDate,
                             duration: this.getDefaultDuration(action.type),
                             status: 'abierta',
-                            notes: `Tarea generada automáticamente de la secuencia "${sequence.name}" - Acción ${actionIndex + 1}${action.count > 1 ? ` (${i + 1}/${action.count})` : ''}`,
+                            notes: `Tarea generada automáticamente de la secuencia "${sequence.name}" - Acción ${actionIndex + 1}${action.repetitions > 1 ? ` (${i + 1}/${action.repetitions})` : ''}`,
                             advisor: advisorName,
                             createdAt: new Date(),
                             sequenceId: sequence.id,
@@ -3614,6 +3654,15 @@ class CRMApp {
         const conversions = leads.filter(lead => lead.status === 'Cierre').length;
         const conversionRate = totalLeads > 0 ? Math.round((conversions / totalLeads) * 100) : 0;
         
+        // Calcular nuevas métricas de leads
+        const leadsLost = leads.filter(lead => lead.status === 'Perdido' || lead.interest === 'No interesado' || lead.interest === '1 - No me interesa').length;
+        const leadsInProcess = leads.filter(lead => 
+            lead.status !== 'Cierre' && 
+            lead.status !== 'Perdido' && 
+            lead.interest !== 'No interesado' && 
+            lead.interest !== '1 - No me interesa'
+        ).length;
+        
         // Update dashboard elements
         const myLeadsCount = document.getElementById('myLeadsCount');
         const myCompletedTasks = document.getElementById('myCompletedTasks');
@@ -3625,10 +3674,62 @@ class CRMApp {
         if (myConversions) myConversions.textContent = conversions;
         if (myConversionRate) myConversionRate.textContent = `${conversionRate}%`;
         
+        // Update new leads breakdown elements
+        const leadsLostCount = document.getElementById('leadsLostCount');
+        const leadsInProcessCount = document.getElementById('leadsInProcessCount');
+        
+        if (leadsLostCount) leadsLostCount.textContent = leadsLost;
+        if (leadsInProcessCount) leadsInProcessCount.textContent = leadsInProcess;
+        
+        // Update today's pending tasks
+        this.updateTodayTasks();
+        
         // Actualizar secuencias asignadas
         this.updateAssignedSequences();
         
-        console.log('Dashboard actualizado:', { totalLeads, completedTasks, conversions, conversionRate });
+        console.log('Dashboard actualizado:', { 
+            totalLeads, 
+            completedTasks, 
+            conversions, 
+            conversionRate,
+            leadsLost,
+            leadsInProcess
+        });
+    }
+    
+    updateTodayTasks() {
+        const tasks = this.getTasksForUser();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        // Contar tareas pendientes para hoy
+        const todayPendingTasks = tasks.filter(task => {
+            const taskDate = new Date(task.dueDate);
+            taskDate.setHours(0, 0, 0, 0);
+            return task.status === 'abierta' && taskDate >= today && taskDate < tomorrow;
+        }).length;
+        
+        // Actualizar elementos del DOM
+        const todayPendingTasksElement = document.getElementById('todayPendingTasks');
+        const todayTasksStatusElement = document.getElementById('todayTasksStatus');
+        
+        if (todayPendingTasksElement) {
+            todayPendingTasksElement.textContent = todayPendingTasks;
+        }
+        
+        if (todayTasksStatusElement) {
+            if (todayPendingTasks === 0) {
+                todayTasksStatusElement.textContent = '¡Todo al día!';
+                todayTasksStatusElement.className = 'stat-change positive';
+            } else {
+                todayTasksStatusElement.textContent = `${todayPendingTasks} pendientes`;
+                todayTasksStatusElement.className = 'stat-change negative';
+            }
+        }
+        
+        console.log('Tareas pendientes para hoy:', todayPendingTasks);
     }
     
     updateAssignedSequences() {
@@ -8971,6 +9072,36 @@ class CRMApp {
             createdBy: this.currentUser.name
         };
 
+        // Si es un asesor, asignar al gerente seleccionado
+        if (userData.role === 'advisor' && userData.managerId) {
+            newUser.managerId = parseInt(userData.managerId);
+            
+            // Agregar el asesor a la lista de asesores asignados del gerente
+            const manager = this.users.find(u => u.id === newUser.managerId);
+            if (manager && manager.role === 'manager') {
+                if (!manager.assignedAdvisors) {
+                    manager.assignedAdvisors = [];
+                }
+                manager.assignedAdvisors.push(newUser.name);
+            }
+        }
+
+        // Si es un gerente, inicializar lista de asesores asignados
+        if (userData.role === 'manager') {
+            newUser.assignedAdvisors = [];
+            
+            // Si se seleccionaron asesores, asignarlos
+            if (userData.selectedAdvisors && userData.selectedAdvisors.length > 0) {
+                userData.selectedAdvisors.forEach(advisorName => {
+                    const advisor = this.users.find(u => u.name === advisorName);
+                    if (advisor && advisor.role === 'advisor') {
+                        advisor.managerId = newUser.id;
+                        newUser.assignedAdvisors.push(advisorName);
+                    }
+                });
+            }
+        }
+
         this.users.push(newUser);
         this.saveData();
         this.showNotification(`Usuario ${newUser.name} creado exitosamente`, 'success');
@@ -8979,6 +9110,264 @@ class CRMApp {
         this.loadUsers();
         
         return newUser;
+    }
+
+    toggleManagerSelection() {
+        const roleSelect = document.getElementById('userRole');
+        const managerGroup = document.getElementById('managerSelectionGroup');
+        const advisorGroup = document.getElementById('advisorSelectionGroup');
+        const managerSelect = document.getElementById('userManager');
+        
+        if (!roleSelect || !managerGroup || !advisorGroup || !managerSelect) return;
+        
+        // Ocultar ambos grupos primero
+        managerGroup.style.display = 'none';
+        advisorGroup.style.display = 'none';
+        managerSelect.value = '';
+        
+        if (roleSelect.value === 'advisor') {
+            managerGroup.style.display = 'block';
+            // Verificar si hay gerentes disponibles, si no, crear uno por defecto
+            this.createDefaultManager();
+            this.populateManagerSelect();
+        } else if (roleSelect.value === 'manager') {
+            advisorGroup.style.display = 'block';
+            this.populateAdvisorsCheckboxes();
+        }
+    }
+
+    populateManagerSelect() {
+        const managerSelect = document.getElementById('userManager');
+        if (!managerSelect) {
+            console.error('Elemento userManager no encontrado');
+            return;
+        }
+        
+        console.log('=== POBLANDO SELECT DE GERENTES ===');
+        console.log('Total usuarios en el sistema:', this.users.length);
+        
+        // Limpiar opciones existentes excepto la primera
+        managerSelect.innerHTML = '<option value="">Seleccionar gerente...</option>';
+        
+        // Obtener todos los gerentes de ventas
+        const managers = this.users.filter(user => user.role === 'manager' && user.isActive);
+        
+        console.log('Gerentes encontrados:', managers.length);
+        console.log('Detalles de gerentes:', managers.map(m => ({
+            id: m.id,
+            name: m.name,
+            role: m.role,
+            isActive: m.isActive,
+            assignedAdvisors: m.assignedAdvisors?.length || 0
+        })));
+        
+        if (managers.length === 0) {
+            console.warn('No se encontraron gerentes de ventas activos');
+            // Agregar opción de "No hay gerentes disponibles"
+            const noManagerOption = document.createElement('option');
+            noManagerOption.value = '';
+            noManagerOption.textContent = 'No hay gerentes de ventas disponibles';
+            noManagerOption.disabled = true;
+            managerSelect.appendChild(noManagerOption);
+            return;
+        }
+        
+        managers.forEach(manager => {
+            const option = document.createElement('option');
+            option.value = manager.id;
+            option.textContent = `${manager.name} (${manager.assignedAdvisors ? manager.assignedAdvisors.length : 0} asesores)`;
+            managerSelect.appendChild(option);
+        });
+        
+        console.log('Select de gerentes poblado exitosamente');
+    }
+
+    // Función para crear un gerente de ventas de prueba si no existe ninguno
+    createDefaultManager() {
+        console.log('Verificando si existe al menos un gerente de ventas...');
+        
+        const existingManagers = this.users.filter(user => user.role === 'manager' && user.isActive);
+        
+        if (existingManagers.length === 0) {
+            console.log('No hay gerentes de ventas, creando uno por defecto...');
+            
+            const defaultManager = {
+                id: Date.now(),
+                username: 'gerente_ventas',
+                password: 'gerente123',
+                role: 'manager',
+                name: 'Gerente de Ventas',
+                firstName: 'Gerente',
+                lastName: 'Ventas',
+                email: 'gerente@empresa.com',
+                phone: '+1234567890',
+                cedula: '1234567890',
+                address: 'Oficina Gerencia, Ciudad',
+                isActive: true,
+                createdAt: new Date(),
+                createdBy: 'Sistema',
+                assignedAdvisors: []
+            };
+            
+            this.users.push(defaultManager);
+            this.saveData();
+            
+            console.log('Gerente de ventas por defecto creado:', defaultManager.name);
+            this.showNotification('Se ha creado un gerente de ventas por defecto', 'info');
+            
+            return defaultManager;
+        }
+        
+        console.log('Ya existen gerentes de ventas:', existingManagers.length);
+        return null;
+    }
+
+    // Función para mostrar el estado de los gerentes de ventas
+    showManagersStatus() {
+        console.log('=== ESTADO DE GERENTES DE VENTAS ===');
+        const allUsers = this.users;
+        const managers = allUsers.filter(user => user.role === 'manager');
+        const activeManagers = managers.filter(user => user.isActive);
+        
+        console.log('Total usuarios:', allUsers.length);
+        console.log('Total gerentes:', managers.length);
+        console.log('Gerentes activos:', activeManagers.length);
+        
+        if (managers.length > 0) {
+            console.log('Detalles de gerentes:');
+            managers.forEach((manager, index) => {
+                console.log(`${index + 1}. ${manager.name} (ID: ${manager.id})`);
+                console.log(`   - Activo: ${manager.isActive}`);
+                console.log(`   - Username: ${manager.username}`);
+                console.log(`   - Email: ${manager.email}`);
+                console.log(`   - Asesores asignados: ${manager.assignedAdvisors?.length || 0}`);
+            });
+        }
+        
+        console.log('=== FIN ESTADO DE GERENTES ===');
+    }
+
+    populateAdvisorsCheckboxes() {
+        const advisorsList = document.getElementById('availableAdvisorsList');
+        if (!advisorsList) return;
+        
+        // Obtener todos los asesores que no tienen gerente asignado
+        const availableAdvisors = this.users.filter(user => 
+            user.role === 'advisor' && 
+            user.isActive && 
+            (!user.managerId || user.managerId === null)
+        );
+        
+        if (availableAdvisors.length === 0) {
+            advisorsList.innerHTML = `
+                <div class="no-advisors-message">
+                    <p>No hay asesores disponibles para asignar.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        advisorsList.innerHTML = availableAdvisors.map(advisor => `
+            <div class="advisor-checkbox-item">
+                <label>
+                    <input type="checkbox" name="selectedAdvisors" value="${advisor.name}">
+                    <span class="advisor-name">${advisor.name}</span>
+                    <span class="advisor-username">@${advisor.username}</span>
+                </label>
+            </div>
+        `).join('');
+    }
+
+    toggleEditManagerSelection() {
+        const roleSelect = document.getElementById('editUserRole');
+        const managerGroup = document.getElementById('editManagerSelectionGroup');
+        const managerSelect = document.getElementById('editUserManager');
+        
+        if (!roleSelect || !managerGroup || !managerSelect) return;
+        
+        if (roleSelect.value === 'advisor') {
+            managerGroup.style.display = 'block';
+            // Verificar si hay gerentes disponibles, si no, crear uno por defecto
+            this.createDefaultManager();
+            this.populateEditManagerSelect();
+        } else {
+            managerGroup.style.display = 'none';
+            managerSelect.value = '';
+        }
+    }
+
+    populateEditManagerSelect() {
+        const managerSelect = document.getElementById('editUserManager');
+        if (!managerSelect) return;
+        
+        // Limpiar opciones existentes excepto la primera
+        managerSelect.innerHTML = '<option value="">Seleccionar gerente...</option>';
+        
+        // Obtener todos los gerentes de ventas
+        const managers = this.users.filter(user => user.role === 'manager' && user.isActive);
+        
+        managers.forEach(manager => {
+            const option = document.createElement('option');
+            option.value = manager.id;
+            option.textContent = `${manager.name} (${manager.assignedAdvisors ? manager.assignedAdvisors.length : 0} asesores)`;
+            managerSelect.appendChild(option);
+        });
+    }
+
+    handleUserCreation() {
+        console.log('Manejando creación de usuario');
+        
+        const form = document.getElementById('userCreationForm');
+        if (!form) {
+            this.showNotification('Formulario no encontrado', 'error');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const userData = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            cedula: formData.get('cedula'),
+            role: formData.get('role'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            username: formData.get('username'),
+            password: formData.get('password')
+        };
+        
+        // Obtener managerId si es asesor
+        if (userData.role === 'advisor') {
+            const managerSelect = document.getElementById('userManager');
+            if (managerSelect) {
+                userData.managerId = managerSelect.value;
+            }
+        }
+        
+        // Obtener asesores seleccionados si es gerente
+        if (userData.role === 'manager') {
+            const selectedCheckboxes = document.querySelectorAll('input[name="selectedAdvisors"]:checked');
+            userData.selectedAdvisors = Array.from(selectedCheckboxes).map(cb => cb.value);
+        }
+        
+        // Validar campos obligatorios
+        if (!userData.firstName || !userData.lastName || !userData.role || !userData.username || !userData.password) {
+            this.showNotification('Por favor complete todos los campos obligatorios', 'error');
+            return;
+        }
+        
+        // Crear usuario
+        const newUser = this.createUser(userData);
+        if (newUser) {
+            // Limpiar formulario
+            form.reset();
+            
+            // Ocultar grupos de selección
+            const managerGroup = document.getElementById('managerSelectionGroup');
+            const advisorGroup = document.getElementById('advisorSelectionGroup');
+            if (managerGroup) managerGroup.style.display = 'none';
+            if (advisorGroup) advisorGroup.style.display = 'none';
+        }
     }
 
     loadUsers() {
@@ -9024,6 +9413,22 @@ class CRMApp {
         const phoneDisplay = hasValue(user.phone) ? user.phone : 'No especificado';
         const cedulaDisplay = hasValue(user.cedula) ? user.cedula : 'No especificado';
         const addressDisplay = hasValue(user.address) ? (user.address.length > 50 ? user.address.substring(0, 50) + '...' : user.address) : 'No especificado';
+        
+        // Obtener información de asociación
+        let associationInfo = '';
+        if (user.role === 'manager' && user.assignedAdvisors) {
+            associationInfo = `<div class="user-association">
+                <span class="association-label">👥 Asesores asignados:</span>
+                <span class="association-value">${user.assignedAdvisors.length} asesor(es)</span>
+            </div>`;
+        } else if (user.role === 'advisor' && user.managerId) {
+            const manager = this.users.find(u => u.id === user.managerId);
+            const managerName = manager ? manager.name : 'Gerente no encontrado';
+            associationInfo = `<div class="user-association">
+                <span class="association-label">👔 Gerente asignado:</span>
+                <span class="association-value">${managerName}</span>
+            </div>`;
+        }
 
         return `
             <div class="user-card ${statusClass}">
@@ -9079,6 +9484,7 @@ class CRMApp {
                             <span class="value">${addressDisplay}</span>
                         </div>
                     </div>
+                    ${associationInfo ? `<div class="detail-row">${associationInfo}</div>` : ''}
                 </div>
             </div>
         `;
@@ -9246,6 +9652,18 @@ class CRMApp {
         formElements.username.value = user.username || '';
         formElements.role.value = user.role || '';
 
+        // Manejar selección de gerente para asesores
+        if (user.role === 'advisor') {
+            this.toggleEditManagerSelection();
+            // Establecer el gerente actual si existe
+            if (user.managerId) {
+                const managerSelect = document.getElementById('editUserManager');
+                if (managerSelect) {
+                    managerSelect.value = user.managerId;
+                }
+            }
+        }
+
         // Guardar el ID del usuario para la actualización
         formElements.form.dataset.userId = userId;
 
@@ -9301,6 +9719,39 @@ class CRMApp {
         // Actualizar contraseña solo si se proporciona una nueva
         if (userData.password && userData.password.trim() !== '') {
             user.password = userData.password;
+        }
+
+        // Manejar cambio de gerente para asesores
+        if (userData.role === 'advisor') {
+            const oldManagerId = user.managerId;
+            const newManagerId = userData.managerId ? parseInt(userData.managerId) : null;
+
+            // Si cambió el gerente
+            if (oldManagerId !== newManagerId) {
+                // Remover del gerente anterior
+                if (oldManagerId) {
+                    const oldManager = this.users.find(u => u.id === oldManagerId);
+                    if (oldManager && oldManager.assignedAdvisors) {
+                        oldManager.assignedAdvisors = oldManager.assignedAdvisors.filter(name => name !== user.name);
+                    }
+                }
+
+                // Agregar al nuevo gerente
+                if (newManagerId) {
+                    user.managerId = newManagerId;
+                    const newManager = this.users.find(u => u.id === newManagerId);
+                    if (newManager) {
+                        if (!newManager.assignedAdvisors) {
+                            newManager.assignedAdvisors = [];
+                        }
+                        if (!newManager.assignedAdvisors.includes(user.name)) {
+                            newManager.assignedAdvisors.push(user.name);
+                        }
+                    }
+                } else {
+                    user.managerId = null;
+                }
+            }
         }
 
         this.saveData();
@@ -9392,6 +9843,14 @@ class CRMApp {
             password: formData.get('password'),
             role: formData.get('role')
         };
+
+        // Obtener managerId si es asesor
+        if (userData.role === 'advisor') {
+            const managerSelect = document.getElementById('editUserManager');
+            if (managerSelect) {
+                userData.managerId = managerSelect.value;
+            }
+        }
 
         // Validaciones básicas
         if (!userData.firstName || !userData.lastName || !userData.cedula || !userData.email || !userData.phone || !userData.address || !userData.username || !userData.role) {
@@ -10236,6 +10695,357 @@ class CRMApp {
         modal.style.display = 'flex';
         modal.classList.add('show');
     }
+
+    // Admin Sidebar Navigation
+    setupAdminSidebarNavigation() {
+        console.log('Configurando navegación del sidebar del admin...');
+        
+        const sidebarButtons = document.querySelectorAll('.sidebar-btn');
+        sidebarButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = button.getAttribute('data-section');
+                this.showAdminSidebarSection(section);
+            });
+        });
+    }
+
+    showAdminSidebarSection(sectionName) {
+        console.log('Cambiando a sección del sidebar:', sectionName);
+        
+        // Ocultar todas las secciones principales
+        document.querySelectorAll('.main-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Mostrar la sección seleccionada
+        const targetSection = document.getElementById(sectionName);
+        if (targetSection) {
+            targetSection.classList.add('active');
+        }
+        
+        // Actualizar botones del sidebar
+        document.querySelectorAll('.sidebar-btn').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        const activeButton = document.querySelector(`[data-section="${sectionName}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+        
+        // Cargar contenido específico de la sección
+        switch (sectionName) {
+            case 'crm-section':
+                console.log('Cargando sección CRM...');
+                // La sección CRM ya tiene su propia navegación interna
+                break;
+            case 'user-section':
+                console.log('Cargando sección de usuarios...');
+                this.loadUsers();
+                break;
+        }
+    }
+
+    // Admin Dashboard Controls
+    setupAdminDashboardControls() {
+        console.log('Configurando controles del dashboard del admin...');
+        
+        // Manager filter
+        const managerFilter = document.getElementById('managerFilter');
+        if (managerFilter) {
+            this.populateManagerFilter();
+            managerFilter.addEventListener('change', () => {
+                this.filterByManager(managerFilter.value);
+            });
+        }
+    }
+
+
+    populateManagerFilter() {
+        const managerFilter = document.getElementById('managerFilter');
+        if (!managerFilter) return;
+        
+        // Clear existing options except "all"
+        managerFilter.innerHTML = '<option value="all">Todos los Gerentes</option>';
+        
+        // Get all managers
+        const managers = this.users.filter(user => user.role === 'manager' && user.isActive);
+        
+        managers.forEach(manager => {
+            const option = document.createElement('option');
+            option.value = manager.id;
+            option.textContent = manager.name;
+            managerFilter.appendChild(option);
+        });
+        
+        console.log('Filtro de gerentes poblado:', managers.length, 'gerentes');
+    }
+
+    updateManagersDashboard() {
+        console.log('Actualizando dashboard de gerentes...');
+        
+        const managersGrid = document.getElementById('managersGrid');
+        if (!managersGrid) return;
+        
+        // Get all managers
+        const managers = this.users.filter(user => user.role === 'manager' && user.isActive);
+        
+        if (managers.length === 0) {
+            managersGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #64748b; background: #f8fafc; border-radius: 12px; border: 2px dashed #e2e8f0;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">👥</div>
+                    <h3 style="margin: 0 0 0.5rem 0; color: #334155;">Sin Gerentes de Ventas</h3>
+                    <p style="margin: 0; font-size: 1rem;">No hay gerentes de ventas registrados en el sistema</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Generate manager cards
+        managersGrid.innerHTML = managers.map(manager => this.createManagerCard(manager)).join('');
+        
+        console.log('Dashboard de gerentes actualizado:', managers.length, 'gerentes');
+    }
+
+    createManagerCard(manager) {
+        // Get manager's advisors
+        const advisors = this.users.filter(user => 
+            user.role === 'advisor' && 
+            user.managerId === manager.id && 
+            user.isActive
+        );
+        
+        // Get manager's leads (through advisors)
+        const managerLeads = this.leads.filter(lead => 
+            advisors.some(advisor => lead.advisor === advisor.name)
+        );
+        
+        // Get manager's tasks
+        const managerTasks = this.tasks.filter(task => 
+            advisors.some(advisor => task.advisor === advisor.name)
+        );
+        
+        // Calculate statistics
+        const totalLeads = managerLeads.length;
+        const totalTasks = managerTasks.length;
+        const conversions = managerLeads.filter(lead => lead.status === 'Cerrado').length;
+        const conversionRate = totalLeads > 0 ? (conversions / totalLeads * 100).toFixed(1) : 0;
+        const activeLeads = managerLeads.filter(lead => lead.status !== 'Cerrado').length;
+        
+        // Get period for comparison
+        const period = document.getElementById('periodSelect')?.value || 'monthly';
+        const periodStats = this.getManagerPeriodStats(manager.id, period);
+        
+        return `
+            <div class="manager-card" data-manager-id="${manager.id}">
+                <div class="manager-header">
+                    <div class="manager-info">
+                        <h4>${manager.name}</h4>
+                        <p>${advisors.length} asesor${advisors.length !== 1 ? 'es' : ''} asignado${advisors.length !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div class="manager-status ${manager.isActive ? 'active' : 'inactive'}">
+                        ${manager.isActive ? 'Activo' : 'Inactivo'}
+                    </div>
+                </div>
+                
+                <div class="manager-stats">
+                    <div class="manager-stat">
+                        <div class="manager-stat-value">${totalLeads}</div>
+                        <div class="manager-stat-label">Total Leads</div>
+                    </div>
+                    <div class="manager-stat">
+                        <div class="manager-stat-value">${conversions}</div>
+                        <div class="manager-stat-label">Conversiones</div>
+                    </div>
+                    <div class="manager-stat">
+                        <div class="manager-stat-value">${conversionRate}%</div>
+                        <div class="manager-stat-label">Tasa Conversión</div>
+                    </div>
+                    <div class="manager-stat">
+                        <div class="manager-stat-value">${activeLeads}</div>
+                        <div class="manager-stat-label">Leads Activos</div>
+                    </div>
+                </div>
+                
+                <div class="advisor-list">
+                    <h5>👥 Asesores Asignados</h5>
+                    ${advisors.length > 0 ? 
+                        advisors.map(advisor => this.createAdvisorItem(advisor)).join('') :
+                        '<p style="text-align: center; color: #64748b; font-style: italic;">Sin asesores asignados</p>'
+                    }
+                </div>
+            </div>
+        `;
+    }
+
+    createAdvisorItem(advisor) {
+        // Get advisor's leads
+        const advisorLeads = this.leads.filter(lead => lead.advisor === advisor.name);
+        const advisorTasks = this.tasks.filter(task => task.advisor === advisor.name);
+        const advisorConversions = advisorLeads.filter(lead => lead.status === 'Cerrado').length;
+        
+        return `
+            <div class="advisor-item">
+                <div class="advisor-name">${advisor.name}</div>
+                <div class="advisor-stats">
+                    <div class="advisor-stat">
+                        <div class="advisor-stat-value">${advisorLeads.length}</div>
+                        <div class="advisor-stat-label">Leads</div>
+                    </div>
+                    <div class="advisor-stat">
+                        <div class="advisor-stat-value">${advisorConversions}</div>
+                        <div class="advisor-stat-label">Conversiones</div>
+                    </div>
+                    <div class="advisor-stat">
+                        <div class="advisor-stat-value">${advisorTasks.length}</div>
+                        <div class="advisor-stat-label">Tareas</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getManagerPeriodStats(managerId, period) {
+        // This would calculate period-specific statistics
+        // For now, return basic stats
+        return {
+            leads: 0,
+            conversions: 0,
+            tasks: 0,
+            conversionRate: 0
+        };
+    }
+
+    filterByManager(managerId) {
+        console.log('Filtrando por gerente:', managerId);
+        
+        if (managerId === 'all') {
+            // Show all managers
+            document.querySelectorAll('.manager-card').forEach(card => {
+                card.style.display = 'block';
+            });
+        } else {
+            // Show only selected manager
+            document.querySelectorAll('.manager-card').forEach(card => {
+                const cardManagerId = card.getAttribute('data-manager-id');
+                card.style.display = cardManagerId === managerId ? 'block' : 'none';
+            });
+        }
+    }
+
+    updateAdvisorsKPIs() {
+        console.log('Actualizando KPIs de asesores...');
+        
+        const kpisGrid = document.getElementById('kpisSummaryGrid');
+        if (!kpisGrid) return;
+        
+        // Get all advisors
+        const advisors = this.users.filter(user => user.role === 'advisor' && user.isActive);
+        
+        if (advisors.length === 0) {
+            kpisGrid.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #64748b; background: #f8fafc; border-radius: 8px;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;">👥</div>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #334155;">Sin Asesores Registrados</h4>
+                    <p style="margin: 0; font-size: 0.9rem;">No hay asesores activos en el sistema</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Generate advisor KPI cards
+        kpisGrid.innerHTML = advisors.map(advisor => this.createAdvisorKPICard(advisor)).join('');
+        
+        console.log('KPIs de asesores actualizados:', advisors.length, 'asesores');
+    }
+
+    createAdvisorKPICard(advisor) {
+        // Get advisor's leads and tasks
+        const advisorLeads = this.leads.filter(lead => lead.advisor === advisor.name);
+        const advisorTasks = this.tasks.filter(task => task.advisor === advisor.name);
+        
+        // Calculate KPIs
+        const dailyGoal = 5; // Meta diaria de leads
+        const weeklyGoal = 3; // Meta semanal de conversiones
+        const dailyActionsGoal = 20; // Meta diaria de acciones
+        
+        const dailyLeads = advisorLeads.length;
+        const weeklyConversions = advisorLeads.filter(lead => lead.status === 'Cerrado').length;
+        const dailyActions = advisorTasks.length;
+        
+        const dailyLeadsProgress = Math.min((dailyLeads / dailyGoal) * 100, 100);
+        const weeklyConversionsProgress = Math.min((weeklyConversions / weeklyGoal) * 100, 100);
+        const dailyActionsProgress = Math.min((dailyActions / dailyActionsGoal) * 100, 100);
+        
+        // Determine overall status
+        const avgProgress = (dailyLeadsProgress + weeklyConversionsProgress + dailyActionsProgress) / 3;
+        let status = 'needs-improvement';
+        let statusText = 'NECESITA MEJORA';
+        
+        if (avgProgress >= 80) {
+            status = 'excellent';
+            statusText = 'EXCELENTE';
+        } else if (avgProgress >= 60) {
+            status = 'good';
+            statusText = 'BUENO';
+        }
+        
+        // Determine percentage class
+        const getPercentageClass = (progress) => {
+            if (progress >= 80) return 'high';
+            if (progress >= 50) return 'medium';
+            return 'low';
+        };
+        
+        return `
+            <div class="advisor-kpi-card">
+                <div class="advisor-kpi-header">
+                    <div class="advisor-kpi-name">
+                        <span>👤</span>
+                        <span>${advisor.name}</span>
+                    </div>
+                    <div class="advisor-kpi-status ${status}">${statusText}</div>
+                </div>
+                
+                <div class="advisor-kpi-metrics">
+                    <div class="advisor-kpi-metric">
+                        <div class="advisor-kpi-metric-icon">📈</div>
+                        <div class="advisor-kpi-metric-title">Meta Diaria de Leads</div>
+                        <div class="advisor-kpi-metric-progress">${dailyLeads}/${dailyGoal}</div>
+                        <div class="advisor-kpi-metric-percentage ${getPercentageClass(dailyLeadsProgress)}">
+                            ${dailyLeadsProgress.toFixed(0)}%
+                        </div>
+                    </div>
+                    
+                    <div class="advisor-kpi-metric">
+                        <div class="advisor-kpi-metric-icon">🎯</div>
+                        <div class="advisor-kpi-metric-title">Meta Semanal de Conversiones</div>
+                        <div class="advisor-kpi-metric-progress">${weeklyConversions}/${weeklyGoal}</div>
+                        <div class="advisor-kpi-metric-percentage ${getPercentageClass(weeklyConversionsProgress)}">
+                            ${weeklyConversionsProgress.toFixed(0)}%
+                        </div>
+                    </div>
+                    
+                    <div class="advisor-kpi-metric">
+                        <div class="advisor-kpi-metric-icon">⚡</div>
+                        <div class="advisor-kpi-metric-title">Acciones del Día</div>
+                        <div class="advisor-kpi-metric-progress">${dailyActions}/${dailyActionsGoal}</div>
+                        <div class="advisor-kpi-metric-percentage ${getPercentageClass(dailyActionsProgress)}">
+                            ${dailyActionsProgress.toFixed(0)}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    updateElement(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
 }
 
 // Initialize the application when DOM is loaded
@@ -10246,6 +11056,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global functions for HTML onclick handlers
 window.crm = window.crm || new CRMApp();
+
+// Función global para verificar el estado de los gerentes de ventas
+window.checkManagers = function() {
+    if (window.crm) {
+        window.crm.showManagersStatus();
+    } else {
+        console.error('CRM App no está disponible');
+    }
+};
+
+// Función global para crear un gerente de ventas por defecto
+window.createDefaultManager = function() {
+    if (window.crm) {
+        const manager = window.crm.createDefaultManager();
+        if (manager) {
+            console.log('Gerente creado:', manager);
+        } else {
+            console.log('Ya existen gerentes de ventas');
+        }
+    } else {
+        console.error('CRM App no está disponible');
+    }
+};
 
 // Global function for Today button
 window.goToToday = function() {
