@@ -44,9 +44,8 @@
             <nav class="main-nav admin-nav">
                 <ul>
                     <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
-                    <li><a href="#team-stats" class="nav-link" data-section="team-stats">Estadísticas</a></li>
+                    <li><a href="#general" class="nav-link" data-section="general">General</a></li>
                     <li><a href="#advisor-management" class="nav-link" data-section="advisor-management">Asesores</a></li>
-                    <li><a href="#sequences" class="nav-link" data-section="sequences">Secuencias</a></li>
                     <li><a href="#calendar" class="nav-link" data-section="calendar">Calendario</a></li>
                     <li><a href="#leads" class="nav-link" data-section="leads">Leads</a></li>
                     <li><a href="#clients" class="nav-link" data-section="clients">Clientes</a></li>
@@ -102,43 +101,214 @@
                 </div>
             </section>
 
-            <!-- Team Stats Section -->
-            <section id="team-stats" class="content-section">
-                <h2>Estadísticas del Equipo</h2>
-                <div class="team-stats-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Asesor</th>
-                                <th>Leads Asignados</th>
-                                <th>Acciones Realizadas</th>
-                                <th>Conversiones</th>
-                                <th>Tasa Conversión</th>
-                                <th>Leads Activos</th>
-                                <th>Última Actividad</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teamStatsTable">
-                            <!-- Team stats will be populated here -->
-                        </tbody>
-                    </table>
+            <!-- General Section -->
+            <section id="general" class="content-section">
+                <h2>Métricas Generales</h2>
+                
+                <!-- Filtros de rango de fechas para Métricas Generales -->
+                <div class="dashboard-controls" style="margin-top: 0; margin-bottom: 1rem;">
+                    <div class="manager-filter">
+                        <label for="generalStartMonth">Mes Inicio:</label>
+                        <select id="generalStartMonth">
+                            <option value="1" selected>Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="generalStartYear">Año Inicio:</label>
+                        <select id="generalStartYear">
+                            <!-- Años se poblarán vía JS -->
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="generalEndMonth">Mes Final:</label>
+                        <select id="generalEndMonth">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5" selected>Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="generalEndYear">Año Final:</label>
+                        <select id="generalEndYear">
+                            <!-- Años se poblarán vía JS -->
+                        </select>
+                    </div>
+                </div>
+
+            <!-- Tarjetas de Métricas Generales -->
+            <div class="general-metrics-cards" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                <div class="metric-card" style="background: #fff; border-radius: 12px; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; min-height: 100px;">
+                    <div style="width: 6px; height: 100%; background: #3B82F6; border-radius: 12px 0 0 12px; flex-shrink: 0;"></div>
+                    <div style="flex: 1; padding: 1rem; text-align: center;">
+                        <div style="color: #374151; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem;">Total Ventas</div>
+                        <div id="totalSalesCount" style="color: #6B7280; font-size: 2rem; font-weight: 700;">92</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" style="background: #fff; border-radius: 12px; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; min-height: 100px;">
+                    <div style="width: 6px; height: 100%; background: #3B82F6; border-radius: 12px 0 0 12px; flex-shrink: 0;"></div>
+                    <div style="flex: 1; padding: 1rem; text-align: center;">
+                        <div style="color: #374151; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem;">Total Perdidos</div>
+                        <div id="totalLostCount" style="color: #6B7280; font-size: 2rem; font-weight: 700;">25</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" style="background: #fff; border-radius: 12px; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; min-height: 100px;">
+                    <div style="width: 6px; height: 100%; background: #3B82F6; border-radius: 12px 0 0 12px; flex-shrink: 0;"></div>
+                    <div style="flex: 1; padding: 1rem; text-align: center;">
+                        <div style="color: #374151; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem;">Clientes Prospectos</div>
+                        <div id="totalProspectsCount" style="color: #6B7280; font-size: 2rem; font-weight: 700;">125</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" style="background: #fff; border-radius: 12px; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; min-height: 100px;">
+                    <div style="width: 6px; height: 100%; background: #3B82F6; border-radius: 12px 0 0 12px; flex-shrink: 0;"></div>
+                    <div style="flex: 1; padding: 1rem; text-align: center;">
+                        <div style="color: #374151; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem;">Tasa de Conversión</div>
+                        <div id="conversionRate" style="color: #6B7280; font-size: 2rem; font-weight: 700;">38.0%</div>
+                    </div>
+                </div>
+            </div>
+
+                <!-- Tabla de Métricas Mensuales -->
+                <div class="general-metrics-table" style="background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 2rem;">
+                    <h3 style="margin: 0 0 1rem 0; color: var(--text-primary);">📊 Métricas por Mes</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
+                                    <th style="padding: 0.75rem; text-align: left; font-weight: 600; color: var(--text-primary);">Mes</th>
+                                    <th style="padding: 0.75rem; text-align: center; font-weight: 600; color: var(--text-primary);">Ventas</th>
+                                    <th style="padding: 0.75rem; text-align: center; font-weight: 600; color: var(--text-primary);">Perdidos</th>
+                                    <th style="padding: 0.75rem; text-align: center; font-weight: 600; color: var(--text-primary);">Prospectos</th>
+                                    <th style="padding: 0.75rem; text-align: center; font-weight: 600; color: var(--text-primary);">Tasa Conversión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">Enero 2025</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">12</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #dc2626; font-weight: 600;">3</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #d97706; font-weight: 600;">18</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">36.4%</td>
+                                </tr>
+                                <tr style="background: #f8fafc;">
+                                    <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">Febrero 2025</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">15</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #dc2626; font-weight: 600;">5</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #d97706; font-weight: 600;">22</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">35.7%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">Marzo 2025</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">18</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #dc2626; font-weight: 600;">4</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #d97706; font-weight: 600;">25</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">38.3%</td>
+                                </tr>
+                                <tr style="background: #f8fafc;">
+                                    <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">Abril 2025</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">22</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #dc2626; font-weight: 600;">6</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #d97706; font-weight: 600;">28</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">39.3%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">Mayo 2025</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">25</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #dc2626; font-weight: 600;">7</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #d97706; font-weight: 600;">32</td>
+                                    <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">39.1%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Espacio para Gráfico de Líneas de Métricas Generales -->
+                <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                    <h3 style="margin: 0 0 1rem 0; color: var(--text-primary);">📈 Evolución de Métricas Generales</h3>
+                    <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem; border: 2px dashed #e2e8f0; border-radius: 8px;">
+                        Espacio reservado para gráfico
+                    </div>
                 </div>
             </section>
 
             <!-- Advisor Management Section -->
             <section id="advisor-management" class="content-section">
-                <h2>Gestión de Asesores</h2>
-                
-                <!-- Navegación de Pantallas -->
-                <div class="screen-navigation">
-                    <button class="screen-nav-btn active" data-screen="advisor-stats-screen">Estadísticas por Asesor</button>
-                    <button class="screen-nav-btn" data-screen="advisor-kpis-screen">Definir KPIs</button>
-                    <button class="screen-nav-btn" data-screen="lead-assignment-screen">Asignación de Leads</button>
-                </div>
-
                 <!-- Pantalla 1: Estadísticas por Asesor -->
                 <div id="advisor-stats-screen" class="advisor-screen active">
                     <h3>Estadísticas por Asesor</h3>
+
+                    <!-- Filtros de tiempo para Estadísticas por Asesor -->
+                    <div class="dashboard-controls" style="margin-top: 0; margin-bottom: 1rem;">
+                        <div class="manager-filter">
+                            <label for="advisorStartMonth">Mes Inicio:</label>
+                            <select id="advisorStartMonth">
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="manager-filter">
+                            <label for="advisorStartYear">Año Inicio:</label>
+                            <select id="advisorStartYear">
+                                <!-- Años se poblarán vía JS -->
+                            </select>
+                        </div>
+                        <div class="manager-filter">
+                            <label for="advisorEndMonth">Mes Final:</label>
+                            <select id="advisorEndMonth">
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="manager-filter">
+                            <label for="advisorEndYear">Año Final:</label>
+                            <select id="advisorEndYear">
+                                <!-- Años se poblarán vía JS -->
+                            </select>
+                        </div>
+                    </div>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <h4>Total de Asesores</h4>
@@ -160,7 +330,7 @@
                     
                     <div class="table-container">
                         <h4>Estadísticas Detalladas por Asesor</h4>
-                        <table class="data-table" id="teamStatsTable">
+                        <table class="data-table" id="advisorStatsTable">
                             <thead>
                                 <tr>
                                     <th>Asesor</th>
@@ -172,172 +342,16 @@
                                     <th>Última Actividad</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="advisorStatsTableBody">
                                 <!-- Los datos se cargarán dinámicamente -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-
-                <!-- Pantalla 2: Definir KPIs por Asesor -->
-                <div id="advisor-kpis-screen" class="advisor-screen">
-                    <h3>Definir KPIs por Asesor</h3>
-                    <form id="advisorKPIForm" class="form-container">
-                        <div class="form-group">
-                            <label for="advisorSelect">Seleccionar Asesor:</label>
-                            <select id="advisorSelect" name="advisor" required>
-                                <option value="">Seleccionar asesor...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="dailyLeadsGoal">Meta Diaria de Leads:</label>
-                            <input type="number" id="dailyLeadsGoal" name="dailyLeadsGoal" min="0" placeholder="Ej: 5">
-                        </div>
-                        <div class="form-group">
-                            <label for="weeklyConversionsGoal">Meta Semanal de Conversiones:</label>
-                            <input type="number" id="weeklyConversionsGoal" name="weeklyConversionsGoal" min="0" placeholder="Ej: 2">
-                        </div>
-                        <div class="form-group">
-                            <label for="maxActionsPerDay">Máximo Acciones por Día:</label>
-                            <input type="number" id="maxActionsPerDay" name="maxActionsPerDay" min="0" placeholder="Ej: 10">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Guardar KPIs</button>
-                    </form>
-                </div>
-
-                <!-- Pantalla 3: Asignación de Leads -->
-                <div id="lead-assignment-screen" class="advisor-screen">
-                    <h3>Asignar Lead a Asesor</h3>
-                    <form id="leadAssignmentForm" class="form-container">
-                        <div class="form-group">
-                            <label for="leadSelect">Seleccionar Lead:</label>
-                            <select id="leadSelect" name="leadId" required>
-                                <option value="">Seleccionar lead...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="assignToAdvisor">Asignar a Asesor:</label>
-                            <select id="assignToAdvisor" name="advisor" required>
-                                <option value="">Seleccionar asesor...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="sequenceAssign">Asignar Secuencia:</label>
-                            <select id="sequenceAssign" name="sequenceId">
-                                <option value="">Sin secuencia específica</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Asignar Lead</button>
-                    </form>
-                </div>
             </section>
 
 
-            <!-- Sequences Section -->
-            <section id="sequences" class="content-section">
-                <h2>Gestión de Secuencias</h2>
-                
-                <div class="sequences-container">
-                    <div class="sequence-form-card">
-                        <div class="card-header">
-                            <h3>Crear Nueva Secuencia</h3>
-                            <p>Define las acciones automáticas para cada estado del lead</p>
-                        </div>
-                        
-                        <form id="sequenceForm" class="sequence-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="sequenceName">Nombre de la Secuencia</label>
-                                    <input type="text" id="sequenceName" placeholder="Ej: Secuencia de Calificación" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="sequenceState">Estado del Lead</label>
-                                    <select id="sequenceState" required>
-                                        <option value="">Seleccionar estado...</option>
-                                        <option value="Calificar">Calificar</option>
-                                        <option value="Desarrollar">Desarrollar</option>
-                                        <option value="Proponer">Proponer</option>
-                                        <option value="Cierre">Cierre</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="sequenceInterest">Nivel de Interés</label>
-                                    <select id="sequenceInterest">
-                                        <option value="">Todos los niveles</option>
-                                        <option value="Poco interesado">Poco interesado</option>
-                                        <option value="Interesado">Interesado</option>
-                                        <option value="Medianamente interesado">Medianamente interesado</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="sequence-actions-section">
-                                <div class="section-header">
-                                    <h4>Acciones de la Secuencia</h4>
-                                    <button type="button" id="addSequenceAction" class="btn btn-outline">
-                                        + Agregar Acción
-                                    </button>
-                                </div>
-                                
-                                <div id="sequenceActions" class="actions-list">
-                                    <div class="sequence-action">
-                                        <div class="action-type-group">
-                                            <label>Tipo de Acción</label>
-                                            <select class="action-type">
-                                                <option value="Llamada">Llamada</option>
-                                                <option value="Mensaje">Mensaje</option>
-                                                <option value="Correo">Correo</option>
-                                                <option value="Reunión presencial">Reunión presencial</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="action-count-group">
-                                            <label>Cantidad</label>
-                                            <input type="number" class="action-repetitions" placeholder="1" min="1" value="1">
-                                        </div>
-                                        
-                                        <div class="action-delay-group">
-                                            <label>Delay (horas)</label>
-                                            <input type="number" class="action-delay" placeholder="0" min="0" value="0">
-                                        </div>
-                                        
-                                        <div class="action-max-time-group">
-                                            <label>Tiempo máx (días)</label>
-                                            <input type="number" class="action-max-time" placeholder="7" min="1" value="7">
-                                        </div>
-                                        
-                                        <div class="action-remove-group">
-                                            <button type="button" class="btn btn-danger btn-sm remove-action">
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" id="resetSequence">Limpiar</button>
-                                <button type="submit" class="btn btn-primary">
-                                    Crear Secuencia
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div class="sequences-list-card">
-                        <div class="card-header">
-                            <h3>Secuencias Existentes</h3>
-                            <span class="sequence-count" id="sequenceCount">0 secuencias</span>
-                        </div>
-                        
-                        <div id="sequencesList" class="sequences-grid">
-                            <!-- Sequences will be populated here -->
-                        </div>
-                    </div>
-                </div>
-            </section>
+            
 
             <!-- Calendar Section -->
             <section id="calendar" class="content-section">
@@ -380,46 +394,223 @@
 
             <!-- Leads Section -->
             <section id="leads" class="content-section">
-                <h2>Gestión de Leads</h2>
-                <div class="leads-filters">
-                    <select id="leadsStatusFilter">
-                        <option value="">Todos los Estados</option>
-                        <option value="Calificar">Calificar</option>
-                        <option value="Desarrollar">Desarrollar</option>
-                        <option value="Proponer">Proponer</option>
-                        <option value="Cierre">Cierre</option>
-                    </select>
-                    <select id="leadsInterestFilter">
-                        <option value="">Todos los Niveles</option>
-                        <option value="Poco interesado">Poco interesado</option>
-                        <option value="Interesado">Interesado</option>
-                        <option value="Medianamente interesado">Medianamente interesado</option>
-                    </select>
-                    <select id="leadsAdvisorFilter">
-                        <option value="">Todos los Asesores</option>
-                    </select>
-                    <button onclick="window.crm.loadManagerLeads()" class="btn btn-primary">Cargar Leads</button>
+                <h2>Estadísticas de Leads</h2>
+                
+                <!-- Filtros de tiempo para estadísticas -->
+                <div class="dashboard-controls">
+                    <div class="manager-filter">
+                        <label for="leadsStartMonth">Mes Inicio:</label>
+                        <select id="leadsStartMonth">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="leadsStartYear">Año Inicio:</label>
+                        <select id="leadsStartYear">
+                            <!-- Años se poblarán vía JS -->
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="leadsEndMonth">Mes Final:</label>
+                        <select id="leadsEndMonth">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="leadsEndYear">Año Final:</label>
+                        <select id="leadsEndYear">
+                            <!-- Años se poblarán vía JS -->
+                        </select>
+                    </div>
                 </div>
-                <div class="leads-grid" id="leadsGrid">
-                    <!-- Leads will be populated here -->
+
+                <!-- Estadísticas de Leads por Período -->
+                <div class="leads-stats-container">
+                    <div class="leads-stats-cards">
+                        <div class="stat-card primary">
+                            <h4>Total Leads</h4>
+                            <div class="stat-value" id="totalLeadsCount">0</div>
+                        </div>
+                        <div class="stat-card success">
+                            <h4>Leads Convertidos</h4>
+                            <div class="stat-value" id="convertedLeadsCount">0</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <h4>Leads Activos</h4>
+                            <div class="stat-value" id="activeLeadsCount">0</div>
+                        </div>
+                        <div class="stat-card danger">
+                            <h4>Leads Perdidos</h4>
+                            <div class="stat-value" id="lostLeadsCount">0</div>
+                        </div>
+                        <div class="stat-card info">
+                            <h4>Tasa Conversión</h4>
+                            <div class="stat-value" id="leadsConversionRate">0%</div>
+                        </div>
+                        <div class="stat-card secondary">
+                            <h4>Promedio Mensual</h4>
+                            <div class="stat-value" id="monthlyAverage">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de estadísticas por mes/año -->
+                <div class="leads-stats-table">
+                    <h3>Estadísticas Detalladas</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Total Leads</th>
+                                <th>Convertidos</th>
+                                <th>Activos</th>
+                                <th>Perdidos</th>
+                                <th>Tasa Conversión</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsStatsTableBody">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Gráfico de estadísticas -->
+                <div class="chart-container">
+                    <canvas id="leadsStatsChart"></canvas>
                 </div>
             </section>
 
+
             <!-- Clients Section -->
             <section id="clients" class="content-section">
-                <h2>Lista de Clientes</h2>
-                <div class="clients-filters">
-                    <select id="clientsAdvisorFilter">
-                        <option value="">Todos los Asesores</option>
-                    </select>
-                    <select id="clientsTypeFilter">
-                        <option value="">Todos los Tipos</option>
-                        <option value="potencial">Cliente Potencial</option>
-                        <option value="fidelizado">Cliente Fidelizado</option>
-                    </select>
+                <h2>Estadísticas de Clientes</h2>
+                
+                <!-- Filtros de tiempo para estadísticas de clientes -->
+                <div class="dashboard-controls">
+                    <div class="manager-filter">
+                        <label for="clientsStartMonth">Mes Inicio:</label>
+                        <select id="clientsStartMonth">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="clientsStartYear">Año Inicio:</label>
+                        <select id="clientsStartYear">
+                            <!-- Años se poblarán vía JS -->
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="clientsEndMonth">Mes Final:</label>
+                        <select id="clientsEndMonth">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="manager-filter">
+                        <label for="clientsEndYear">Año Final:</label>
+                        <select id="clientsEndYear">
+                            <!-- Años se poblarán vía JS -->
+                        </select>
+                    </div>
                 </div>
-                <div class="clients-list" id="clientsList">
-                    <!-- Clients will be populated here -->
+
+                <!-- Estadísticas de Clientes por Período -->
+                <div class="clients-stats-container">
+                    <div class="clients-stats-cards">
+                        <div class="stat-card primary">
+                            <h4>Total Clientes</h4>
+                            <div class="stat-value" id="totalClientsCount">0</div>
+                        </div>
+                        <div class="stat-card success">
+                            <h4>Clientes Fidelizados</h4>
+                            <div class="stat-value" id="fidelizedClientsCount">0</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <h4>Clientes Potenciales</h4>
+                            <div class="stat-value" id="potentialClientsCount">0</div>
+                        </div>
+                        <div class="stat-card info">
+                            <h4>Clientes Activos</h4>
+                            <div class="stat-value" id="activeClientsCount">0</div>
+                        </div>
+                        <div class="stat-card danger">
+                            <h4>Clientes Perdidos</h4>
+                            <div class="stat-value" id="lostClientsCount">0</div>
+                        </div>
+                        <div class="stat-card secondary">
+                            <h4>Tasa Fidelización</h4>
+                            <div class="stat-value" id="fidelizationRate">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de estadísticas por mes/año -->
+                <div class="clients-stats-table">
+                    <h3>Estadísticas Detalladas</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Total Clientes</th>
+                                <th>Fidelizados</th>
+                                <th>Potenciales</th>
+                                <th>Activos</th>
+                                <th>Perdidos</th>
+                                <th>Tasa Fidelización</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsStatsTableBody">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Gráfico de estadísticas -->
+                <div class="chart-container">
+                    <canvas id="clientsStatsChart"></canvas>
                 </div>
             </section>
         </main>
@@ -546,8 +737,37 @@
                         <button onclick="window.crm.loadUsers()" class="btn btn-primary">Actualizar Lista</button>
                     </div>
                     
-                    <div id="usersList" class="users-grid">
-                        <!-- Los usuarios se cargarán dinámicamente -->
+                    <!-- Sección de Administradores -->
+                    <div class="user-section">
+                        <div class="user-section-header">
+                            <h4>👑 Administradores</h4>
+                            <span class="section-count" id="adminCount">0 administradores</span>
+                        </div>
+                        <div id="adminUsersList" class="users-grid">
+                            <!-- Los administradores se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <!-- Sección de Gerentes -->
+                    <div class="user-section">
+                        <div class="user-section-header">
+                            <h4>👔 Gerentes de Ventas</h4>
+                            <span class="section-count" id="managerCount">0 gerentes</span>
+                        </div>
+                        <div id="managerUsersList" class="users-grid">
+                            <!-- Los gerentes se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <!-- Sección de Asesores -->
+                    <div class="user-section">
+                        <div class="user-section-header">
+                            <h4>👤 Asesores</h4>
+                            <span class="section-count" id="advisorCount">0 asesores</span>
+                        </div>
+                        <div id="advisorUsersList" class="users-grid">
+                            <!-- Los asesores se cargarán dinámicamente -->
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1001,30 +1001,7 @@ class CRMApp {
             }
         ];
         
-        this.kpis = {
-            global: {
-                dailyTargetClients: 10,
-                weeklyConversionTarget: 15,
-                maxDaysPerState: 7
-            },
-            advisor: {
-                'Asesor': {
-                    dailyTarget: 5,
-                    weeklyTarget: 3,
-                    maxActionsPerDay: 10
-                },
-                'Asesor 2': {
-                    dailyTarget: 6,
-                    weeklyTarget: 4,
-                    maxActionsPerDay: 12
-                },
-                'Asesor 3': {
-                    dailyTarget: 4,
-                    weeklyTarget: 2,
-                    maxActionsPerDay: 8
-                }
-            }
-        };
+        this.kpis = [];
         
         this.activities = [
             {
@@ -1317,13 +1294,21 @@ class CRMApp {
         // Load data from localStorage if available
         const savedData = localStorage.getItem('crmData');
         if (savedData) {
-            const data = JSON.parse(savedData);
-            this.leads = data.leads || this.leads;
-            this.tasks = data.tasks || this.tasks;
-            this.sequences = data.sequences || this.sequences;
-            this.kpis = data.kpis || this.kpis;
-            this.activities = data.activities || this.activities;
-            this.users = data.users || this.users;
+            try {
+                const data = JSON.parse(savedData);
+                this.leads = data.leads || this.leads;
+                this.tasks = data.tasks || this.tasks;
+                this.sequences = data.sequences || this.sequences;
+                this.kpis = Array.isArray(data.kpis) ? data.kpis : [];
+                this.activities = data.activities || this.activities;
+                this.users = data.users || this.users;
+            } catch (error) {
+                console.error('Error al cargar datos del localStorage:', error);
+                console.log('Limpiando localStorage corrupto...');
+                localStorage.removeItem('crmData');
+                // Reinicializar con datos por defecto
+                this.kpis = [];
+            }
             
             // Asegurar que los usuarios tengan todos los campos necesarios
             this.users = this.users.map(user => ({
@@ -1341,8 +1326,7 @@ class CRMApp {
             
             console.log('Datos cargados:', {
                 sequences: this.sequences.length,
-                users: this.users.length,
-                data: data
+                users: this.users.length
             });
         } else {
             console.log('No hay datos guardados, usando datos por defecto');
@@ -1970,6 +1954,9 @@ class CRMApp {
         const loginForm = document.getElementById('loginForm');
         console.log('Formulario encontrado:', loginForm);
         
+        // Asegurar cuentas por defecto para pruebas si no existen contraseñas
+        this.ensureDefaultAccountsForLogin();
+        
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -1993,6 +1980,32 @@ class CRMApp {
         } else {
             console.error('No se encontró el formulario de login');
         }
+    }
+    
+    // Crea 3 cuentas demo (admin/manager/advisor) si faltan o no tienen password
+    ensureDefaultAccountsForLogin() {
+        if (!Array.isArray(this.users)) {
+            this.users = [];
+        }
+        const nowIso = new Date().toISOString();
+        const ensure = (username, password, role, name) => {
+            let u = this.users.find(x => x.username === username && x.role === role);
+            if (!u) {
+                u = { id: `${role}-${username}`, name, firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' '), username, password, role, email: `${username}@demo.local`, isActive: true, createdAt: nowIso };
+                this.users.push(u);
+            } else {
+                if (!u.password) u.password = password;
+                if (!u.username) u.username = username;
+                u.role = role;
+                if (u.isActive === undefined) u.isActive = true;
+            }
+        };
+        ensure('admin', 'admin123', 'admin', 'Admin Demo');
+        ensure('manager', 'manager123', 'manager', 'Gerente Demo');
+        ensure('advisor', 'advisor123', 'advisor', 'Asesor Demo');
+        
+        // Guardar si fue necesario
+        try { this.saveData(); } catch(e) { console.warn('No se pudo guardar datos demo:', e); }
     }
     
     initAdmin() {
@@ -2028,6 +2041,547 @@ class CRMApp {
             // Agregar botón de prueba temporal
             this.addTestButton();
         }, 100);
+        
+        // Initialize dynamic KPIs system
+        this.initializeDynamicKPIs();
+    }
+    
+    // Sistema Dinámico de KPIs
+    initializeDynamicKPIs() {
+        this.setupKPIEventListeners();
+        this.loadKPIs();
+        this.populateKPIFormOptions();
+        this.setupKPIAIRecommendations();
+    }
+    
+    setupKPIEventListeners() {
+        console.log('Configurando event listeners de KPIs...');
+        
+        // Event listeners para selección de tipo de KPI
+        const kpiTypeCards = document.querySelectorAll('.kpi-type-card');
+        console.log('Encontradas', kpiTypeCards.length, 'tarjetas de tipo KPI');
+        kpiTypeCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const kpiType = card.getAttribute('data-kpi-type');
+                console.log('Tipo de KPI seleccionado:', kpiType);
+                this.selectKPIType(kpiType);
+            });
+        });
+        
+        // Event listener para el formulario de KPIs
+        const kpiForm = document.getElementById('dynamicKPIForm');
+        if (kpiForm) {
+            console.log('Formulario de KPI encontrado, configurando event listener');
+            kpiForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Formulario enviado, guardando KPI...');
+                this.saveKPI();
+            });
+        } else {
+            console.error('Formulario de KPI no encontrado');
+        }
+        
+        // Event listener adicional para el botón de guardar
+        const saveButton = document.querySelector('#dynamicKPIForm button[type="submit"]');
+        if (saveButton) {
+            console.log('Botón de guardar encontrado');
+            saveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Botón de guardar clickeado');
+                this.saveKPI();
+            });
+        } else {
+            console.error('Botón de guardar no encontrado');
+        }
+    }
+
+    // Recomendaciones IA (simuladas)
+    setupKPIAIRecommendations() {
+        const btn = document.getElementById('kpiAIRecommendBtn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            const recs = this.generateAIKPIRecommendations();
+            this.renderAIKPIRecommendations(recs);
+        });
+    }
+
+    generateAIKPIRecommendations() {
+        // Analiza leads y tareas recientes (últimos 60 días)
+        const now = new Date();
+        const from = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+        const leadsRecent = this.leads.filter(l => new Date(l.createdAt) >= from);
+        const tasksRecent = this.tasks.filter(t => new Date(t.createdAt || t.dueDate) >= from);
+
+        const advisors = this.users.filter(u => u.role === 'advisor');
+
+        const byAdvisor = advisors.map(a => {
+            const aLeads = leadsRecent.filter(l => l.advisor === a.name);
+            const aTasks = tasksRecent.filter(t => t.advisor === a.name);
+            const conversions = aLeads.filter(l => l.status === 'Cierre').length;
+            const lost = aLeads.filter(l => l.status === 'Perdido').length;
+            const active = aLeads.filter(l => ['Calificar','Desarrollar','Proponer','Contactado','En Proceso'].includes(l.status)).length;
+            const calls = aTasks.filter(t => (t.type || '').toLowerCase().includes('llamada')).length;
+            const meetings = aTasks.filter(t => (t.type || '').toLowerCase().includes('reunión')).length;
+
+            // Heurísticas simples
+            const recs = [];
+            // Si hay muchos activos y pocas llamadas -> empujar actividad
+            if (active >= 5 && calls < active) {
+                recs.push({ type: 'activity', name: 'Incrementar llamadas', params: [
+                    { name: 'Llamadas Diarias', value: Math.max(10, Math.ceil(active * 1.2)), unit: 'llamadas' },
+                    { name: 'Reuniones Semanales', value: Math.max(3, Math.ceil(meetings * 1.2)), unit: 'reuniones' }
+                ]});
+            }
+            // Si conversión baja con muchos leads -> KPI de conversión
+            const convRate = aLeads.length ? Math.round((conversions / aLeads.length) * 100) : 0;
+            if (aLeads.length >= 8 && convRate < 25) {
+                recs.push({ type: 'sales', name: 'Mejorar conversión', params: [
+                    { name: 'Tasa de Conversión', value: Math.min(35, convRate + 10), unit: '%' },
+                    { name: 'Número de Oportunidades', value: Math.max(12, aLeads.length), unit: 'oportunidades' }
+                ]});
+            }
+            // Si hay perdidos altos -> KPI de calidad/tiempos
+            if (lost >= 3) {
+                recs.push({ type: 'quality', name: 'Reducir pérdidas', params: [
+                    { name: 'Tiempo de Respuesta', value: 2, unit: 'horas' },
+                    { name: 'Puntuación de Satisfacción', value: 8, unit: '/10' }
+                ]});
+            }
+
+            // Fallback: si no hubo recs, dar una estándar
+            if (recs.length === 0) {
+                recs.push({ type: 'activity', name: 'Actividad mínima', params: [
+                    { name: 'Llamadas Diarias', value: 12, unit: 'llamadas' },
+                    { name: 'Emails Enviados', value: 25, unit: 'emails' }
+                ]});
+            }
+
+            return { advisor: a, leads: aLeads.length, convRate, recs };
+        });
+
+        // Recomendación global para el equipo
+        const totalLeads = leadsRecent.length;
+        const totalConv = leadsRecent.filter(l => l.status === 'Cierre').length;
+        const teamConv = totalLeads ? Math.round((totalConv / totalLeads) * 100) : 0;
+        const teamRec = teamConv < 20
+            ? { type: 'sales', name: 'Objetivo de conversión del equipo', params: [
+                { name: 'Tasa de Conversión', value: Math.min(30, teamConv + 8), unit: '%' }
+              ]}
+            : { type: 'activity', name: 'Mantener actividad del equipo', params: [
+                { name: 'Reuniones Semanales', value: 6, unit: 'reuniones' }
+              ]};
+
+        return { team: { conv: teamConv, rec: teamRec }, advisors: byAdvisor };
+    }
+
+    renderAIKPIRecommendations(data) {
+        const box = document.getElementById('kpi-ai-recommendations');
+        if (!box) return;
+
+        const pill = (text) => `<span style="display:inline-block;padding:2px 8px;border:1px solid #d9d9d9;border-radius:999px;font-size:12px;color:#555;">${text}</span>`;
+        const recCard = (rec, advisorId=null) => `
+            <div class="kpi-ai-card" style="background:#fff;border:1px solid #f0f0f0;border-radius:10px;padding:12px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <div style="font-weight:600;">${rec.name} ${pill(this.getKPITypeName(rec.type))}</div>
+                    <div>
+                        <button class="btn btn-outline btn-xs" data-apply-kpi data-type="${rec.type}" data-name="${rec.name}" data-adv="${advisorId ?? ''}">Aplicar</button>
+                    </div>
+                </div>
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+                    ${rec.params.map(p=>pill(`${p.name}: ${p.value} ${p.unit||''}`)).join('')}
+                </div>
+            </div>`;
+
+        let html = '';
+        html += `<div style="margin-bottom:10px;color:#555;">${pill(`Conversión equipo: ${data.team.conv}%`)}</div>`;
+        html += recCard(data.team.rec, '');
+
+        data.advisors.forEach(a => {
+            html += `<div style="margin-top:12px;margin-bottom:6px;font-weight:600;">${a.advisor.name} ${pill(`Leads: ${a.leads}`)} ${pill(`Conv: ${a.convRate}%`)}</div>`;
+            a.recs.forEach(r => { html += recCard(r, a.advisor.id); });
+        });
+
+        box.innerHTML = html;
+        box.style.display = 'block';
+
+        // Listeners para Aplicar
+        box.querySelectorAll('[data-apply-kpi]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const type = btn.getAttribute('data-type');
+                const name = btn.getAttribute('data-name');
+                const advisorId = btn.getAttribute('data-adv') || '';
+                this.applyAIRecommendationToForm({ type, name, advisorId, rec: data });
+            });
+        });
+    }
+
+    applyAIRecommendationToForm({ type, name, advisorId }) {
+        // Abrir formulario con tipo seleccionado y rellenar valores
+        this.selectKPIType(type);
+        const formContainer = document.getElementById('kpi-form-container');
+        if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Set nombre, asignación, periodo sugerido
+        const nameInput = document.getElementById('kpiName');
+        if (nameInput) nameInput.value = name;
+        const advSelect = document.getElementById('kpiAdvisor');
+        if (advSelect && advisorId) advSelect.value = advisorId;
+        const period = document.getElementById('kpiPeriod');
+        if (period) period.value = 'monthly';
+
+        // Rellenar parámetros básicos si existen inputs renderizados
+        const params = document.querySelectorAll('#kpi-parameters-container .kpi-parameter input');
+        params.forEach((input, idx) => {
+            // Valores demo razonables según índice
+            const defaults = ['12','25','5000','15'];
+            input.value = defaults[idx] || '10';
+        });
+    }
+    
+    selectKPIType(kpiType) {
+        // Remover selección anterior
+        document.querySelectorAll('.kpi-type-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Seleccionar nueva tarjeta
+        const selectedCard = document.querySelector(`[data-kpi-type="${kpiType}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
+        
+        // Mostrar formulario y configurar parámetros
+        this.showKPIForm(kpiType);
+    }
+    
+    showKPIForm(kpiType) {
+        const formContainer = document.getElementById('kpi-form-container');
+        const formTitle = document.getElementById('kpi-form-title');
+        const parametersContainer = document.getElementById('kpi-parameters-container');
+        
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
+        
+        if (formTitle) {
+            formTitle.textContent = `Configurar KPIs de ${this.getKPITypeName(kpiType)}`;
+        }
+        
+        if (parametersContainer) {
+            parametersContainer.innerHTML = this.generateKPIParameters(kpiType);
+        }
+        
+        // Configurar fecha de inicio por defecto
+        const startDateInput = document.getElementById('kpiStartDate');
+        if (startDateInput) {
+            startDateInput.value = new Date().toISOString().split('T')[0];
+        }
+        
+        // Reconfigurar event listeners después de mostrar el formulario
+        setTimeout(() => {
+            this.setupKPIFormEventListeners();
+        }, 100);
+    }
+    
+    setupKPIFormEventListeners() {
+        console.log('Reconfigurando event listeners del formulario...');
+        
+        // Event listener para el formulario de KPIs
+        const kpiForm = document.getElementById('dynamicKPIForm');
+        if (kpiForm) {
+            // Remover event listeners anteriores
+            kpiForm.removeEventListener('submit', this.handleKPIFormSubmit);
+            
+            // Agregar nuevo event listener
+            this.handleKPIFormSubmit = (e) => {
+                e.preventDefault();
+                console.log('Formulario enviado, guardando KPI...');
+                this.saveKPI();
+            };
+            kpiForm.addEventListener('submit', this.handleKPIFormSubmit);
+            console.log('Event listener del formulario configurado');
+        }
+        
+        // Event listener adicional para el botón de guardar
+        const saveButton = document.querySelector('#dynamicKPIForm button[type="submit"]');
+        if (saveButton) {
+            // Remover event listeners anteriores
+            saveButton.removeEventListener('click', this.handleSaveButtonClick);
+            
+            // Agregar nuevo event listener
+            this.handleSaveButtonClick = (e) => {
+                e.preventDefault();
+                console.log('Botón de guardar clickeado');
+                this.saveKPI();
+            };
+            saveButton.addEventListener('click', this.handleSaveButtonClick);
+            console.log('Event listener del botón de guardar configurado');
+        }
+    }
+    
+    getKPITypeName(kpiType) {
+        const names = {
+            'sales': 'Ventas',
+            'activity': 'Actividad',
+            'quality': 'Calidad',
+            'custom': 'Personalizados'
+        };
+        return names[kpiType] || 'Personalizados';
+    }
+    
+    generateKPIParameters(kpiType) {
+        const parameters = {
+            'sales': [
+                { name: 'Meta de Ventas', type: 'number', unit: 'ventas', placeholder: 'Ej: 10' },
+                { name: 'Tasa de Conversión', type: 'percentage', unit: '%', placeholder: 'Ej: 25' },
+                { name: 'Valor Promedio de Venta', type: 'currency', unit: '$', placeholder: 'Ej: 5000' },
+                { name: 'Número de Oportunidades', type: 'number', unit: 'oportunidades', placeholder: 'Ej: 20' }
+            ],
+            'activity': [
+                { name: 'Llamadas Diarias', type: 'number', unit: 'llamadas', placeholder: 'Ej: 15' },
+                { name: 'Reuniones Semanales', type: 'number', unit: 'reuniones', placeholder: 'Ej: 5' },
+                { name: 'Emails Enviados', type: 'number', unit: 'emails', placeholder: 'Ej: 30' },
+                { name: 'Tiempo de Seguimiento', type: 'number', unit: 'horas', placeholder: 'Ej: 2' }
+            ],
+            'quality': [
+                { name: 'Puntuación de Satisfacción', type: 'number', unit: '/10', placeholder: 'Ej: 8.5' },
+                { name: 'Tiempo de Respuesta', type: 'number', unit: 'horas', placeholder: 'Ej: 2' },
+                { name: 'Tasa de Retención', type: 'percentage', unit: '%', placeholder: 'Ej: 85' },
+                { name: 'NPS Score', type: 'number', unit: 'puntos', placeholder: 'Ej: 9' }
+            ],
+            'custom': [
+                { name: 'Parámetro Personalizado 1', type: 'text', unit: '', placeholder: 'Ej: Valor personalizado' },
+                { name: 'Parámetro Personalizado 2', type: 'number', unit: 'unidades', placeholder: 'Ej: 100' }
+            ]
+        };
+        
+        const kpiParams = parameters[kpiType] || parameters['custom'];
+        
+        return kpiParams.map((param, index) => `
+            <div class="kpi-parameter">
+                <label>${param.name}:</label>
+                <input type="${param.type}" 
+                       name="parameter_${index}" 
+                       placeholder="${param.placeholder}"
+                       class="parameter-value"
+                       required>
+                <span class="parameter-unit">${param.unit}</span>
+                <button type="button" class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">Eliminar</button>
+            </div>
+        `).join('');
+    }
+    
+    populateKPIFormOptions() {
+        // Poblar opciones de asesores
+        const advisorSelect = document.getElementById('kpiAdvisor');
+        if (advisorSelect) {
+            const advisors = this.users.filter(user => user.role === 'advisor');
+            advisorSelect.innerHTML = '<option value="">Todos los asesores</option>' +
+                advisors.map(advisor => `<option value="${advisor.id}">${advisor.name}</option>`).join('');
+        }
+        
+        // Poblar opciones de gerentes
+        const managerSelect = document.getElementById('kpiManager');
+        if (managerSelect) {
+            const managers = this.users.filter(user => user.role === 'manager');
+            managerSelect.innerHTML = '<option value="">Todos los gerentes</option>' +
+                managers.map(manager => `<option value="${manager.id}">${manager.name}</option>`).join('');
+        }
+    }
+    
+    saveKPI() {
+        console.log('Iniciando guardado de KPI...');
+        
+        const form = document.getElementById('dynamicKPIForm');
+        if (!form) {
+            console.error('Formulario no encontrado');
+            this.showNotification('Error: Formulario no encontrado', 'error');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const name = formData.get('name');
+        const description = formData.get('description');
+        const startDate = formData.get('startDate');
+        
+        // Validaciones básicas
+        if (!name || name.trim() === '') {
+            this.showNotification('Por favor ingresa un nombre para el KPI', 'error');
+            return;
+        }
+        
+        if (!startDate) {
+            this.showNotification('Por favor selecciona una fecha de inicio', 'error');
+            return;
+        }
+        
+        const kpiData = {
+            id: Date.now().toString(),
+            name: name.trim(),
+            description: description ? description.trim() : '',
+            type: this.getSelectedKPIType(),
+            advisor: formData.get('advisor'),
+            manager: formData.get('manager'),
+            period: formData.get('period'),
+            startDate: startDate,
+            endDate: formData.get('endDate'),
+            parameters: this.extractKPIParameters(),
+            createdAt: new Date().toISOString(),
+            status: 'active'
+        };
+        
+        console.log('Datos del KPI:', kpiData);
+        
+        // Guardar KPI - Asegurar que this.kpis sea un array
+        if (!this.kpis || !Array.isArray(this.kpis)) {
+            console.log('Inicializando this.kpis como array');
+            this.kpis = [];
+        }
+        this.kpis.push(kpiData);
+        
+        try {
+            this.saveData();
+            console.log('KPI guardado exitosamente');
+        } catch (error) {
+            console.error('Error al guardar KPI:', error);
+            this.showNotification('Error al guardar el KPI', 'error');
+            return;
+        }
+        
+        // Actualizar lista
+        this.loadKPIs();
+        
+        // Cerrar formulario
+        this.closeKPIForm();
+        
+        this.showNotification('KPI guardado exitosamente', 'success');
+    }
+    
+    getSelectedKPIType() {
+        const selectedCard = document.querySelector('.kpi-type-card.selected');
+        return selectedCard ? selectedCard.getAttribute('data-kpi-type') : 'custom';
+    }
+    
+    extractKPIParameters() {
+        const parameters = [];
+        const parameterElements = document.querySelectorAll('.kpi-parameter');
+        
+        parameterElements.forEach((element, index) => {
+            const input = element.querySelector('input[name^="parameter_"]');
+            const unit = element.querySelector('.parameter-unit').textContent;
+            
+            if (input && input.value) {
+                parameters.push({
+                    name: input.previousElementSibling.textContent.replace(':', ''),
+                    value: input.value,
+                    unit: unit,
+                    type: input.type
+                });
+            }
+        });
+        
+        return parameters;
+    }
+    
+    loadKPIs() {
+        const kpiList = document.getElementById('kpi-list');
+        if (!kpiList) return;
+        
+        if (!this.kpis || this.kpis.length === 0) {
+            kpiList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No hay KPIs configurados</p>';
+            return;
+        }
+        
+        kpiList.innerHTML = this.kpis.map(kpi => `
+            <div class="kpi-item">
+                <div class="kpi-item-header">
+                    <h4 class="kpi-item-title">${kpi.name}</h4>
+                    <span class="kpi-item-type">${this.getKPITypeName(kpi.type)}</span>
+                </div>
+                <p class="kpi-item-description">${kpi.description || 'Sin descripción'}</p>
+                <div class="kpi-item-parameters">
+                    ${kpi.parameters.map(param => `
+                        <div class="kpi-parameter-item">
+                            <div class="kpi-parameter-name">${param.name}</div>
+                            <div class="kpi-parameter-value">${param.value} ${param.unit}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="kpi-item-footer">
+                    <div class="kpi-item-assignment">
+                        Período: ${kpi.period} | 
+                        ${kpi.startDate} ${kpi.endDate ? `- ${kpi.endDate}` : ''}
+                    </div>
+                    <div class="kpi-item-actions">
+                        <button class="btn-edit" onclick="window.crm.editKPI('${kpi.id}')">Editar</button>
+                        <button class="btn-delete" onclick="window.crm.deleteKPI('${kpi.id}')">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    closeKPIForm() {
+        const formContainer = document.getElementById('kpi-form-container');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+        
+        // Limpiar formulario
+        const form = document.getElementById('dynamicKPIForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Remover selección de tipo
+        document.querySelectorAll('.kpi-type-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+    }
+    
+    editKPI(kpiId) {
+        const kpi = this.kpis.find(k => k.id === kpiId);
+        if (!kpi) return;
+        
+        // Seleccionar tipo de KPI
+        this.selectKPIType(kpi.type);
+        
+        // Llenar formulario
+        document.getElementById('kpiName').value = kpi.name;
+        document.getElementById('kpiDescription').value = kpi.description || '';
+        document.getElementById('kpiAdvisor').value = kpi.advisor || '';
+        document.getElementById('kpiManager').value = kpi.manager || '';
+        document.getElementById('kpiPeriod').value = kpi.period;
+        document.getElementById('kpiStartDate').value = kpi.startDate;
+        document.getElementById('kpiEndDate').value = kpi.endDate || '';
+        
+        // Configurar parámetros
+        const parametersContainer = document.getElementById('kpi-parameters-container');
+        if (parametersContainer) {
+            parametersContainer.innerHTML = this.generateKPIParameters(kpi.type);
+            
+            // Llenar valores existentes
+            kpi.parameters.forEach((param, index) => {
+                const input = parametersContainer.querySelector(`input[name="parameter_${index}"]`);
+                if (input) {
+                    input.value = param.value;
+                }
+            });
+        }
+    }
+    
+    deleteKPI(kpiId) {
+        if (confirm('¿Estás seguro de que quieres eliminar este KPI?')) {
+            this.kpis = this.kpis.filter(k => k.id !== kpiId);
+            this.saveData();
+            this.loadKPIs();
+            this.showNotification('KPI eliminado exitosamente', 'success');
+        }
+    }
+    
+    // Función global para cerrar formulario de KPIs
+    closeKPIFormGlobal() {
+        this.closeKPIForm();
     }
     
     initManagerForAdmin() {
@@ -2042,6 +2596,19 @@ class CRMApp {
         this.setupAdminDashboardControls();
         this.updateManagersDashboard();
         this.updateAdvisorsKPIs();
+        // Métricas generales
+        this.setupGeneralMetricsFilters && this.setupGeneralMetricsFilters();
+        this.updateGeneralMetricsUI && this.updateGeneralMetricsUI();
+        // Estadísticas generales y por asesor
+        this.updateStatsGeneralUI && this.updateStatsGeneralUI();
+        this.setupAdvisorStatsFilters();
+        this.updateAdvisorStatsUI();
+        // Estadísticas de leads
+        this.setupLeadsStatsFilters && this.setupLeadsStatsFilters();
+        this.updateLeadsStatsUI && this.updateLeadsStatsUI();
+        // Estadísticas de clientes
+        this.setupClientsStatsFilters && this.setupClientsStatsFilters();
+        this.updateClientsStatsUI && this.updateClientsStatsUI();
         
         // Initialize sequences display
         setTimeout(() => {
@@ -2060,6 +2627,9 @@ class CRMApp {
             return;
         }
         
+        // Sembrar datos de ejemplo para el asesor actual si no existen suficientes clientes
+        this.ensureAdvisorSampleLeads(this.currentUser?.name);
+        
         // Initialize calendar with current date
         this.currentCalendarDate = new Date();
         this.currentCalendarView = 'week';
@@ -2074,6 +2644,44 @@ class CRMApp {
             this.updateTodayPendingTasks();
             this.updateUpcomingTasksWidget();
         }, 100);
+    }
+
+    // Crea 7 clientes para el asesor: 2 "Cierre" (convertido), 1 "Perdido" y 4 en oportunidad
+    ensureAdvisorSampleLeads(advisorName) {
+        try {
+            if (!advisorName) return;
+            if (!Array.isArray(this.leads)) this.leads = [];
+            const myLeads = this.leads.filter(l => l.advisor === advisorName);
+            if (myLeads.length >= 7) return; // Ya hay suficientes
+            const now = new Date();
+            const makeDate = (d) => new Date(now.getFullYear(), now.getMonth(), d).toISOString();
+            const base = [
+                { name: 'Cliente Convertido 1', status: 'Cierre' },
+                { name: 'Cliente Convertido 2', status: 'Cierre' },
+                { name: 'Cliente Perdido 1', status: 'Perdido' },
+                { name: 'Oportunidad 1', status: 'Calificar' },
+                { name: 'Oportunidad 2', status: 'Desarrollar' },
+                { name: 'Oportunidad 3', status: 'Proponer' },
+                { name: 'Oportunidad 4', status: 'Cierre' } // permanece en pipeline (no contado como convertido si no se marca ganado)
+            ];
+            // Ajustar última a estado de oportunidad para no contarla como conversión aún
+            base[6].status = 'Proponer';
+            const startIdx = myLeads.length;
+            for (let i = 0; i < base.length && this.leads.filter(l => l.advisor === advisorName).length < 7; i++) {
+                const item = base[i];
+                this.leads.push({
+                    id: `demo-${advisorName}-${Date.now()}-${i}`,
+                    name: item.name,
+                    advisor: advisorName,
+                    status: item.status,
+                    createdAt: makeDate(1 + i),
+                    updatedAt: makeDate(1 + i)
+                });
+            }
+            try { this.saveData(); } catch (e) { /* noop */ }
+        } catch (e) {
+            console.warn('No se pudieron crear leads de ejemplo para el asesor:', e);
+        }
     }
     
     // Admin specific methods
@@ -2645,11 +3253,15 @@ class CRMApp {
         const teamTotalActions = document.getElementById('teamTotalActions');
         const teamConversions = document.getElementById('teamConversions');
         const teamConversionRate = document.getElementById('teamConversionRate');
+        const teamLostClients = document.getElementById('teamLostClients');
+        const teamProspectClients = document.getElementById('teamProspectClients');
         
         if (teamTotalLeads) teamTotalLeads.textContent = stats.totalLeads;
         if (teamTotalActions) teamTotalActions.textContent = stats.completedTasks;
         if (teamConversions) teamConversions.textContent = stats.conversions;
         if (teamConversionRate) teamConversionRate.textContent = `${stats.conversionRate}%`;
+        if (teamLostClients) teamLostClients.textContent = stats.lostClients;
+        if (teamProspectClients) teamProspectClients.textContent = stats.prospectClients;
         
         // Actualizar resumen de KPIs
         this.updateManagerKPIsSummary();
@@ -2696,6 +3308,8 @@ class CRMApp {
         // Calcular estadísticas
         const completedTasks = periodTasks.filter(task => task.status === 'completada');
         const conversions = periodLeads.filter(lead => lead.status === 'Cierre');
+        const lostClients = periodLeads.filter(lead => lead.status === 'Perdido');
+        const prospectClients = periodLeads.filter(lead => lead.status !== 'Cierre' && lead.status !== 'Perdido');
         const conversionRate = periodLeads.length > 0 ? Math.round((conversions.length / periodLeads.length) * 100) : 0;
         
         console.log('Estadísticas del equipo calculadas:', {
@@ -2705,6 +3319,8 @@ class CRMApp {
             periodTasks: periodTasks.length,
             completedTasks: completedTasks.length,
             conversions: conversions.length,
+            lostClients: lostClients.length,
+            prospectClients: prospectClients.length,
             conversionRate: conversionRate
         });
         
@@ -2715,6 +3331,8 @@ class CRMApp {
             periodTasks: periodTasks.length,
             completedTasks: completedTasks.length,
             conversions: conversions.length,
+            lostClients: lostClients.length,
+            prospectClients: prospectClients.length,
             conversionRate: conversionRate
         };
     }
@@ -4003,14 +4621,14 @@ class CRMApp {
                         return `
                             <div class="lead-card" data-lead-id="${lead.id}" draggable="true">
                                 <h4>${lead.name}</h4>
-                                <p><strong>Empresa:</strong> ${lead.company}</p>
-                                <p><strong>Interés:</strong> <span class="lead-interest interest-${interestClass}">${lead.interest}</span></p>
+                                <p><strong>Empresa:</strong> ${lead.company || 'Sin empresa'}</p>
+                                <p><strong>Interés:</strong> <span class="lead-interest interest-${interestClass}">${lead.interest || 'No definido'}</span></p>
                                 <p><strong>Última actividad:</strong> ${this.formatDate(lead.lastActivity)}</p>
                                 <div class="lead-actions">
-                                    <button class="btn btn-primary" onclick="window.crm.showLeadDetail(${lead.id})">👁️ Ver</button>
-                                    ${canAdvance ? `<button class="btn btn-success" onclick="window.crm.advanceLeadState(${lead.id})">⬆️ Avanzar</button>` : ''}
-                                    <button class="btn btn-warning" onclick="window.crm.qualifyClient(${lead.id})" title="Calificar cliente">⭐ Calificar</button>
-                                    <button class="btn btn-danger" onclick="window.crm.confirmDeleteClient(${lead.id})" title="Eliminar cliente">🗑️ Eliminar</button>
+                                    <button class="btn btn-primary" onclick="window.crm.showLeadDetail('${lead.id}')">👁️ Ver</button>
+                                    ${canAdvance ? `<button class="btn btn-success" onclick="window.crm.advanceLeadState('${lead.id}')">⬆️ Avanzar</button>` : ''}
+                                    <button class="btn btn-warning" onclick="window.crm.qualifyClient('${lead.id}')" title="Calificar cliente">⭐ Calificar</button>
+                                    <button class="btn btn-danger" onclick="window.crm.confirmDeleteClient('${lead.id}')" title="Eliminar cliente">🗑️ Eliminar</button>
                                 </div>
                             </div>
                         `;
@@ -4032,21 +4650,46 @@ class CRMApp {
     }
     
     setupDragAndDrop() {
+        // Limpiar event listeners anteriores
+        const existingCards = document.querySelectorAll('.lead-card[draggable="true"]');
+        const existingZones = document.querySelectorAll('.column-content[data-state]');
+        
+        // Remover todos los event listeners existentes
+        existingCards.forEach(card => {
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+        });
+        
+        existingZones.forEach(zone => {
+            const newZone = zone.cloneNode(true);
+            zone.parentNode.replaceChild(newZone, zone);
+        });
+        
+        // Obtener elementos actualizados
         const leadCards = document.querySelectorAll('.lead-card[draggable="true"]');
         const dropZones = document.querySelectorAll('.column-content[data-state]');
+        
+        console.log('Configurando drag & drop para', leadCards.length, 'tarjetas y', dropZones.length, 'zonas');
         
         // Setup drag events for lead cards
         leadCards.forEach(card => {
             card.addEventListener('dragstart', (e) => {
+                console.log('Iniciando arrastre de lead:', card.dataset.leadId);
                 e.dataTransfer.setData('text/plain', card.dataset.leadId);
-                card.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
+                card.classList.add('dragging');
+                
+                // Agregar clase a todas las zonas de drop
+                dropZones.forEach(zone => zone.classList.add('drop-zone-active'));
             });
             
             card.addEventListener('dragend', (e) => {
+                console.log('Finalizando arrastre');
                 card.classList.remove('dragging');
-                // Remove drag-over class from all drop zones
-                dropZones.forEach(zone => zone.classList.remove('drag-over'));
+                // Remover clases de todas las zonas
+                dropZones.forEach(zone => {
+                    zone.classList.remove('drag-over', 'drop-zone-active');
+                });
             });
         });
         
@@ -4058,8 +4701,13 @@ class CRMApp {
                 zone.classList.add('drag-over');
             });
             
+            zone.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+            
             zone.addEventListener('dragleave', (e) => {
-                // Only remove drag-over if we're leaving the zone entirely
+                // Solo remover si realmente estamos saliendo de la zona
                 if (!zone.contains(e.relatedTarget)) {
                     zone.classList.remove('drag-over');
                 }
@@ -4069,8 +4717,10 @@ class CRMApp {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
                 
-                const leadId = parseInt(e.dataTransfer.getData('text/plain'));
+                const leadId = e.dataTransfer.getData('text/plain');
                 const newState = zone.dataset.state;
+                
+                console.log('Soltando lead:', leadId, 'en estado:', newState);
                 
                 if (leadId && newState) {
                     this.moveLeadToState(leadId, newState);
@@ -4080,13 +4730,16 @@ class CRMApp {
     }
     
     moveLeadToState(leadId, newState) {
-        const lead = this.leads.find(l => l.id === leadId);
+        console.log('Moviendo lead:', leadId, 'a estado:', newState);
+        const lead = this.leads.find(l => l.id == leadId); // Usar == para comparación flexible
         if (!lead) {
+            console.error('Lead no encontrado:', leadId);
             this.showNotification('Lead no encontrado', 'error');
             return;
         }
         
         const previousState = lead.status;
+        console.log('Estado anterior:', previousState, 'Nuevo estado:', newState);
         
         // Check if the move is valid (can move to any state)
         if (previousState === newState) {
@@ -4096,7 +4749,9 @@ class CRMApp {
         
         // Update lead state
         lead.status = newState;
-        lead.lastActivity = new Date();
+        lead.lastActivity = new Date().toISOString();
+        
+        console.log('Lead actualizado:', lead);
         
         // Save data
         this.saveData();
@@ -4108,7 +4763,7 @@ class CRMApp {
         this.updateAdvisorKanban();
         
         // Show notification
-        this.showNotification(`Lead movido a ${newState}`, 'success');
+        this.showNotification(`Lead movido de ${previousState} a ${newState}`, 'success');
         
         console.log(`Lead ${leadId} movido de ${previousState} a ${newState}`);
     }
@@ -4884,7 +5539,7 @@ class CRMApp {
         this.updateLeadAssignmentForm();
         
         // Mostrar solo la primera pantalla
-        this.showScreen('advisor-stats-screen');
+        this.showScreen('advisor-kpis-screen');
     }
     
     setupScreenNavigation() {
@@ -6615,6 +7270,7 @@ class CRMApp {
         if (!lead) {
             console.error('Lead no encontrado:', leadId);
             console.log('Leads disponibles:', this.leads.map(l => ({ id: l.id, name: l.name })));
+            this.showNotification('Lead no encontrado', 'error');
             return;
         }
         console.log('Lead encontrado:', lead);
@@ -9371,20 +10027,60 @@ class CRMApp {
     }
 
     loadUsers() {
+        // Semilla mínima: 2 gerentes y 6 asesores si no existen
+        try {
+            const nowIso = new Date().toISOString();
+            const countManagers = (this.users || []).filter(u => u.role === 'manager').length;
+            const countAdvisors = (this.users || []).filter(u => u.role === 'advisor').length;
+            if (!Array.isArray(this.users) || this.users.length === 0 || countManagers < 2 || countAdvisors < 6) {
+                this.users = [
+                    { id: 'm1', name: 'Laura Gómez', firstName: 'Laura', lastName: 'Gómez', role: 'manager', username: 'lgomez', email: 'laura@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'm2', name: 'Diego Torres', firstName: 'Diego', lastName: 'Torres', role: 'manager', username: 'dtorres', email: 'diego@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'a1', name: 'Carlos Ruiz', firstName: 'Carlos', lastName: 'Ruiz', role: 'advisor', managerId: 'm1', username: 'cruiz', email: 'carlos@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'a2', name: 'María López', firstName: 'María', lastName: 'López', role: 'advisor', managerId: 'm1', username: 'mlopez', email: 'maria@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'a3', name: 'Andrés Pérez', firstName: 'Andrés', lastName: 'Pérez', role: 'advisor', managerId: 'm1', username: 'aperez', email: 'andres@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'a4', name: 'Sofía Medina', firstName: 'Sofía', lastName: 'Medina', role: 'advisor', managerId: 'm2', username: 'smedina', email: 'sofia@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'a5', name: 'Julián Castro', firstName: 'Julián', lastName: 'Castro', role: 'advisor', managerId: 'm2', username: 'jcastro', email: 'julian@empresa.com', isActive: true, createdAt: nowIso },
+                    { id: 'a6', name: 'Paula Vargas', firstName: 'Paula', lastName: 'Vargas', role: 'advisor', managerId: 'm2', username: 'pvargas', email: 'paula@empresa.com', isActive: true, createdAt: nowIso }
+                ];
+            }
+        } catch (e) { /* noop */ }
+
+        // Si existe la UI separada por roles, renderizar ahí
+        const adminList = document.getElementById('adminUsersList');
+        const managerList = document.getElementById('managerUsersList');
+        const advisorList = document.getElementById('advisorUsersList');
+        const adminCount = document.getElementById('adminCount');
+        const managerCount = document.getElementById('managerCount');
+        const advisorCount = document.getElementById('advisorCount');
+
+        if (managerList || advisorList || adminList) {
+            const admins = (this.users || []).filter(u => u.role === 'admin');
+            const managers = (this.users || []).filter(u => u.role === 'manager');
+            const advisors = (this.users || []).filter(u => u.role === 'advisor');
+
+            if (adminList) adminList.innerHTML = admins.map(u => this.createUserCard(u)).join('');
+            if (managerList) managerList.innerHTML = managers.map(u => this.createUserCard(u)).join('');
+            if (advisorList) advisorList.innerHTML = advisors.map(u => this.createUserCard(u)).join('');
+
+            if (adminCount) adminCount.textContent = `${admins.length} administradores`;
+            if (managerCount) managerCount.textContent = `${managers.length} gerentes`;
+            if (advisorCount) advisorCount.textContent = `${advisors.length} asesores`;
+            return;
+        }
+
+        // Fallback a la lista plana
         const roleFilter = document.getElementById('usersRoleFilter')?.value;
         let filteredUsers = this.users;
-
         if (roleFilter) {
             filteredUsers = this.users.filter(user => user.role === roleFilter);
         }
 
         const usersList = document.getElementById('usersList');
         const userCount = document.getElementById('userCount');
-
         if (!usersList) return;
 
         userCount.textContent = `${filteredUsers.length} usuarios`;
-
         if (filteredUsers.length === 0) {
             usersList.innerHTML = `
                 <div class="no-users-message">
@@ -9395,7 +10091,6 @@ class CRMApp {
             `;
             return;
         }
-
         usersList.innerHTML = filteredUsers.map(user => this.createUserCard(user)).join('');
     }
 
@@ -9445,13 +10140,13 @@ class CRMApp {
                         <div class="user-username">@${user.username}</div>
                     </div>
                     <div class="user-actions-compact">
-                        <button onclick="window.crm.viewUserDetails(${user.id})" class="btn btn-outline btn-xs" title="Ver Detalles">
+                        <button onclick="window.crm.viewUserDetails('${user.id}')" class="btn btn-outline btn-xs" title="Ver Detalles">
                             👁️
                         </button>
-                        <button onclick="window.crm.editUser(${user.id})" class="btn btn-primary btn-xs" title="Editar">
+                        <button onclick="window.crm.editUser('${user.id}')" class="btn btn-primary btn-xs" title="Editar">
                             ✏️
                         </button>
-                        <button onclick="window.crm.toggleUserStatus(${user.id})" class="btn btn-${user.isActive ? 'warning' : 'success'} btn-xs" title="${user.isActive ? 'Desactivar' : 'Activar'}">
+                        <button onclick="window.crm.toggleUserStatus('${user.id}')" class="btn btn-${user.isActive ? 'warning' : 'success'} btn-xs" title="${user.isActive ? 'Desactivar' : 'Activar'}">
                             ${user.isActive ? '⏸️' : '▶️'}
                         </button>
                     </div>
@@ -9600,10 +10295,10 @@ class CRMApp {
                 </div>
                 
                 <div class="user-detail-actions">
-                    <button onclick="window.crm.editUser(${user.id}); document.getElementById('userDetailModal').style.display='none';" class="btn btn-primary">
+                    <button onclick="window.crm.editUser('${user.id}'); document.getElementById('userDetailModal').style.display='none';" class="btn btn-primary">
                         ✏️ Editar Usuario
                     </button>
-                    <button onclick="window.crm.toggleUserStatus(${user.id}); document.getElementById('userDetailModal').style.display='none';" class="btn btn-${user.isActive ? 'warning' : 'success'}">
+                    <button onclick="window.crm.toggleUserStatus('${user.id}'); document.getElementById('userDetailModal').style.display='none';" class="btn btn-${user.isActive ? 'warning' : 'success'}">
                         ${user.isActive ? '⏸️ Desactivar' : '▶️ Activar'}
                     </button>
                 </div>
@@ -10757,10 +11452,157 @@ class CRMApp {
             this.populateManagerFilter();
             managerFilter.addEventListener('change', () => {
                 this.filterByManager(managerFilter.value);
+                this.updateGeneralTeamStatsTable && this.updateGeneralTeamStatsTable();
+                this.updateGeneralSalesReport && this.updateGeneralSalesReport();
+            });
+        }
+
+        // Filtros de tiempo para pestaña Estadísticas
+        const yearSelect = document.getElementById('filterYear');
+        const monthSelect = document.getElementById('filterMonth');
+        const periodType = document.getElementById('timePeriodType');
+
+        if (yearSelect) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 2; y++) years.push(y);
+            yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('');
+        }
+
+        const updateMonthVisibility = () => {
+            const monthGroup = document.getElementById('monthFilterGroup');
+            if (monthGroup && periodType) {
+                monthGroup.style.display = periodType.value === 'monthly' ? 'flex' : 'none';
+            }
+        };
+        updateMonthVisibility();
+
+        if (periodType) {
+            periodType.addEventListener('change', () => {
+                updateMonthVisibility();
+                this.updateGeneralTeamStatsTable && this.updateGeneralTeamStatsTable();
+                this.updateGeneralSalesReport && this.updateGeneralSalesReport();
+            });
+        }
+        if (monthSelect) {
+            monthSelect.addEventListener('change', () => {
+                this.updateGeneralTeamStatsTable && this.updateGeneralTeamStatsTable();
+                this.updateGeneralSalesReport && this.updateGeneralSalesReport();
+            });
+        }
+        if (yearSelect) {
+            yearSelect.addEventListener('change', () => {
+                this.updateGeneralTeamStatsTable && this.updateGeneralTeamStatsTable();
+                this.updateGeneralSalesReport && this.updateGeneralSalesReport();
             });
         }
     }
 
+    // ====== Estadísticas por Asesor (filtros y UI) ======
+    setupAdvisorStatsFilters() {
+        const yearSelect = document.getElementById('advisorFilterYear');
+        const monthSelect = document.getElementById('advisorFilterMonth');
+        const periodType = document.getElementById('advisorPeriodType');
+        if (!yearSelect && !monthSelect && !periodType) return;
+
+        // Poblar años
+        if (yearSelect) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 2; y++) years.push(y);
+            yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('');
+        }
+
+        // Visibilidad del mes
+        const updateMonthVisibility = () => {
+            const monthGroup = document.getElementById('advisorMonthFilterGroup');
+            if (monthGroup && periodType) {
+                monthGroup.style.display = periodType.value === 'monthly' ? 'flex' : 'none';
+            }
+        };
+        updateMonthVisibility();
+
+        const onChange = () => this.updateAdvisorStatsUI();
+        if (periodType) periodType.addEventListener('change', () => { updateMonthVisibility(); onChange(); });
+        if (monthSelect) monthSelect.addEventListener('change', onChange);
+        if (yearSelect) yearSelect.addEventListener('change', onChange);
+    }
+
+    getAdvisorSelectedRange() {
+        const periodTypeEl = document.getElementById('advisorPeriodType');
+        const monthEl = document.getElementById('advisorFilterMonth');
+        const yearEl = document.getElementById('advisorFilterYear');
+        const now = new Date();
+        const year = yearEl ? parseInt(yearEl.value || String(now.getFullYear()), 10) : now.getFullYear();
+        const isMonthly = !periodTypeEl || periodTypeEl.value === 'monthly';
+        if (isMonthly) {
+            const month = monthEl ? parseInt(monthEl.value || String(now.getMonth() + 1), 10) : now.getMonth() + 1;
+            const startDate = new Date(year, month - 1, 1, 0, 0, 0);
+            const endDate = new Date(year, month, 0, 23, 59, 59);
+            return { startDate, endDate };
+        }
+        const startDate = new Date(year, 0, 1, 0, 0, 0);
+        const endDate = new Date(year, 11, 31, 23, 59, 59);
+        return { startDate, endDate };
+    }
+
+    isInAdvisorRange(item) {
+        const { startDate, endDate } = this.getAdvisorSelectedRange();
+        const raw = item?.date || item?.createdAt || item?.updatedAt || item?.dueDate || item?.fecha || item?.created;
+        if (!raw) return true;
+        const d = new Date(raw);
+        if (isNaN(d.getTime())) return true;
+        return d >= startDate && d <= endDate;
+    }
+
+    updateAdvisorStatsUI() {
+        const tbody = document.getElementById('advisorStatsTableBody');
+        if (!tbody) return;
+
+        const advisors = (this.users || []).filter(u => u.role === 'advisor' && u.isActive);
+        const leads = this.leads || [];
+        const tasks = this.tasks || [];
+
+        const rows = advisors.map(advisor => {
+            const advLeads = leads.filter(l => l.advisor === advisor.name && this.isInAdvisorRange(l));
+            const advTasks = tasks.filter(t => t.advisor === advisor.name && this.isInAdvisorRange(t));
+            const conversions = advLeads.filter(l => l.status === 'Cerrado').length;
+            const activeLeads = advLeads.filter(l => l.status !== 'Cerrado').length;
+            const rate = advLeads.length > 0 ? ((conversions / advLeads.length) * 100).toFixed(1) : '0.0';
+            const lastActivity = advTasks.concat(advLeads)
+                .map(x => new Date(x.updatedAt || x.createdAt || x.date || x.lastActivity || 0))
+                .reduce((a,b)=> (a>b?a:b), new Date(0));
+            const lastStr = isNaN(lastActivity.getTime()) || lastActivity.getTime()===0 ? '-' : lastActivity.toLocaleDateString('es-ES');
+            return `
+                <tr>
+                    <td>${advisor.name}</td>
+                    <td>${advLeads.length}</td>
+                    <td>${advTasks.length}</td>
+                    <td>${conversions}</td>
+                    <td>${rate}%</td>
+                    <td>${activeLeads}</td>
+                    <td>${lastStr}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // Si no hay asesores o datos, mostrar un row con demo para ejemplificar
+        if (!rows || rows.trim()==='') {
+            tbody.innerHTML = `
+                <tr>
+                    <td>Asesor Demo</td>
+                    <td>12</td>
+                    <td>30</td>
+                    <td>5</td>
+                    <td>41.7%</td>
+                    <td>7</td>
+                    <td>${new Date().toLocaleDateString('es-ES')}</td>
+                </tr>
+            `;
+        } else {
+            tbody.innerHTML = rows;
+        }
+    }
 
     populateManagerFilter() {
         const managerFilter = document.getElementById('managerFilter');
@@ -10804,6 +11646,8 @@ class CRMApp {
         
         // Generate manager cards
         managersGrid.innerHTML = managers.map(manager => this.createManagerCard(manager)).join('');
+        // También refrescar la pestaña de estadísticas (tabla y gráfico), si existe
+        this.updateGeneralTeamStatsTable && this.updateGeneralTeamStatsTable();
         
         console.log('Dashboard de gerentes actualizado:', managers.length, 'gerentes');
     }
@@ -10960,6 +11804,58 @@ class CRMApp {
         console.log('KPIs de asesores actualizados:', advisors.length, 'asesores');
     }
 
+    // Renderiza gráfico de barras en la pestaña Estadísticas
+    renderTeamStatsBarChart(advisors) {
+        const canvas = document.getElementById('teamStatsBarChart');
+        if (!canvas) return;
+
+        const chartData = this.getTeamStatsForDateRange();
+        
+        if (this._teamStatsBarChart) {
+            this._teamStatsBarChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        this._teamStatsBarChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    { 
+                        label: 'Leads', 
+                        data: chartData.leadsData, 
+                        borderColor: '#2563eb',
+                        backgroundColor: '#2563eb20',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Acciones', 
+                        data: chartData.actionsData, 
+                        borderColor: '#10b981',
+                        backgroundColor: '#10b98120',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Conversiones', 
+                        data: chartData.conversionsData, 
+                        borderColor: '#f59e0b',
+                        backgroundColor: '#f59e0b20',
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+    }
+
     createAdvisorKPICard(advisor) {
         // Get advisor's leads and tasks
         const advisorLeads = this.leads.filter(lead => lead.advisor === advisor.name);
@@ -11044,6 +11940,1345 @@ class CRMApp {
         const element = document.getElementById(elementId);
         if (element) {
             element.textContent = value;
+        }
+    }
+
+    // Funciones para métricas generales
+    setupGeneralMetricsFilters() {
+        console.log('Configurando filtros de métricas generales...');
+        
+        // Filtros de rango de fechas para métricas generales
+        const startYearSelect = document.getElementById('generalStartYear');
+        const endYearSelect = document.getElementById('generalEndYear');
+        const startMonthSelect = document.getElementById('generalStartMonth');
+        const endMonthSelect = document.getElementById('generalEndMonth');
+
+        // Poblar años
+        if (startYearSelect && endYearSelect) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 2; y++) years.push(y);
+            const yearOptions = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('');
+            startYearSelect.innerHTML = yearOptions;
+            endYearSelect.innerHTML = yearOptions;
+        }
+
+        // Configurar valores por defecto (Enero 2025 - Mayo 2025)
+        if (startMonthSelect) startMonthSelect.value = '1';
+        if (endMonthSelect) endMonthSelect.value = '5';
+        if (startYearSelect) startYearSelect.value = '2025';
+        if (endYearSelect) endYearSelect.value = '2025';
+
+        // Event listeners
+        if (startMonthSelect) {
+            startMonthSelect.addEventListener('change', () => this.updateGeneralMetricsUI());
+        }
+        if (startYearSelect) {
+            startYearSelect.addEventListener('change', () => this.updateGeneralMetricsUI());
+        }
+        if (endMonthSelect) {
+            endMonthSelect.addEventListener('change', () => this.updateGeneralMetricsUI());
+        }
+        if (endYearSelect) {
+            endYearSelect.addEventListener('change', () => this.updateGeneralMetricsUI());
+        }
+    }
+
+    updateGeneralMetricsUI() {
+        console.log('Actualizando UI de métricas generales...');
+        this.updateGeneralMetricsCards();
+        this.updateGeneralMetricsTable();
+        this.renderGeneralMetricsChart();
+    }
+
+    updateGeneralMetricsCards() {
+        const metrics = this.getGeneralMetricsForSelectedRange();
+        
+        // Actualizar tarjetas de métricas
+        this.updateElement('totalSalesCount', metrics.totalSales);
+        this.updateElement('totalLostCount', metrics.totalLost);
+        this.updateElement('totalProspectsCount', metrics.totalProspects);
+        this.updateElement('conversionRate', `${metrics.conversionRate}%`);
+    }
+
+    updateGeneralMetricsTable() {
+        const tbody = document.getElementById('generalMetricsTableBody');
+        if (!tbody) return;
+
+        const monthlyData = this.getGeneralMetricsMonthlyData();
+        
+        if (monthlyData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #64748b;">
+                        No hay datos para el rango seleccionado
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = monthlyData.map(month => `
+            <tr>
+                <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">${month.monthName}</td>
+                <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">${month.sales}</td>
+                <td style="padding: 0.75rem; text-align: center; color: #dc2626; font-weight: 600;">${month.lost}</td>
+                <td style="padding: 0.75rem; text-align: center; color: #d97706; font-weight: 600;">${month.prospects}</td>
+                <td style="padding: 0.75rem; text-align: center; color: #059669; font-weight: 600;">${month.conversionRate}%</td>
+            </tr>
+        `).join('');
+    }
+
+    getGeneralMetricsForSelectedRange() {
+        const startYear = parseInt(document.getElementById('generalStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('generalStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('generalEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('generalEndMonth')?.value || 5);
+
+        // Filtrar leads por rango de fechas
+        const rangeLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            const leadYear = leadDate.getFullYear();
+            const leadMonth = leadDate.getMonth() + 1;
+            
+            return (leadYear > startYear || (leadYear === startYear && leadMonth >= startMonth)) &&
+                   (leadYear < endYear || (leadYear === endYear && leadMonth <= endMonth));
+        });
+
+        // Calcular métricas
+        const totalSales = rangeLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+        const totalLost = rangeLeads.filter(lead => lead.status === 'Perdido').length;
+        const totalProspects = rangeLeads.filter(lead => 
+            lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido'
+        ).length;
+        const totalLeads = rangeLeads.length;
+        const conversionRate = totalLeads > 0 ? ((totalSales / totalLeads) * 100).toFixed(1) : 0;
+
+        // Si no hay datos, mostrar ceros
+        if (totalLeads === 0) {
+            return {
+                totalSales: 0,
+                totalLost: 0,
+                totalProspects: 0,
+                conversionRate: 0
+            };
+        }
+
+        return {
+            totalSales,
+            totalLost,
+            totalProspects,
+            conversionRate: parseFloat(conversionRate)
+        };
+    }
+
+    getGeneralMetricsMonthlyData() {
+        const startYear = parseInt(document.getElementById('generalStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('generalStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('generalEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('generalEndMonth')?.value || 5);
+
+        const monthlyData = [];
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        let currentYear = startYear;
+        let currentMonth = startMonth;
+        
+        while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+            const monthLeads = this.leads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === currentYear && leadDate.getMonth() + 1 === currentMonth;
+            });
+
+            const sales = monthLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+            const lost = monthLeads.filter(lead => lead.status === 'Perdido').length;
+            const prospects = monthLeads.filter(lead => 
+                lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido'
+            ).length;
+            const total = monthLeads.length;
+            const conversionRate = total > 0 ? ((sales / total) * 100).toFixed(1) : 0;
+
+            monthlyData.push({
+                monthName: `${monthNames[currentMonth - 1]} ${currentYear}`,
+                sales,
+                lost,
+                prospects,
+                conversionRate: parseFloat(conversionRate)
+            });
+            
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+        }
+
+        return monthlyData;
+    }
+
+    renderGeneralMetricsChart() {
+        const canvas = document.getElementById('generalMetricsChart');
+        if (!canvas || !window.Chart) return;
+
+        const chartData = this.getGeneralMetricsChartData();
+        
+        if (this._generalMetricsChart) {
+            this._generalMetricsChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        this._generalMetricsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    { 
+                        label: 'Ventas', 
+                        data: chartData.salesData, 
+                        borderColor: '#059669',
+                        backgroundColor: '#05966920',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Perdidos', 
+                        data: chartData.lostData, 
+                        borderColor: '#dc2626',
+                        backgroundColor: '#dc262620',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Prospectos', 
+                        data: chartData.prospectsData, 
+                        borderColor: '#d97706',
+                        backgroundColor: '#d9770620',
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 0
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { 
+                            precision: 0,
+                            stepSize: 10
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    }
+                },
+                plugins: { 
+                    legend: { 
+                        display: true,
+                        position: 'top'
+                    } 
+                }
+            }
+        });
+    }
+
+    getGeneralMetricsChartData() {
+        const startYear = parseInt(document.getElementById('generalStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('generalStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('generalEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('generalEndMonth')?.value || 5);
+
+        let labels = [];
+        let salesData = [];
+        let lostData = [];
+        let prospectsData = [];
+
+        const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
+                          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        let currentYear = startYear;
+        let currentMonth = startMonth;
+        
+        while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+            labels.push(`${monthNames[currentMonth - 1]} ${currentYear}`);
+            
+            const monthLeads = this.leads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === currentYear && leadDate.getMonth() + 1 === currentMonth;
+            });
+
+            const sales = monthLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+            const lost = monthLeads.filter(lead => lead.status === 'Perdido').length;
+            const prospects = monthLeads.filter(lead => 
+                lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido'
+            ).length;
+
+            salesData.push(sales);
+            lostData.push(lost);
+            prospectsData.push(prospects);
+            
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+        }
+
+        // Si no hay datos, mostrar arrays vacíos
+        if (salesData.length === 0 || salesData.every(v => v === 0)) {
+            labels = [];
+            salesData = [];
+            lostData = [];
+            prospectsData = [];
+        }
+
+        return {
+            labels,
+            salesData,
+            lostData,
+            prospectsData
+        };
+    }
+
+    // Funciones para estadísticas de leads
+    setupLeadsStatsFilters() {
+        console.log('Configurando filtros de estadísticas de leads...');
+        
+        // Filtros de rango de fechas para estadísticas de leads
+        const startYearSelect = document.getElementById('leadsStartYear');
+        const endYearSelect = document.getElementById('leadsEndYear');
+        const startMonthSelect = document.getElementById('leadsStartMonth');
+        const endMonthSelect = document.getElementById('leadsEndMonth');
+
+        // Poblar años
+        if (startYearSelect && endYearSelect) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 2; y++) years.push(y);
+            const yearOptions = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('');
+            startYearSelect.innerHTML = yearOptions;
+            endYearSelect.innerHTML = yearOptions;
+        }
+
+        // Configurar valores por defecto (Enero 2025 - Mayo 2025)
+        if (startMonthSelect) startMonthSelect.value = '1';
+        if (endMonthSelect) endMonthSelect.value = '5';
+        if (startYearSelect) startYearSelect.value = '2025';
+        if (endYearSelect) endYearSelect.value = '2025';
+
+        // Event listeners
+        if (startMonthSelect) {
+            startMonthSelect.addEventListener('change', () => this.updateLeadsStatsUI());
+        }
+        if (startYearSelect) {
+            startYearSelect.addEventListener('change', () => this.updateLeadsStatsUI());
+        }
+        if (endMonthSelect) {
+            endMonthSelect.addEventListener('change', () => this.updateLeadsStatsUI());
+        }
+        if (endYearSelect) {
+            endYearSelect.addEventListener('change', () => this.updateLeadsStatsUI());
+        }
+    }
+
+    updateLeadsStatsUI() {
+        console.log('Actualizando UI de estadísticas de leads...');
+        this.updateLeadsStatsCards();
+        this.updateLeadsStatsTable();
+        this.updateLeadsStatsChart();
+    }
+
+    updateLeadsStatsCards() {
+        const stats = this.getLeadsStatsForSelectedRange();
+        
+        // Actualizar tarjetas de estadísticas
+        this.updateElement('totalLeadsCount', stats.totalLeads);
+        this.updateElement('convertedLeadsCount', stats.convertedLeads);
+        this.updateElement('activeLeadsCount', stats.activeLeads);
+        this.updateElement('lostLeadsCount', stats.lostLeads);
+        this.updateElement('leadsConversionRate', `${stats.conversionRate}%`);
+        this.updateElement('monthlyAverage', stats.monthlyAverage);
+    }
+
+    updateLeadsStatsTable() {
+        const tbody = document.getElementById('leadsStatsTableBody');
+        if (!tbody) return;
+
+        const stats = this.getLeadsStatsForSelectedRange();
+        const periodType = document.getElementById('leadsPeriodType')?.value || 'monthly';
+        const year = document.getElementById('leadsFilterYear')?.value || new Date().getFullYear();
+        const month = document.getElementById('leadsFilterMonth')?.value || new Date().getMonth() + 1;
+
+        let periodLabel = '';
+        if (periodType === 'monthly') {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            periodLabel = `${monthNames[month - 1]} ${year}`;
+        } else {
+            periodLabel = `Año ${year}`;
+        }
+
+        tbody.innerHTML = `
+            <tr>
+                <td>${periodLabel}</td>
+                <td>${stats.totalLeads}</td>
+                <td>${stats.convertedLeads}</td>
+                <td>${stats.activeLeads}</td>
+                <td>${stats.lostLeads}</td>
+                <td>${stats.conversionRate}%</td>
+            </tr>
+        `;
+    }
+
+    updateLeadsStatsChart() {
+        const canvas = document.getElementById('leadsStatsChart');
+        if (!canvas || !window.Chart) return;
+
+        const chartData = this.getLeadsStatsForDateRange();
+        
+        if (this._leadsStatsChart) this._leadsStatsChart.destroy();
+        
+        this._leadsStatsChart = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { 
+                labels: chartData.labels, 
+                datasets: [
+                    { 
+                        label: 'Total Leads', 
+                        data: chartData.totalLeads,
+                        borderColor: '#2563eb',
+                        backgroundColor: '#2563eb20',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Convertidos', 
+                        data: chartData.convertedLeads,
+                        borderColor: '#10b981',
+                        backgroundColor: '#10b98120',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Activos', 
+                        data: chartData.activeLeads,
+                        borderColor: '#f59e0b',
+                        backgroundColor: '#f59e0b20',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Perdidos', 
+                        data: chartData.lostLeads,
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef444420',
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { precision: 0 } 
+                    } 
+                },
+                plugins: { 
+                    legend: { 
+                        display: true,
+                        position: 'top'
+                    } 
+                }
+            }
+        });
+    }
+
+    getLeadsStatsForSelectedRange() {
+        const periodType = document.getElementById('leadsPeriodType')?.value || 'monthly';
+        const year = parseInt(document.getElementById('leadsFilterYear')?.value || new Date().getFullYear());
+        const month = parseInt(document.getElementById('leadsFilterMonth')?.value || new Date().getMonth() + 1);
+
+        let filteredLeads = this.leads || [];
+        
+        // Filtrar por rango de fechas
+        if (periodType === 'monthly') {
+            filteredLeads = filteredLeads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === year && leadDate.getMonth() + 1 === month;
+            });
+        } else {
+            filteredLeads = filteredLeads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === year;
+            });
+        }
+
+        // Calcular estadísticas
+        const totalLeads = filteredLeads.length;
+        const convertedLeads = filteredLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+        const activeLeads = filteredLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length;
+        const lostLeads = filteredLeads.filter(lead => lead.status === 'Perdido').length;
+        const conversionRate = totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) : 0;
+        
+        // Calcular promedio mensual (últimos 12 meses)
+        const monthlyAverage = this.calculateMonthlyAverage();
+
+        // Fallback demo si no hay datos
+        if (totalLeads === 0 && convertedLeads === 0 && activeLeads === 0 && lostLeads === 0) {
+            return {
+                totalLeads: 25,
+                convertedLeads: 8,
+                activeLeads: 12,
+                lostLeads: 5,
+                conversionRate: 32.0,
+                monthlyAverage: 20
+            };
+        }
+
+        return {
+            totalLeads,
+            convertedLeads,
+            activeLeads,
+            lostLeads,
+            conversionRate: parseFloat(conversionRate),
+            monthlyAverage
+        };
+    }
+
+    calculateMonthlyAverage() {
+        const currentYear = new Date().getFullYear();
+        const monthlyTotals = [];
+        
+        for (let month = 1; month <= 12; month++) {
+            const monthLeads = this.leads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === currentYear && leadDate.getMonth() + 1 === month;
+            });
+            monthlyTotals.push(monthLeads.length);
+        }
+        
+        return Math.round(monthlyTotals.reduce((sum, total) => sum + total, 0) / 12);
+    }
+
+    // Funciones para estadísticas de clientes
+    setupClientsStatsFilters() {
+        console.log('Configurando filtros de estadísticas de clientes...');
+        
+        // Filtros de rango de fechas para estadísticas de clientes
+        const startYearSelect = document.getElementById('clientsStartYear');
+        const endYearSelect = document.getElementById('clientsEndYear');
+        const startMonthSelect = document.getElementById('clientsStartMonth');
+        const endMonthSelect = document.getElementById('clientsEndMonth');
+
+        // Poblar años
+        if (startYearSelect && endYearSelect) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 2; y++) years.push(y);
+            const yearOptions = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('');
+            startYearSelect.innerHTML = yearOptions;
+            endYearSelect.innerHTML = yearOptions;
+        }
+
+        // Configurar valores por defecto (Enero 2025 - Mayo 2025)
+        if (startMonthSelect) startMonthSelect.value = '1';
+        if (endMonthSelect) endMonthSelect.value = '5';
+        if (startYearSelect) startYearSelect.value = '2025';
+        if (endYearSelect) endYearSelect.value = '2025';
+
+        // Event listeners
+        if (startMonthSelect) {
+            startMonthSelect.addEventListener('change', () => this.updateClientsStatsUI());
+        }
+        if (startYearSelect) {
+            startYearSelect.addEventListener('change', () => this.updateClientsStatsUI());
+        }
+        if (endMonthSelect) {
+            endMonthSelect.addEventListener('change', () => this.updateClientsStatsUI());
+        }
+        if (endYearSelect) {
+            endYearSelect.addEventListener('change', () => this.updateClientsStatsUI());
+        }
+    }
+
+    updateClientsStatsUI() {
+        console.log('Actualizando UI de estadísticas de clientes...');
+        this.updateClientsStatsCards();
+        this.updateClientsStatsTable();
+        this.updateClientsStatsChart();
+    }
+
+    // Funciones para estadísticas por asesor con rango de fechas
+    setupAdvisorStatsFilters() {
+        console.log('Configurando filtros de estadísticas por asesor...');
+        
+        // Filtros de rango de fechas para estadísticas por asesor
+        const startYearSelect = document.getElementById('advisorStartYear');
+        const endYearSelect = document.getElementById('advisorEndYear');
+        const startMonthSelect = document.getElementById('advisorStartMonth');
+        const endMonthSelect = document.getElementById('advisorEndMonth');
+
+        // Poblar años
+        if (startYearSelect && endYearSelect) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 2; y++) years.push(y);
+            const yearOptions = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('');
+            startYearSelect.innerHTML = yearOptions;
+            endYearSelect.innerHTML = yearOptions;
+        }
+
+        // Configurar valores por defecto (Enero 2025 - Mayo 2025)
+        if (startMonthSelect) startMonthSelect.value = '1';
+        if (endMonthSelect) endMonthSelect.value = '5';
+        if (startYearSelect) startYearSelect.value = '2025';
+        if (endYearSelect) endYearSelect.value = '2025';
+
+        // Event listeners
+        if (startMonthSelect) {
+            startMonthSelect.addEventListener('change', () => this.updateAdvisorStatsUI());
+        }
+        if (startYearSelect) {
+            startYearSelect.addEventListener('change', () => this.updateAdvisorStatsUI());
+        }
+        if (endMonthSelect) {
+            endMonthSelect.addEventListener('change', () => this.updateAdvisorStatsUI());
+        }
+        if (endYearSelect) {
+            endYearSelect.addEventListener('change', () => this.updateAdvisorStatsUI());
+        }
+    }
+
+    updateAdvisorStatsUI() {
+        console.log('Actualizando UI de estadísticas por asesor...');
+        this.updateAdvisorStatsCards();
+        this.updateAdvisorStatsTable();
+    }
+
+    updateAdvisorStatsCards() {
+        // Obtener estadísticas para el rango seleccionado
+        const stats = this.getAdvisorStatsForSelectedRange();
+        
+        // Actualizar tarjetas
+        this.updateElement('totalAdvisors', stats.totalAdvisors);
+        this.updateElement('totalAssignedLeads', stats.totalLeads);
+        this.updateElement('teamConversions', stats.totalConversions);
+        this.updateElement('teamConversionRate', `${stats.conversionRate}%`);
+    }
+
+    updateAdvisorStatsTable() {
+        const tableBody = document.getElementById('advisorStatsTableBody');
+        if (!tableBody) return;
+
+        const advisorsStats = this.getDetailedAdvisorStatsForRange();
+        
+        if (advisorsStats.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: #64748b;">
+                        No hay datos para el rango seleccionado
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tableBody.innerHTML = advisorsStats.map(advisor => `
+            <tr>
+                <td><strong>${advisor.name}</strong></td>
+                <td>${advisor.leadsAssigned}</td>
+                <td>${advisor.actionsPerformed}</td>
+                <td>${advisor.conversions}</td>
+                <td>${advisor.conversionRate}%</td>
+                <td>${advisor.activeLeads}</td>
+                <td>${advisor.lastActivity}</td>
+            </tr>
+        `).join('');
+    }
+
+    getAdvisorStatsForSelectedRange() {
+        const startYear = parseInt(document.getElementById('advisorStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('advisorStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('advisorEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('advisorEndMonth')?.value || 5);
+
+        // Obtener todos los asesores
+        const advisors = this.users.filter(user => user.role === 'advisor' && user.isActive);
+        
+        // Filtrar leads por rango de fechas
+        const rangeLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            const leadYear = leadDate.getFullYear();
+            const leadMonth = leadDate.getMonth() + 1;
+            
+            return (leadYear > startYear || (leadYear === startYear && leadMonth >= startMonth)) &&
+                   (leadYear < endYear || (leadYear === endYear && leadMonth <= endMonth));
+        });
+
+        // Filtrar tareas por rango de fechas
+        const rangeTasks = this.tasks.filter(task => {
+            const taskDate = new Date(task.createdAt || task.dueDate || task.fecha);
+            const taskYear = taskDate.getFullYear();
+            const taskMonth = taskDate.getMonth() + 1;
+            
+            return (taskYear > startYear || (taskYear === startYear && taskMonth >= startMonth)) &&
+                   (taskYear < endYear || (taskYear === endYear && taskMonth <= endMonth));
+        });
+
+        const totalLeads = rangeLeads.length;
+        const totalConversions = rangeLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+        const conversionRate = totalLeads > 0 ? ((totalConversions / totalLeads) * 100).toFixed(1) : 0;
+
+        return {
+            totalAdvisors: advisors.length,
+            totalLeads,
+            totalConversions,
+            conversionRate: parseFloat(conversionRate)
+        };
+    }
+
+    getDetailedAdvisorStatsForRange() {
+        const startYear = parseInt(document.getElementById('advisorStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('advisorStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('advisorEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('advisorEndMonth')?.value || 5);
+
+        // Obtener todos los asesores
+        const advisors = this.users.filter(user => user.role === 'advisor' && user.isActive);
+        
+        return advisors.map(advisor => {
+            // Filtrar leads del asesor por rango de fechas
+            const advisorLeads = this.leads.filter(lead => {
+                if (lead.advisor !== advisor.name) return false;
+                
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                const leadYear = leadDate.getFullYear();
+                const leadMonth = leadDate.getMonth() + 1;
+                
+                return (leadYear > startYear || (leadYear === startYear && leadMonth >= startMonth)) &&
+                       (leadYear < endYear || (leadYear === endYear && leadMonth <= endMonth));
+            });
+
+            // Filtrar tareas del asesor por rango de fechas
+            const advisorTasks = this.tasks.filter(task => {
+                if (task.advisor !== advisor.name) return false;
+                
+                const taskDate = new Date(task.createdAt || task.dueDate || task.fecha);
+                const taskYear = taskDate.getFullYear();
+                const taskMonth = taskDate.getMonth() + 1;
+                
+                return (taskYear > startYear || (taskYear === startYear && taskMonth >= startMonth)) &&
+                       (taskYear < endYear || (taskYear === endYear && taskMonth <= endMonth));
+            });
+
+            const conversions = advisorLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+            const activeLeads = advisorLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length;
+            const conversionRate = advisorLeads.length > 0 ? ((conversions / advisorLeads.length) * 100).toFixed(1) : 0;
+            
+            // Obtener última actividad
+            const lastActivity = advisorLeads.length > 0 ? 
+                Math.max(...advisorLeads.map(lead => new Date(lead.lastActivity || lead.createdAt).getTime())) : null;
+            const lastActivityText = lastActivity ? 
+                new Date(lastActivity).toLocaleDateString('es-ES') : 'Sin actividad';
+
+            return {
+                name: advisor.name,
+                leadsAssigned: advisorLeads.length,
+                actionsPerformed: advisorTasks.length,
+                conversions,
+                conversionRate: parseFloat(conversionRate),
+                activeLeads,
+                lastActivity: lastActivityText
+            };
+        });
+    }
+
+    updateClientsStatsCards() {
+        const stats = this.getClientsStatsForSelectedRange();
+        
+        // Actualizar tarjetas de estadísticas
+        this.updateElement('totalClientsCount', stats.totalClients);
+        this.updateElement('fidelizedClientsCount', stats.fidelizedClients);
+        this.updateElement('potentialClientsCount', stats.potentialClients);
+        this.updateElement('activeClientsCount', stats.activeClients);
+        this.updateElement('lostClientsCount', stats.lostClients);
+        this.updateElement('fidelizationRate', `${stats.fidelizationRate}%`);
+    }
+
+    updateClientsStatsTable() {
+        const tbody = document.getElementById('clientsStatsTableBody');
+        if (!tbody) return;
+
+        const stats = this.getClientsStatsForSelectedRange();
+        const periodType = document.getElementById('clientsPeriodType')?.value || 'monthly';
+        const year = document.getElementById('clientsFilterYear')?.value || new Date().getFullYear();
+        const month = document.getElementById('clientsFilterMonth')?.value || new Date().getMonth() + 1;
+
+        let periodLabel = '';
+        if (periodType === 'monthly') {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            periodLabel = `${monthNames[month - 1]} ${year}`;
+        } else {
+            periodLabel = `Año ${year}`;
+        }
+
+        tbody.innerHTML = `
+            <tr>
+                <td>${periodLabel}</td>
+                <td>${stats.totalClients}</td>
+                <td>${stats.fidelizedClients}</td>
+                <td>${stats.potentialClients}</td>
+                <td>${stats.activeClients}</td>
+                <td>${stats.lostClients}</td>
+                <td>${stats.fidelizationRate}%</td>
+            </tr>
+        `;
+    }
+
+    updateClientsStatsChart() {
+        const canvas = document.getElementById('clientsStatsChart');
+        if (!canvas || !window.Chart) return;
+
+        const chartData = this.getClientsStatsForDateRange();
+        
+        if (this._clientsStatsChart) this._clientsStatsChart.destroy();
+        
+        this._clientsStatsChart = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { 
+                labels: chartData.labels, 
+                datasets: [
+                    { 
+                        label: 'Total Clientes', 
+                        data: chartData.totalClients,
+                        borderColor: '#2563eb',
+                        backgroundColor: '#2563eb20',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Fidelizados', 
+                        data: chartData.fidelizedClients,
+                        borderColor: '#10b981',
+                        backgroundColor: '#10b98120',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Potenciales', 
+                        data: chartData.potentialClients,
+                        borderColor: '#f59e0b',
+                        backgroundColor: '#f59e0b20',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Activos', 
+                        data: chartData.activeClients,
+                        borderColor: '#06b6d4',
+                        backgroundColor: '#06b6d420',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    { 
+                        label: 'Perdidos', 
+                        data: chartData.lostClients,
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef444420',
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { precision: 0 } 
+                    } 
+                },
+                plugins: { 
+                    legend: { 
+                        display: true,
+                        position: 'top'
+                    } 
+                }
+            }
+        });
+    }
+
+    getClientsStatsForSelectedRange() {
+        const periodType = document.getElementById('clientsPeriodType')?.value || 'monthly';
+        const year = parseInt(document.getElementById('clientsFilterYear')?.value || new Date().getFullYear());
+        const month = parseInt(document.getElementById('clientsFilterMonth')?.value || new Date().getMonth() + 1);
+
+        // Obtener leads que se convirtieron en clientes
+        let clientLeads = this.leads || [];
+        
+        // Filtrar por rango de fechas
+        if (periodType === 'monthly') {
+            clientLeads = clientLeads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === year && leadDate.getMonth() + 1 === month;
+            });
+        } else {
+            clientLeads = clientLeads.filter(lead => {
+                const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+                return leadDate.getFullYear() === year;
+            });
+        }
+
+        // Calcular estadísticas de clientes
+        const totalClients = clientLeads.length;
+        const fidelizedClients = clientLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length;
+        const potentialClients = clientLeads.filter(lead => lead.status === 'Calificar' || lead.status === 'Desarrollar' || lead.status === 'Proponer').length;
+        const activeClients = clientLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length;
+        const lostClients = clientLeads.filter(lead => lead.status === 'Perdido').length;
+        const fidelizationRate = totalClients > 0 ? ((fidelizedClients / totalClients) * 100).toFixed(1) : 0;
+
+        // Fallback demo si no hay datos
+        if (totalClients === 0 && fidelizedClients === 0 && potentialClients === 0 && activeClients === 0 && lostClients === 0) {
+            return {
+                totalClients: 18,
+                fidelizedClients: 6,
+                potentialClients: 8,
+                activeClients: 10,
+                lostClients: 2,
+                fidelizationRate: 33.3
+            };
+        }
+
+        return {
+            totalClients,
+            fidelizedClients,
+            potentialClients,
+            activeClients,
+            lostClients,
+            fidelizationRate: parseFloat(fidelizationRate)
+        };
+    }
+
+    // Funciones para generar datos de rango de fechas para gráficos de líneas
+    getLeadsStatsForDateRange() {
+        const startYear = parseInt(document.getElementById('leadsStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('leadsStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('leadsEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('leadsEndMonth')?.value || 5);
+
+        let labels = [];
+        let totalLeads = [];
+        let convertedLeads = [];
+        let activeLeads = [];
+        let lostLeads = [];
+
+        // Generar datos para cada mes en el rango
+        const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
+                          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        let currentYear = startYear;
+        let currentMonth = startMonth;
+        
+        while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+            labels.push(`${monthNames[currentMonth - 1]} ${currentYear}`);
+            
+            const monthStats = this.getLeadsStatsForMonth(currentYear, currentMonth);
+            totalLeads.push(monthStats.totalLeads);
+            convertedLeads.push(monthStats.convertedLeads);
+            activeLeads.push(monthStats.activeLeads);
+            lostLeads.push(monthStats.lostLeads);
+            
+            // Avanzar al siguiente mes
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+        }
+
+        return {
+            labels,
+            totalLeads,
+            convertedLeads,
+            activeLeads,
+            lostLeads
+        };
+    }
+
+    getClientsStatsForDateRange() {
+        const startYear = parseInt(document.getElementById('clientsStartYear')?.value || 2025);
+        const startMonth = parseInt(document.getElementById('clientsStartMonth')?.value || 1);
+        const endYear = parseInt(document.getElementById('clientsEndYear')?.value || 2025);
+        const endMonth = parseInt(document.getElementById('clientsEndMonth')?.value || 5);
+
+        let labels = [];
+        let totalClients = [];
+        let fidelizedClients = [];
+        let potentialClients = [];
+        let activeClients = [];
+        let lostClients = [];
+
+        // Generar datos para cada mes en el rango
+        const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
+                          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        let currentYear = startYear;
+        let currentMonth = startMonth;
+        
+        while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+            labels.push(`${monthNames[currentMonth - 1]} ${currentYear}`);
+            
+            const monthStats = this.getClientsStatsForMonth(currentYear, currentMonth);
+            totalClients.push(monthStats.totalClients);
+            fidelizedClients.push(monthStats.fidelizedClients);
+            potentialClients.push(monthStats.potentialClients);
+            activeClients.push(monthStats.activeClients);
+            lostClients.push(monthStats.lostClients);
+            
+            // Avanzar al siguiente mes
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+        }
+
+        return {
+            labels,
+            totalClients,
+            fidelizedClients,
+            potentialClients,
+            activeClients,
+            lostClients
+        };
+    }
+
+    getLeadsStatsForDay(date) {
+        const dayLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            return leadDate.toDateString() === date.toDateString();
+        });
+
+        return {
+            totalLeads: dayLeads.length,
+            convertedLeads: dayLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length,
+            activeLeads: dayLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length,
+            lostLeads: dayLeads.filter(lead => lead.status === 'Perdido').length
+        };
+    }
+
+    getLeadsStatsForMonth(year, month) {
+        const monthLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            return leadDate.getFullYear() === year && leadDate.getMonth() + 1 === month;
+        });
+
+        return {
+            totalLeads: monthLeads.length,
+            convertedLeads: monthLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length,
+            activeLeads: monthLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length,
+            lostLeads: monthLeads.filter(lead => lead.status === 'Perdido').length
+        };
+    }
+
+    getClientsStatsForDay(date) {
+        const dayLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            return leadDate.toDateString() === date.toDateString();
+        });
+
+        return {
+            totalClients: dayLeads.length,
+            fidelizedClients: dayLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length,
+            potentialClients: dayLeads.filter(lead => lead.status === 'Calificar' || lead.status === 'Desarrollar' || lead.status === 'Proponer').length,
+            activeClients: dayLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length,
+            lostClients: dayLeads.filter(lead => lead.status === 'Perdido').length
+        };
+    }
+
+    getClientsStatsForMonth(year, month) {
+        const monthLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            return leadDate.getFullYear() === year && leadDate.getMonth() + 1 === month;
+        });
+
+        return {
+            totalClients: monthLeads.length,
+            fidelizedClients: monthLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length,
+            potentialClients: monthLeads.filter(lead => lead.status === 'Calificar' || lead.status === 'Desarrollar' || lead.status === 'Proponer').length,
+            activeClients: monthLeads.filter(lead => lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido').length,
+            lostClients: monthLeads.filter(lead => lead.status === 'Perdido').length
+        };
+    }
+
+    getTeamStatsForDateRange() {
+        // Para estadísticas del equipo, usar un rango fijo por defecto (Enero 2025 - Mayo 2025)
+        const startYear = 2025;
+        const startMonth = 1;
+        const endYear = 2025;
+        const endMonth = 5;
+
+        let labels = [];
+        let leadsData = [];
+        let actionsData = [];
+        let conversionsData = [];
+
+        // Generar datos para cada mes en el rango
+        const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
+                          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        let currentYear = startYear;
+        let currentMonth = startMonth;
+        
+        while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+            labels.push(`${monthNames[currentMonth - 1]} ${currentYear}`);
+            
+            const monthStats = this.getTeamStatsForMonth(currentYear, currentMonth);
+            leadsData.push(monthStats.leads);
+            actionsData.push(monthStats.actions);
+            conversionsData.push(monthStats.conversions);
+            
+            // Avanzar al siguiente mes
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+        }
+
+        return {
+            labels,
+            leadsData,
+            actionsData,
+            conversionsData
+        };
+    }
+
+    getTeamStatsForDay(date) {
+        const dayLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            return leadDate.toDateString() === date.toDateString();
+        });
+
+        const dayTasks = this.tasks.filter(task => {
+            const taskDate = new Date(task.createdAt || task.dueDate || task.fecha);
+            return taskDate.toDateString() === date.toDateString();
+        });
+
+        return {
+            leads: dayLeads.length,
+            actions: dayTasks.length,
+            conversions: dayLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length
+        };
+    }
+
+    getTeamStatsForMonth(year, month) {
+        const monthLeads = this.leads.filter(lead => {
+            const leadDate = new Date(lead.createdAt || lead.date || lead.fecha);
+            return leadDate.getFullYear() === year && leadDate.getMonth() + 1 === month;
+        });
+
+        const monthTasks = this.tasks.filter(task => {
+            const taskDate = new Date(task.createdAt || task.dueDate || task.fecha);
+            return taskDate.getFullYear() === year && taskDate.getMonth() + 1 === month;
+        });
+
+        return {
+            leads: monthLeads.length,
+            actions: monthTasks.length,
+            conversions: monthLeads.filter(lead => lead.status === 'Cerrado' || lead.status === 'Cierre').length
+        };
+    }
+
+    // Funciones faltantes para el tablero Kanban
+    advanceLeadState(leadId) {
+        console.log('Avanzando estado del lead:', leadId);
+        const lead = this.leads.find(l => l.id == leadId);
+        if (!lead) {
+            this.showNotification('Lead no encontrado', 'error');
+            return;
+        }
+
+        const currentState = lead.status;
+        let newState = '';
+        
+        switch(currentState) {
+            case 'Calificar':
+                newState = 'Desarrollar';
+                break;
+            case 'Desarrollar':
+                newState = 'Proponer';
+                break;
+            case 'Proponer':
+                newState = 'Cierre';
+                break;
+            case 'Cierre':
+                this.showNotification('El lead ya está en el estado final', 'info');
+                return;
+            default:
+                this.showNotification('Estado no válido para avanzar', 'error');
+                return;
+        }
+
+        lead.status = newState;
+        lead.lastActivity = new Date().toISOString();
+        
+        this.saveData();
+        this.updateAdvisorKanban();
+        this.showNotification(`Lead avanzado de ${currentState} a ${newState}`, 'success');
+    }
+
+    qualifyClient(leadId) {
+        console.log('Calificando cliente:', leadId);
+        const lead = this.leads.find(l => l.id == leadId);
+        if (!lead) {
+            this.showNotification('Lead no encontrado', 'error');
+            return;
+        }
+
+        // Crear modal de calificación
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Calificar Cliente: ${lead.name}</h3>
+                    <span class="close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="qualifyForm">
+                        <div class="form-group">
+                            <label for="interestLevel">Nivel de Interés:</label>
+                            <select id="interestLevel" required>
+                                <option value="">Seleccionar nivel...</option>
+                                <option value="1 - No me interesa">1 - No me interesa</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10 - Super interesado">10 - Super interesado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="qualificationNotes">Notas de Calificación:</label>
+                            <textarea id="qualificationNotes" rows="4" placeholder="Describe el nivel de interés y próximos pasos..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="nextAction">Próxima Acción:</label>
+                            <select id="nextAction" required>
+                                <option value="">Seleccionar acción...</option>
+                                <option value="Llamada de seguimiento">Llamada de seguimiento</option>
+                                <option value="Enviar propuesta">Enviar propuesta</option>
+                                <option value="Reunión presencial">Reunión presencial</option>
+                                <option value="Enviar información adicional">Enviar información adicional</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="window.crm.saveQualification('${leadId}')">Guardar Calificación</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    saveQualification(leadId) {
+        const lead = this.leads.find(l => l.id == leadId);
+        if (!lead) return;
+
+        const interestLevel = document.getElementById('interestLevel').value;
+        const notes = document.getElementById('qualificationNotes').value;
+        const nextAction = document.getElementById('nextAction').value;
+
+        if (!interestLevel || !nextAction) {
+            this.showNotification('Por favor completa todos los campos requeridos', 'error');
+            return;
+        }
+
+        // Actualizar lead
+        lead.interestLevel = interestLevel;
+        lead.interest = interestLevel;
+        lead.notes = (lead.notes || '') + (notes ? `\n\nCalificación: ${notes}` : '');
+        lead.lastActivity = new Date().toISOString();
+
+        // Crear tarea automática si se especifica
+        if (nextAction) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const task = {
+                id: Date.now(),
+                advisor: lead.advisor,
+                leadId: leadId,
+                type: nextAction,
+                title: `${nextAction} - ${lead.name}`,
+                dueDate: tomorrow.toISOString(),
+                duration: 30,
+                status: 'abierta',
+                priority: 'Media',
+                notes: `Tarea generada automáticamente por calificación del cliente`,
+                createdAt: new Date().toISOString()
+            };
+            
+            this.tasks.push(task);
+        }
+
+        this.saveData();
+        this.updateAdvisorKanban();
+        this.updateAdvisorTasks();
+        
+        // Cerrar modal
+        document.querySelector('.modal').remove();
+        
+        this.showNotification('Cliente calificado exitosamente', 'success');
+    }
+
+    confirmDeleteClient(leadId) {
+        console.log('Confirmando eliminación del lead:', leadId);
+        const lead = this.leads.find(l => l.id == leadId);
+        if (!lead) {
+            this.showNotification('Lead no encontrado', 'error');
+            return;
+        }
+
+        if (confirm(`¿Estás seguro de que deseas eliminar el lead "${lead.name}"?\n\nEsta acción no se puede deshacer.`)) {
+            // Eliminar lead
+            const leadIndex = this.leads.findIndex(l => l.id == leadId);
+            if (leadIndex !== -1) {
+                this.leads.splice(leadIndex, 1);
+            }
+
+            // Eliminar tareas relacionadas
+            this.tasks = this.tasks.filter(task => task.leadId != leadId);
+
+            this.saveData();
+            this.updateAdvisorKanban();
+            this.updateAdvisorTasks();
+            this.showNotification('Lead eliminado exitosamente', 'success');
         }
     }
 }

@@ -50,20 +50,31 @@
 
                 <div class="team-stats-grid">
                     <div class="stat-card">
-                        <h3>Total Leads</h3>
+                        <h3>Total Clientes</h3>
                         <div class="stat-number" id="teamTotalLeads">0</div>
                         <div class="stat-change positive">+15% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clientes Activos</h3>
+                        <div class="stat-number" id="teamConversions">0</div>
+                        <div class="stat-change positive">+8% vs período anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clientes Perdidos</h3>
+                        <div class="stat-number" id="teamLostClients">0</div>
+                        <div class="stat-change">&nbsp;</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clientes Prospectos</h3>
+                        <div class="stat-number" id="teamProspectClients">0</div>
+                        <div class="stat-change">&nbsp;</div>
                     </div>
                     <div class="stat-card">
                         <h3>Acciones Realizadas</h3>
                         <div class="stat-number" id="teamTotalActions">0</div>
                         <div class="stat-change positive">+22% vs período anterior</div>
                     </div>
-                    <div class="stat-card">
-                        <h3>Conversiones</h3>
-                        <div class="stat-number" id="teamConversions">0</div>
-                        <div class="stat-change positive">+8% vs período anterior</div>
-                    </div>
+                    
                     <div class="stat-card">
                         <h3>Tasa Conversión</h3>
                         <div class="stat-number" id="teamConversionRate">0%</div>
@@ -123,109 +134,137 @@
 
             <!-- Advisor Management Section -->
             <section id="advisor-management" class="content-section">
-                <h2>Gestión de Asesores</h2>
-                
-                <!-- Navegación de Pantallas -->
-                <div class="screen-navigation">
-                    <button class="screen-nav-btn active" data-screen="advisor-stats-screen">Estadísticas por Asesor</button>
-                    <button class="screen-nav-btn" data-screen="advisor-kpis-screen">Definir KPIs</button>
-                    <button class="screen-nav-btn" data-screen="lead-assignment-screen">Asignación de Leads</button>
-                </div>
+                <h2>Gestión de KPIs</h2>
 
-                <!-- Pantalla 1: Estadísticas por Asesor -->
-                <div id="advisor-stats-screen" class="advisor-screen active">
-                    <h3>Estadísticas por Asesor</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h4>Total de Asesores</h4>
-                            <div class="stat-value" id="totalAdvisors">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Leads Asignados</h4>
-                            <div class="stat-value" id="totalAssignedLeads">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Conversiones del Equipo</h4>
-                            <div class="stat-value" id="teamConversions">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Tasa de Conversión</h4>
-                            <div class="stat-value" id="teamConversionRate">0%</div>
-                        </div>
-                    </div>
+                <!-- Pantalla: Definir KPIs por Asesor -->
+                <div id="advisor-kpis-screen" class="advisor-screen active">
+                    <h3>Configuración Dinámica de KPIs</h3>
                     
-                    <div class="table-container">
-                        <h4>Estadísticas Detalladas por Asesor</h4>
-                        <table class="data-table" id="teamStatsTable">
-                            <thead>
-                                <tr>
-                                    <th>Asesor</th>
-                                    <th>Leads Asignados</th>
-                                    <th>Acciones Realizadas</th>
-                                    <th>Conversiones</th>
-                                    <th>Tasa Conversión</th>
-                                    <th>Leads Activos</th>
-                                    <th>Última Actividad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Los datos se cargarán dinámicamente -->
-                            </tbody>
-                        </table>
+                    <!-- Selector de Tipo de KPI -->
+                    <div class="kpi-type-selector">
+                        <h4>Seleccionar Tipo de KPI</h4>
+                        <div class="kpi-type-cards">
+                            <div class="kpi-type-card" data-kpi-type="sales">
+                                <div class="kpi-type-icon">💰</div>
+                                <h4>KPIs de Ventas</h4>
+                                <p>Configurar metas de ventas, conversiones y objetivos comerciales</p>
+                            </div>
+                            <div class="kpi-type-card" data-kpi-type="activity">
+                                <div class="kpi-type-icon">📊</div>
+                                <h4>KPIs de Actividad</h4>
+                                <p>Definir metas de llamadas, reuniones y acciones diarias</p>
+                            </div>
+                            <div class="kpi-type-card" data-kpi-type="quality">
+                                <div class="kpi-type-icon">⭐</div>
+                                <h4>KPIs de Calidad</h4>
+                                <p>Establecer estándares de calidad y satisfacción del cliente</p>
+                            </div>
+                            <div class="kpi-type-card" data-kpi-type="custom">
+                                <div class="kpi-type-icon">⚙️</div>
+                                <h4>KPIs Personalizados</h4>
+                                <p>Crear métricas específicas según las necesidades del equipo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recomendación por IA -->
+                    <div class="kpi-ai-box" style="margin: 16px 0 24px; padding: 16px; background: #fff7e6; border: 1px solid #ffe7ba; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+                        <div style="font-size: 22px;">🤖</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #613400;">Recomendación IA</div>
+                            <div style="color: #8c5a00; font-size: 13px;">Obtén sugerencias de KPIs según el rendimiento reciente de tu equipo y de tus clientes.</div>
+                        </div>
+                        <button id="kpiAIRecommendBtn" class="btn btn-primary">Sugerir KPIs</button>
+                    </div>
+                    <div id="kpi-ai-recommendations" class="kpi-ai-recommendations" style="display:none; margin-bottom: 16px;"></div>
+
+                    <!-- Formulario Dinámico de KPIs -->
+                    <div id="kpi-form-container" class="kpi-form-container" style="display: none;">
+                        <div class="kpi-form-header">
+                            <h4 id="kpi-form-title">Configurar KPIs</h4>
+                            <button type="button" class="btn btn-secondary" onclick="window.crm.closeKPIFormGlobal()">Cerrar</button>
+                        </div>
+                        
+                        <form id="dynamicKPIForm" class="kpi-form">
+                            <div class="kpi-form-section">
+                                <h4>Información General</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="kpiName">Nombre del KPI:</label>
+                                        <input type="text" id="kpiName" name="name" required placeholder="Ej: Meta de Ventas Mensual">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="kpiDescription">Descripción:</label>
+                                        <input type="text" id="kpiDescription" name="description" placeholder="Descripción del KPI">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="kpi-form-section">
+                                <h4>Configuración de Parámetros</h4>
+                                <div id="kpi-parameters-container">
+                                    <!-- Los parámetros se cargarán dinámicamente según el tipo de KPI -->
+                                </div>
+                            </div>
+
+                            <div class="kpi-form-section">
+                                <h4>Asignación</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="kpiAdvisor">Asignar a Asesor:</label>
+                                        <select id="kpiAdvisor" name="advisor">
+                                            <option value="">Todos los asesores</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="kpiManager">Asignar a Gerente:</label>
+                                        <select id="kpiManager" name="manager">
+                                            <option value="">Todos los gerentes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="kpi-form-section">
+                                <h4>Período de Evaluación</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="kpiPeriod">Período:</label>
+                                        <select id="kpiPeriod" name="period">
+                                            <option value="daily">Diario</option>
+                                            <option value="weekly">Semanal</option>
+                                            <option value="monthly">Mensual</option>
+                                            <option value="quarterly">Trimestral</option>
+                                            <option value="yearly">Anual</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="kpiStartDate">Fecha de Inicio:</label>
+                                        <input type="date" id="kpiStartDate" name="startDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="kpiEndDate">Fecha de Fin:</label>
+                                        <input type="date" id="kpiEndDate" name="endDate">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="window.crm.closeKPIFormGlobal()">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar KPI</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Lista de KPIs Configurados -->
+                    <div class="kpi-list-container">
+                        <h4>KPIs Configurados</h4>
+                        <div id="kpi-list" class="kpi-list">
+                            <!-- Los KPIs se cargarán dinámicamente -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- Pantalla 2: Definir KPIs por Asesor -->
-                <div id="advisor-kpis-screen" class="advisor-screen">
-                    <h3>Definir KPIs por Asesor</h3>
-                    <form id="advisorKPIForm" class="form-container">
-                        <div class="form-group">
-                            <label for="advisorSelect">Seleccionar Asesor:</label>
-                            <select id="advisorSelect" name="advisor" required>
-                                <option value="">Seleccionar asesor...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="dailyLeadsGoal">Meta Diaria de Leads:</label>
-                            <input type="number" id="dailyLeadsGoal" name="dailyLeadsGoal" min="0" placeholder="Ej: 5">
-                        </div>
-                        <div class="form-group">
-                            <label for="weeklyConversionsGoal">Meta Semanal de Conversiones:</label>
-                            <input type="number" id="weeklyConversionsGoal" name="weeklyConversionsGoal" min="0" placeholder="Ej: 2">
-                        </div>
-                        <div class="form-group">
-                            <label for="maxActionsPerDay">Máximo Acciones por Día:</label>
-                            <input type="number" id="maxActionsPerDay" name="maxActionsPerDay" min="0" placeholder="Ej: 10">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Guardar KPIs</button>
-                    </form>
-                </div>
-
-                <!-- Pantalla 3: Asignación de Leads -->
-                <div id="lead-assignment-screen" class="advisor-screen">
-                    <h3>Asignar Lead a Asesor</h3>
-                    <form id="leadAssignmentForm" class="form-container">
-                        <div class="form-group">
-                            <label for="leadSelect">Seleccionar Lead:</label>
-                            <select id="leadSelect" name="leadId" required>
-                                <option value="">Seleccionar lead...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="assignToAdvisor">Asignar a Asesor:</label>
-                            <select id="assignToAdvisor" name="advisor" required>
-                                <option value="">Seleccionar asesor...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="sequenceAssign">Asignar Secuencia:</label>
-                            <select id="sequenceAssign" name="sequenceId">
-                                <option value="">Sin secuencia específica</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Asignar Lead</button>
-                    </form>
-                </div>
             </section>
 
             <!-- Sequences Section -->
