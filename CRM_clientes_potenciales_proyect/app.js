@@ -96,6 +96,22 @@ class CRMApp {
                 createdAt: new Date('2024-01-01'),
                 createdBy: 'Sistema',
                 managerId: 2 // ID del gerente asignado
+            },
+            { 
+                id: 6, 
+                username: 'contract-generator', 
+                password: 'contract123', 
+                role: 'contract-generator', 
+                name: 'Generador de Contratos',
+                firstName: 'Contract',
+                lastName: 'Generator',
+                email: 'contract-generator@empresa.com',
+                phone: '+1234567896',
+                cedula: '1234567896',
+                address: 'Oficina Contratos, Ciudad',
+                isActive: true,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
             }
         ];
         
@@ -2003,6 +2019,7 @@ class CRMApp {
         ensure('admin', 'admin123', 'admin', 'Admin Demo');
         ensure('manager', 'manager123', 'manager', 'Gerente Demo');
         ensure('advisor', 'advisor123', 'advisor', 'Asesor Demo');
+        ensure('contract-generator', 'contract123', 'contract-generator', 'Contract Generator Demo');
         
         // Guardar si fue necesario
         try { this.saveData(); } catch(e) { console.warn('No se pudo guardar datos demo:', e); }
@@ -13322,4 +13339,3618 @@ window.goToToday = function() {
         window.crm.currentCalendarDate = new Date();
         window.crm.updateAdvisorCalendar();
     }
+};
+
+// Contract Generator functionality
+CRMApp.prototype.initContractGenerator = function() {
+    console.log('Inicializando Contract Generator...');
+    this.setupContractGeneratorEventListeners();
+    this.loadContractGeneratorData();
+    this.updateContractGeneratorDashboard();
+};
+
+CRMApp.prototype.setupContractGeneratorEventListeners = function() {
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            this.showContractGeneratorSection(section);
+        });
+    });
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => this.logout());
+    }
+
+    // Refresh clients
+    const refreshBtn = document.getElementById('refreshClientsBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => this.refreshClientsList());
+    }
+
+    // Export clients
+    const exportBtn = document.getElementById('exportClientsBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => this.exportClientsList());
+    }
+
+    // Modal close handlers
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('close')) {
+            this.closeModal(e.target.closest('.modal'));
+        }
+    });
+};
+
+CRMApp.prototype.showContractGeneratorSection = function(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Show selected section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+
+    // Add active class to nav link
+    const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+
+    // Load section-specific data
+    switch(sectionId) {
+        case 'dashboard':
+            this.updateContractGeneratorDashboard();
+            break;
+        case 'clients-list':
+            this.updateClientsListGrid();
+            break;
+        case 'contracts':
+            this.updateContractsGrid();
+            break;
+        case 'templates':
+            this.updateTemplatesGrid();
+            break;
+        case 'reports':
+            this.updateReports();
+            break;
+    }
+};
+
+CRMApp.prototype.loadContractGeneratorData = function() {
+    // Initialize contract-ready clients data
+    if (!this.contractReadyClients) {
+        this.contractReadyClients = [
+            {
+                id: 1,
+                name: 'Juan Pérez',
+                company: 'Empresa ABC',
+                email: 'juan@empresaabc.com',
+                phone: '+1234567890',
+                status: 'aceptado',
+                contractType: 'servicios',
+                serviceDetails: {
+                    plan: 'Plan Premium',
+                    speed: '100 Mbps',
+                    price: 150,
+                    duration: 12
+                },
+                clientInfo: {
+                    identification: 'CEDULA',
+                    idNumber: '1234567890',
+                    fullName: 'Juan Carlos Pérez García',
+                    birthDate: '1985-03-15',
+                    address: 'Calle Principal 123, Ciudad'
+                },
+                contractInfo: {
+                    contractDate: '2024-12-01',
+                    signatureDate: '2024-12-01',
+                    collectionDay: 15,
+                    cutOffDay: 30,
+                    collectionType: 'Prepago',
+                    clientCondition: 'Normal'
+                },
+                createdAt: '2024-11-25',
+                lastActivity: '2024-12-01',
+                advisor: 'Asesor',
+                notes: 'Cliente aceptó propuesta, listo para generar contrato'
+            },
+            {
+                id: 2,
+                name: 'María García',
+                company: 'Corporación XYZ',
+                email: 'maria@corporacionxyz.com',
+                phone: '+1234567891',
+                status: 'aceptado',
+                contractType: 'servicios',
+                serviceDetails: {
+                    plan: 'Plan Empresarial',
+                    speed: '500 Mbps',
+                    price: 300,
+                    duration: 24
+                },
+                clientInfo: {
+                    identification: 'RUC',
+                    idNumber: '1234567890001',
+                    fullName: 'María Elena García López',
+                    birthDate: '1980-07-22',
+                    address: 'Av. Empresarial 456, Ciudad'
+                },
+                contractInfo: {
+                    contractDate: '2024-12-01',
+                    signatureDate: '2024-12-01',
+                    collectionDay: 10,
+                    cutOffDay: 25,
+                    collectionType: 'Postpago',
+                    clientCondition: 'VIP'
+                },
+                createdAt: '2024-11-20',
+                lastActivity: '2024-12-01',
+                advisor: 'Asesor 2',
+                notes: 'Cliente corporativo, contrato empresarial'
+            },
+            {
+                id: 3,
+                name: 'Carlos López',
+                company: 'Industrias DEF',
+                email: 'carlos@industriasdef.com',
+                phone: '+1234567892',
+                status: 'en_proceso',
+                contractType: 'servicios',
+                serviceDetails: {
+                    plan: 'Plan Básico',
+                    speed: '50 Mbps',
+                    price: 80,
+                    duration: 12
+                },
+                clientInfo: {
+                    identification: 'CEDULA',
+                    idNumber: '9876543210',
+                    fullName: 'Carlos Alberto López Martínez',
+                    birthDate: '1990-11-10',
+                    address: 'Calle Secundaria 789, Ciudad'
+                },
+                contractInfo: {
+                    contractDate: '2024-12-01',
+                    signatureDate: null,
+                    collectionDay: 5,
+                    cutOffDay: 20,
+                    collectionType: 'Prepago',
+                    clientCondition: 'Normal'
+                },
+                createdAt: '2024-11-28',
+                lastActivity: '2024-12-01',
+                advisor: 'Asesor',
+                notes: 'Cliente en proceso de revisión de contrato'
+            }
+        ];
+    }
+
+    // Initialize contracts data
+    if (!this.contractsData) {
+        this.contractsData = [
+            {
+                id: 1,
+                clientId: 1,
+                clientName: 'Juan Pérez',
+                contractNumber: 'CTR-001-2024',
+                status: 'generado',
+                contractType: 'servicios',
+                value: 150,
+                startDate: '2024-12-01',
+                endDate: '2025-11-30',
+                generatedDate: '2024-12-01',
+                signedDate: null,
+                advisor: 'Asesor'
+            },
+            {
+                id: 2,
+                clientId: 2,
+                clientName: 'María García',
+                contractNumber: 'CTR-002-2024',
+                status: 'firmado',
+                contractType: 'servicios',
+                value: 300,
+                startDate: '2024-12-01',
+                endDate: '2026-11-30',
+                generatedDate: '2024-12-01',
+                signedDate: '2024-12-01',
+                advisor: 'Asesor 2'
+            }
+        ];
+    }
+
+    // Initialize templates data
+    if (!this.contractTemplates) {
+        this.contractTemplates = [
+            {
+                id: 1,
+                name: 'Contrato Servicios Básico',
+                type: 'servicios',
+                description: 'Plantilla para servicios básicos de internet',
+                content: 'Plantilla de contrato para servicios básicos...',
+                createdAt: '2024-01-01'
+            },
+            {
+                id: 2,
+                name: 'Contrato Servicios Empresarial',
+                type: 'servicios',
+                description: 'Plantilla para servicios empresariales',
+                content: 'Plantilla de contrato para servicios empresariales...',
+                createdAt: '2024-01-01'
+            }
+        ];
+    }
+};
+
+CRMApp.prototype.updateContractGeneratorDashboard = function() {
+    const pendingClients = this.contractReadyClients.filter(c => c.status === 'aceptado').length;
+    const generatedContracts = this.contractsData.filter(c => c.status === 'generado' || c.status === 'firmado').length;
+    const pendingContracts = this.contractsData.filter(c => c.status === 'generado').length;
+    const signedContracts = this.contractsData.filter(c => c.status === 'firmado').length;
+    const totalValue = this.contractsData.reduce((sum, c) => sum + c.value, 0);
+    const avgProcessingTime = 2; // Simulated average processing time
+
+    // Update dashboard stats
+    document.getElementById('pendingClientsCount').textContent = pendingClients;
+    document.getElementById('generatedContractsCount').textContent = generatedContracts;
+    document.getElementById('pendingContractsCount').textContent = pendingContracts;
+    document.getElementById('signedContractsCount').textContent = signedContracts;
+    document.getElementById('totalContractValue').textContent = '$' + totalValue.toLocaleString();
+    document.getElementById('avgProcessingTime').textContent = avgProcessingTime + 'h';
+
+    // Update widgets
+    this.updateRecentClientsWidget();
+    this.updateContractsByStatusWidget();
+    this.updateSystemAlertsWidget();
+};
+
+CRMApp.prototype.updateRecentClientsWidget = function() {
+    const recentWidget = document.getElementById('recentClientsWidget');
+    if (!recentWidget) return;
+
+    const recentClients = this.contractReadyClients.slice(0, 5);
+    
+    recentWidget.innerHTML = recentClients.map(client => `
+        <div class="recent-client-item">
+            <div class="client-name">${client.name}</div>
+            <div class="client-company">${client.company}</div>
+            <div class="client-status status-${client.status}">${client.status}</div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateContractsByStatusWidget = function() {
+    const statusWidget = document.getElementById('contractsByStatusWidget');
+    if (!statusWidget) return;
+
+    const statusCounts = {
+        'generado': this.contractsData.filter(c => c.status === 'generado').length,
+        'firmado': this.contractsData.filter(c => c.status === 'firmado').length,
+        'pendiente_firma': this.contractsData.filter(c => c.status === 'pendiente_firma').length
+    };
+
+    statusWidget.innerHTML = Object.entries(statusCounts).map(([status, count]) => `
+        <div class="status-item">
+            <span class="status-label">${status.replace('_', ' ').toUpperCase()}:</span>
+            <span class="status-count">${count}</span>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateSystemAlertsWidget = function() {
+    const alertsWidget = document.getElementById('systemAlertsWidget');
+    if (!alertsWidget) return;
+
+    const alerts = [
+        {
+            type: 'info',
+            message: '3 clientes listos para generar contrato',
+            priority: 'media'
+        },
+        {
+            type: 'warning',
+            message: '1 contrato pendiente de firma por más de 7 días',
+            priority: 'alta'
+        },
+        {
+            type: 'success',
+            message: '5 contratos firmados esta semana',
+            priority: 'baja'
+        }
+    ];
+
+    alertsWidget.innerHTML = alerts.map(alert => `
+        <div class="alert alert-${alert.type}">
+            <strong>${alert.priority.toUpperCase()}:</strong> ${alert.message}
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateClientsListGrid = function() {
+    const clientsGrid = document.getElementById('clientsListGrid');
+    if (!clientsGrid) return;
+
+    const totalClients = this.contractReadyClients.length;
+    const pendingClients = this.contractReadyClients.filter(c => c.status === 'aceptado').length;
+    const inProcessClients = this.contractReadyClients.filter(c => c.status === 'en_proceso').length;
+
+    // Update stats
+    document.getElementById('totalClientsCount').textContent = totalClients;
+    document.getElementById('pendingClientsCount').textContent = pendingClients;
+    document.getElementById('inProcessClientsCount').textContent = inProcessClients;
+
+    // Update grid
+    clientsGrid.innerHTML = this.contractReadyClients.map(client => `
+        <div class="client-card" data-client-id="${client.id}">
+            <div class="client-header">
+                <h3>${client.name}</h3>
+                <span class="client-status status-${client.status}">${client.status}</span>
+            </div>
+            <div class="client-info">
+                <p><strong>Empresa:</strong> ${client.company}</p>
+                <p><strong>Email:</strong> ${client.email}</p>
+                <p><strong>Teléfono:</strong> ${client.phone}</p>
+                <p><strong>Tipo de Contrato:</strong> ${client.contractType}</p>
+                <p><strong>Plan:</strong> ${client.serviceDetails.plan}</p>
+                <p><strong>Valor:</strong> $${client.serviceDetails.price}/mes</p>
+                <p><strong>Asesor:</strong> ${client.advisor}</p>
+            </div>
+            <div class="client-actions">
+                <button class="btn btn-primary" onclick="window.crm.viewClientDetail(${client.id})">Ver Detalle</button>
+                <button class="btn btn-success" onclick="window.crm.generateContract(${client.id})">Generar Contrato</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.viewClientDetail = function(clientId) {
+    const client = this.contractReadyClients.find(c => c.id == clientId);
+    if (!client) return;
+
+    const modal = document.getElementById('clientDetailModal');
+    const content = document.getElementById('clientDetailContent');
+    
+    if (content) {
+        content.innerHTML = `
+            <div class="client-detail">
+                <h4>Información del Cliente</h4>
+                <p><strong>Nombre:</strong> ${client.name}</p>
+                <p><strong>Empresa:</strong> ${client.company}</p>
+                <p><strong>Email:</strong> ${client.email}</p>
+                <p><strong>Teléfono:</strong> ${client.phone}</p>
+                <p><strong>Identificación:</strong> ${client.clientInfo.identification} - ${client.clientInfo.idNumber}</p>
+                <p><strong>Nombre Completo:</strong> ${client.clientInfo.fullName}</p>
+                <p><strong>Fecha de Nacimiento:</strong> ${client.clientInfo.birthDate}</p>
+                <p><strong>Dirección:</strong> ${client.clientInfo.address}</p>
+                
+                <h4>Detalles del Servicio</h4>
+                <p><strong>Plan:</strong> ${client.serviceDetails.plan}</p>
+                <p><strong>Velocidad:</strong> ${client.serviceDetails.speed}</p>
+                <p><strong>Precio:</strong> $${client.serviceDetails.price}/mes</p>
+                <p><strong>Duración:</strong> ${client.serviceDetails.duration} meses</p>
+                
+                <h4>Información del Contrato</h4>
+                <p><strong>Fecha de Contrato:</strong> ${client.contractInfo.contractDate}</p>
+                <p><strong>Día de Cobro:</strong> ${client.contractInfo.collectionDay}</p>
+                <p><strong>Día de Corte:</strong> ${client.contractInfo.cutOffDay}</p>
+                <p><strong>Tipo de Cobro:</strong> ${client.contractInfo.collectionType}</p>
+                <p><strong>Condición del Cliente:</strong> ${client.contractInfo.clientCondition}</p>
+                
+                <h4>Notas</h4>
+                <p>${client.notes}</p>
+            </div>
+        `;
+    }
+    
+    if (modal) {
+        modal.style.display = 'block';
+    }
+};
+
+CRMApp.prototype.generateContract = function(clientId) {
+    console.log('Generando contrato para cliente ID:', clientId);
+    
+    const client = this.contractReadyClients.find(c => c.id == clientId);
+    if (!client) {
+        console.error('Cliente no encontrado con ID:', clientId);
+        alert('Cliente no encontrado');
+        return;
+    }
+
+    console.log('Cliente encontrado:', client);
+    
+    // Guardar datos del cliente en localStorage para la página de generación
+    localStorage.setItem('currentContractClient', JSON.stringify(client));
+    
+    // Redirigir a la página de generación de contratos
+    window.location.href = 'contract-generation.html';
+};
+
+CRMApp.prototype.setupWizardNavigation = function() {
+    console.log('Configurando navegación del wizard...');
+    
+    // Current step tracking
+    this.currentWizardStep = 1;
+    const totalSteps = 8;
+    const steps = ['informacion', 'contactos', 'ubicacion', 'medios-pago', 'planes', 'referencias', 'adjuntos', 'finalizar'];
+    
+    // Tab click handlers
+    const tabs = document.querySelectorAll('.wizard-tab');
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+            this.goToWizardStep(index + 1);
+        });
+    });
+    
+    // Next button
+    const nextBtn = document.getElementById('nextStep');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            if (this.currentWizardStep < totalSteps) {
+                this.goToWizardStep(this.currentWizardStep + 1);
+            }
+        });
+    }
+    
+    // Previous button
+    const prevBtn = document.getElementById('prevStep');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (this.currentWizardStep > 1) {
+                this.goToWizardStep(this.currentWizardStep - 1);
+            }
+        });
+    }
+    
+    console.log('Navegación del wizard configurada');
+};
+
+CRMApp.prototype.goToWizardStep = function(stepNumber) {
+    console.log(`Navegando al paso ${stepNumber}...`);
+    
+    const totalSteps = 8;
+    const steps = ['informacion', 'contactos', 'ubicacion', 'medios-pago', 'planes', 'referencias', 'adjuntos', 'finalizar'];
+    
+    // Hide all steps
+    const allSteps = document.querySelectorAll('.wizard-step');
+    allSteps.forEach(step => {
+        step.classList.remove('active');
+    });
+    
+    // Show current step
+    const currentStep = document.getElementById(`step-${steps[stepNumber - 1]}`);
+    if (currentStep) {
+        currentStep.classList.add('active');
+    }
+    
+    // Update tabs
+    const allTabs = document.querySelectorAll('.wizard-tab');
+    allTabs.forEach((tab, index) => {
+        tab.classList.remove('active');
+        if (index === stepNumber - 1) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // Update navigation buttons
+    const prevBtn = document.getElementById('prevStep');
+    const nextBtn = document.getElementById('nextStep');
+    const previewBtn = document.getElementById('previewBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    if (prevBtn) {
+        prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
+    }
+    
+    if (nextBtn) {
+        if (stepNumber < totalSteps) {
+            nextBtn.style.display = 'inline-block';
+            nextBtn.textContent = 'Siguiente';
+        } else {
+            nextBtn.style.display = 'none';
+        }
+    }
+    
+    if (previewBtn) {
+        previewBtn.style.display = stepNumber === totalSteps ? 'inline-block' : 'none';
+    }
+    
+    if (generateBtn) {
+        generateBtn.style.display = stepNumber === totalSteps ? 'inline-block' : 'none';
+    }
+    
+    this.currentWizardStep = stepNumber;
+    console.log(`Paso ${stepNumber} activado`);
+};
+
+CRMApp.prototype.setupContractFormFunctionality = function() {
+    console.log('Configurando funcionalidad del formulario de contrato...');
+    
+    // Auto-calculate age when birth date changes
+    const birthDateInput = document.getElementById('birthDate');
+    const ageInput = document.getElementById('age');
+    
+    if (birthDateInput && ageInput) {
+        birthDateInput.addEventListener('change', () => {
+            const birthDate = new Date(birthDateInput.value);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            ageInput.value = age > 0 ? age : '';
+        });
+    }
+    
+    // Auto-calculate expiration date when contract date or duration changes
+    const contractDateInput = document.getElementById('contractDate');
+    const durationInput = document.getElementById('duration');
+    const expirationDateInput = document.getElementById('expirationDate');
+    
+    if (contractDateInput && durationInput && expirationDateInput) {
+        const updateExpirationDate = () => {
+            if (contractDateInput.value && durationInput.value) {
+                const startDate = new Date(contractDateInput.value);
+                const duration = parseInt(durationInput.value);
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + duration);
+                expirationDateInput.value = endDate.toISOString().split('T')[0];
+            }
+        };
+        
+        contractDateInput.addEventListener('change', updateExpirationDate);
+        durationInput.addEventListener('input', updateExpirationDate);
+    }
+    
+    // Setup invoice data button
+    const invoiceDataBtn = document.getElementById('invoiceDataBtn');
+    if (invoiceDataBtn) {
+        invoiceDataBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de Datos Factura en desarrollo', 'info');
+        });
+    }
+    
+    // Setup contacts functionality
+    this.setupContactsFunctionality();
+    
+    // Setup location functionality
+    this.setupLocationFunctionality();
+    
+    console.log('Funcionalidad del formulario configurada');
+};
+
+CRMApp.prototype.setupContactsFunctionality = function() {
+    console.log('Configurando funcionalidad de contactos...');
+    
+    // Initialize contacts array
+    this.contractContacts = [];
+    
+    // Setup add phone button
+    const addPhoneBtn = document.getElementById('addPhoneBtn');
+    if (addPhoneBtn) {
+        addPhoneBtn.addEventListener('click', () => {
+            this.addContact('phone');
+        });
+    }
+    
+    // Setup add email button
+    const addEmailBtn = document.getElementById('addEmailBtn');
+    if (addEmailBtn) {
+        addEmailBtn.addEventListener('click', () => {
+            this.addContact('email');
+        });
+    }
+    
+    // Load existing client contacts
+    this.loadClientContacts();
+    
+    console.log('Funcionalidad de contactos configurada');
+};
+
+CRMApp.prototype.loadClientContacts = function() {
+    console.log('Cargando contactos del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) return;
+    
+    try {
+        const client = JSON.parse(clientData);
+        
+        // Add client's main phone and email as celular contacts
+        if (client.phone) {
+            this.contractContacts.push({
+                id: Date.now() + 1,
+                type: 'celular',
+                phone: client.phone,
+                email: client.email || '',
+                isFromClient: true
+            });
+        }
+        
+        // Add client's email as celular contact if different from phone contact
+        if (client.email && client.phone !== client.email) {
+            this.contractContacts.push({
+                id: Date.now() + 2,
+                type: 'celular',
+                phone: '',
+                email: client.email,
+                isFromClient: true
+            });
+        }
+        
+        // Render contacts
+        this.renderContacts();
+        
+    } catch (error) {
+        console.error('Error al cargar contactos del cliente:', error);
+    }
+};
+
+CRMApp.prototype.addContact = function(type) {
+    console.log(`Agregando contacto de tipo: ${type}`);
+    
+    const contactType = document.getElementById('contactType').value;
+    const contactPhone = document.getElementById('contactPhone').value;
+    const contactEmail = document.getElementById('contactEmail').value;
+    
+    if (!contactType) {
+        this.showNotification('Seleccione un tipo de contacto', 'warning');
+        return;
+    }
+    
+    if (type === 'phone' && !contactPhone) {
+        this.showNotification('Ingrese un número de teléfono', 'warning');
+        return;
+    }
+    
+    if (type === 'email' && !contactEmail) {
+        this.showNotification('Ingrese un email', 'warning');
+        return;
+    }
+    
+    const newContact = {
+        id: Date.now(),
+        type: contactType,
+        phone: type === 'phone' ? contactPhone : '',
+        email: type === 'email' ? contactEmail : '',
+        isFromClient: false
+    };
+    
+    this.contractContacts.push(newContact);
+    this.renderContacts();
+    
+    // Clear form
+    if (type === 'phone') {
+        document.getElementById('contactPhone').value = '';
+    } else {
+        document.getElementById('contactEmail').value = '';
+    }
+    
+    this.showNotification('Contacto agregado exitosamente', 'success');
+};
+
+CRMApp.prototype.renderContacts = function() {
+    console.log('Renderizando contactos...');
+    
+    const contactsList = document.getElementById('contactsList');
+    if (!contactsList) return;
+    
+    if (this.contractContacts.length === 0) {
+        contactsList.innerHTML = '';
+        return;
+    }
+    
+    contactsList.innerHTML = this.contractContacts.map(contact => `
+        <div class="contact-item" data-contact-id="${contact.id}">
+            <div class="contact-info">
+                <span class="contact-type-badge ${contact.type}">${this.getContactTypeLabel(contact.type)}</span>
+                <div class="contact-details">
+                    ${contact.phone ? `<div class="contact-phone">📞 ${contact.phone}</div>` : ''}
+                    ${contact.email ? `<div class="contact-email">📧 ${contact.email}</div>` : ''}
+                </div>
+            </div>
+            <div class="contact-actions">
+                ${!contact.isFromClient ? `
+                    <button class="btn-edit" onclick="window.crm.editContact(${contact.id})">Editar</button>
+                    <button class="btn-delete" onclick="window.crm.deleteContact(${contact.id})">Eliminar</button>
+                ` : `
+                    <span class="text-muted">Datos del cliente</span>
+                `}
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.getContactTypeLabel = function(type) {
+    const labels = {
+        'celular': 'CELULAR',
+        'fud': 'FUD',
+        'fax': 'FAX'
+    };
+    return labels[type] || type;
+};
+
+CRMApp.prototype.editContact = function(contactId) {
+    console.log(`Editando contacto ID: ${contactId}`);
+    
+    const contact = this.contractContacts.find(c => c.id === contactId);
+    if (!contact) return;
+    
+    // Fill form with contact data
+    document.getElementById('contactType').value = contact.type;
+    document.getElementById('contactPhone').value = contact.phone;
+    document.getElementById('contactEmail').value = contact.email;
+    
+    // Remove contact from list
+    this.deleteContact(contactId, false);
+    
+    this.showNotification('Contacto cargado para edición', 'info');
+};
+
+CRMApp.prototype.deleteContact = function(contactId, showNotification = true) {
+    console.log(`Eliminando contacto ID: ${contactId}`);
+    
+    this.contractContacts = this.contractContacts.filter(c => c.id !== contactId);
+    this.renderContacts();
+    
+    if (showNotification) {
+        this.showNotification('Contacto eliminado', 'success');
+    }
+};
+
+CRMApp.prototype.setupLocationFunctionality = function() {
+    console.log('Configurando funcionalidad de ubicación...');
+    
+    // Setup sub-navigation
+    const subNavTabs = document.querySelectorAll('.sub-nav-tab');
+    subNavTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const subsection = tab.getAttribute('data-subsection');
+            this.switchLocationSubsection(subsection);
+        });
+    });
+    
+    // Setup routes button
+    const routesBtn = document.querySelector('.btn-rutas');
+    if (routesBtn) {
+        routesBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de Rutas en desarrollo', 'info');
+        });
+    }
+    
+    // Load client location data
+    this.loadClientLocationData();
+    
+    // Setup georeferencia functionality
+    this.setupGeoreferenciaFunctionality();
+    
+    // Setup payment methods functionality
+    this.setupPaymentMethodsFunctionality();
+    
+    // Setup services functionality
+    this.setupServicesFunctionality();
+    
+        // Setup references functionality
+        this.setupReferencesFunctionality();
+        
+        // Setup attachments functionality
+        this.setupAttachmentsFunctionality();
+    
+    console.log('Funcionalidad de ubicación configurada');
+};
+
+CRMApp.prototype.switchLocationSubsection = function(subsection) {
+    console.log(`Cambiando a subsección: ${subsection}`);
+    
+    // Update active tab
+    const subNavTabs = document.querySelectorAll('.sub-nav-tab');
+    subNavTabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-subsection') === subsection) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // Update active section
+    const sections = document.querySelectorAll('.location-section');
+    sections.forEach(section => {
+        section.classList.remove('active');
+        if (section.id === `${subsection}-section`) {
+            section.classList.add('active');
+        }
+    });
+};
+
+CRMApp.prototype.loadClientLocationData = function() {
+    console.log('Cargando datos de ubicación del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) return;
+    
+    try {
+        const client = JSON.parse(clientData);
+        
+        // Load client address if available
+        if (client.clientInfo && client.clientInfo.address) {
+            const addressInput = document.getElementById('direccionCompleta');
+            if (addressInput) {
+                addressInput.value = client.clientInfo.address;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar datos de ubicación del cliente:', error);
+    }
+};
+
+CRMApp.prototype.setupGeoreferenciaFunctionality = function() {
+    console.log('Configurando funcionalidad de georeferencia...');
+    
+    // Setup search location button
+    const searchLocationBtn = document.getElementById('searchLocation');
+    if (searchLocationBtn) {
+        searchLocationBtn.addEventListener('click', () => {
+            this.showNotification('Buscando ubicación...', 'info');
+            // Simulate location search
+            setTimeout(() => {
+                this.showNotification('Ubicación encontrada', 'success');
+            }, 1500);
+        });
+    }
+    
+    // Setup diamond button
+    const diamondBtn = document.getElementById('diamondBtn');
+    if (diamondBtn) {
+        diamondBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de diamante en desarrollo', 'info');
+        });
+    }
+    
+    // Setup open map button
+    const openMapBtn = document.getElementById('openMap');
+    if (openMapBtn) {
+        openMapBtn.addEventListener('click', () => {
+            this.showNotification('Abriendo mapa interactivo...', 'info');
+            // Simulate map opening
+            setTimeout(() => {
+                this.showNotification('Mapa cargado exitosamente', 'success');
+            }, 1000);
+        });
+    }
+    
+    // Setup search NAPS button
+    const searchNapsBtn = document.getElementById('searchNaps');
+    if (searchNapsBtn) {
+        searchNapsBtn.addEventListener('click', () => {
+            const searchValue = document.getElementById('busquedaNaps').value;
+            if (!searchValue) {
+                this.showNotification('Ingrese un término de búsqueda', 'warning');
+                return;
+            }
+            this.showNotification(`Buscando NAPS: ${searchValue}`, 'info');
+        });
+    }
+    
+    // Setup notes button
+    const notesBtn = document.getElementById('notesBtn');
+    if (notesBtn) {
+        notesBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de notas en desarrollo', 'info');
+        });
+    }
+    
+    // Setup save georeferencia button
+    const saveGeoreferenciaBtn = document.getElementById('saveGeoreferencia');
+    if (saveGeoreferenciaBtn) {
+        saveGeoreferenciaBtn.addEventListener('click', () => {
+            this.saveGeoreferenciaData();
+        });
+    }
+    
+    // Setup coordinate validation
+    this.setupCoordinateValidation();
+    
+    console.log('Funcionalidad de georeferencia configurada');
+};
+
+CRMApp.prototype.setupCoordinateValidation = function() {
+    const latitudInput = document.getElementById('latitud');
+    const longitudInput = document.getElementById('longitud');
+    
+    if (latitudInput) {
+        latitudInput.addEventListener('blur', () => {
+            this.validateCoordinate(latitudInput.value, 'latitud');
+        });
+    }
+    
+    if (longitudInput) {
+        longitudInput.addEventListener('blur', () => {
+            this.validateCoordinate(longitudInput.value, 'longitud');
+        });
+    }
+};
+
+CRMApp.prototype.validateCoordinate = function(value, type) {
+    const numValue = parseFloat(value);
+    let isValid = false;
+    let message = '';
+    
+    if (type === 'latitud') {
+        isValid = numValue >= -90 && numValue <= 90;
+        message = isValid ? 'Latitud válida' : 'Latitud debe estar entre -90 y 90';
+    } else if (type === 'longitud') {
+        isValid = numValue >= -180 && numValue <= 180;
+        message = isValid ? 'Longitud válida' : 'Longitud debe estar entre -180 y 180';
+    }
+    
+    if (!isValid) {
+        this.showNotification(message, 'error');
+    }
+};
+
+CRMApp.prototype.saveGeoreferenciaData = function() {
+    console.log('Guardando datos de georeferencia...');
+    
+    const georeferenciaData = {
+        latitud: document.getElementById('latitud').value,
+        longitud: document.getElementById('longitud').value,
+        poste: document.getElementById('poste').value,
+        cajaNap: document.getElementById('cajaNap').value,
+        puerto: document.getElementById('puerto').value,
+        busquedaNaps: document.getElementById('busquedaNaps').value,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Validate required fields
+    if (!georeferenciaData.latitud || !georeferenciaData.longitud) {
+        this.showNotification('Latitud y Longitud son campos requeridos', 'error');
+        return;
+    }
+    
+    // Save to localStorage
+    const existingData = JSON.parse(localStorage.getItem('contractGeoreferenciaData') || '{}');
+    const clientId = JSON.parse(localStorage.getItem('currentContractClient') || '{}').id;
+    
+    if (clientId) {
+        existingData[clientId] = georeferenciaData;
+        localStorage.setItem('contractGeoreferenciaData', JSON.stringify(existingData));
+        
+        this.showNotification('Datos de georeferencia guardados exitosamente', 'success');
+        console.log('Datos de georeferencia guardados:', georeferenciaData);
+    } else {
+        this.showNotification('Error: No se encontró información del cliente', 'error');
+    }
+};
+
+CRMApp.prototype.setupPaymentMethodsFunctionality = function() {
+    console.log('Configurando funcionalidad de medios de pago...');
+    
+    // Setup payment method selection
+    const formaPagoSelect = document.getElementById('formaPago');
+    if (formaPagoSelect) {
+        formaPagoSelect.addEventListener('change', () => {
+            this.handlePaymentMethodChange();
+        });
+    }
+    
+    // Load client payment data
+    this.loadClientPaymentData();
+    
+    console.log('Funcionalidad de medios de pago configurada');
+};
+
+CRMApp.prototype.handlePaymentMethodChange = function() {
+    const formaPago = document.getElementById('formaPago').value;
+    const paymentDetails = document.getElementById('paymentDetails');
+    const paymentSummary = document.getElementById('paymentSummary');
+    
+    if (!formaPago) {
+        paymentDetails.style.display = 'none';
+        paymentSummary.style.display = 'none';
+        return;
+    }
+    
+    // Show payment details
+    paymentDetails.style.display = 'grid';
+    paymentSummary.style.display = 'block';
+    
+    // Auto-fill payment details based on selection
+    this.autoFillPaymentDetails(formaPago);
+    
+    // Update payment summary
+    this.updatePaymentSummary(formaPago);
+    
+    console.log('Método de pago seleccionado:', formaPago);
+};
+
+CRMApp.prototype.autoFillPaymentDetails = function(paymentMethod) {
+    const numeroCuenta = document.getElementById('numeroCuenta');
+    const banco = document.getElementById('banco');
+    const tipoCuenta = document.getElementById('tipoCuenta');
+    
+    // Clear previous values
+    if (numeroCuenta) numeroCuenta.value = '';
+    if (banco) banco.value = '';
+    if (tipoCuenta) tipoCuenta.value = '';
+    
+    // Auto-fill based on payment method
+    switch (paymentMethod) {
+        case 'banco_pichincha_ah2213822815':
+            if (numeroCuenta) numeroCuenta.value = 'AH2213822815';
+            if (banco) banco.value = 'Banco Pichincha';
+            if (tipoCuenta) tipoCuenta.value = 'ahorro';
+            break;
+        case 'banco_pichincha_ct2100298478':
+            if (numeroCuenta) numeroCuenta.value = 'CT2100298478';
+            if (banco) banco.value = 'Banco Pichincha';
+            if (tipoCuenta) tipoCuenta.value = 'corriente';
+            break;
+        case 'banco_promerica_ah12006886111':
+            if (numeroCuenta) numeroCuenta.value = 'AH12006886111';
+            if (banco) banco.value = 'Banco Promerica';
+            if (tipoCuenta) tipoCuenta.value = 'ahorro';
+            break;
+        case 'cuenta_tvmundo_2100144415':
+            if (numeroCuenta) numeroCuenta.value = '2100144415';
+            if (banco) banco.value = 'TVMundo';
+            if (tipoCuenta) tipoCuenta.value = 'corriente';
+            break;
+        case 'cheques':
+            if (banco) banco.value = 'Cheques';
+            if (tipoCuenta) tipoCuenta.value = '';
+            break;
+        case 'credito':
+        case 'credito_inv':
+            if (banco) banco.value = 'Crédito';
+            if (tipoCuenta) tipoCuenta.value = 'credito';
+            break;
+        case 'cruce_facturas_servicios':
+            if (banco) banco.value = 'Cruce de Facturas';
+            if (tipoCuenta) tipoCuenta.value = '';
+            break;
+    }
+};
+
+CRMApp.prototype.updatePaymentSummary = function(paymentMethod) {
+    const summaryContent = document.getElementById('summaryContent');
+    if (!summaryContent) return;
+    
+    const paymentMethodText = document.getElementById('formaPago').selectedOptions[0].text;
+    const numeroCuenta = document.getElementById('numeroCuenta').value;
+    const banco = document.getElementById('banco').value;
+    const tipoCuenta = document.getElementById('tipoCuenta').value;
+    
+    // Determine payment method class for styling
+    let methodClass = 'payment-method-bank';
+    if (paymentMethod.includes('cheques')) methodClass = 'payment-method-check';
+    else if (paymentMethod.includes('credito')) methodClass = 'payment-method-credit';
+    else if (paymentMethod.includes('cruce')) methodClass = 'payment-method-transfer';
+    
+    // Update payment summary styling
+    const paymentSummary = document.getElementById('paymentSummary');
+    if (paymentSummary) {
+        paymentSummary.className = `payment-summary ${methodClass}`;
+    }
+    
+    // Create summary content
+    let summaryHTML = `
+        <div class="summary-item">
+            <span class="summary-label">Método de Pago:</span>
+            <span class="summary-value">${paymentMethodText}</span>
+        </div>
+    `;
+    
+    if (numeroCuenta) {
+        summaryHTML += `
+            <div class="summary-item">
+                <span class="summary-label">Número de Cuenta:</span>
+                <span class="summary-value">${numeroCuenta}</span>
+            </div>
+        `;
+    }
+    
+    if (banco) {
+        summaryHTML += `
+            <div class="summary-item">
+                <span class="summary-label">Banco:</span>
+                <span class="summary-value">${banco}</span>
+            </div>
+        `;
+    }
+    
+    if (tipoCuenta) {
+        const tipoCuentaText = tipoCuenta === 'ahorro' ? 'Ahorro' : 
+                               tipoCuenta === 'corriente' ? 'Corriente' : 
+                               tipoCuenta === 'credito' ? 'Crédito' : tipoCuenta;
+        summaryHTML += `
+            <div class="summary-item">
+                <span class="summary-label">Tipo de Cuenta:</span>
+                <span class="summary-value">${tipoCuentaText}</span>
+            </div>
+        `;
+    }
+    
+    summaryContent.innerHTML = summaryHTML;
+};
+
+CRMApp.prototype.loadClientPaymentData = function() {
+    console.log('Cargando datos de pago del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) return;
+    
+    try {
+        const client = JSON.parse(clientData);
+        
+        // Load saved payment data if available
+        const savedPaymentData = localStorage.getItem('contractPaymentData');
+        if (savedPaymentData) {
+            const paymentData = JSON.parse(savedPaymentData);
+            const clientId = client.id;
+            
+            if (paymentData[clientId]) {
+                const data = paymentData[clientId];
+                
+                // Restore form values
+                if (data.formaPago && document.getElementById('formaPago')) {
+                    document.getElementById('formaPago').value = data.formaPago;
+                    this.handlePaymentMethodChange();
+                }
+                
+                if (data.numeroCuenta && document.getElementById('numeroCuenta')) {
+                    document.getElementById('numeroCuenta').value = data.numeroCuenta;
+                }
+                
+                if (data.banco && document.getElementById('banco')) {
+                    document.getElementById('banco').value = data.banco;
+                }
+                
+                if (data.tipoCuenta && document.getElementById('tipoCuenta')) {
+                    document.getElementById('tipoCuenta').value = data.tipoCuenta;
+                }
+                
+                if (data.titularCuenta && document.getElementById('titularCuenta')) {
+                    document.getElementById('titularCuenta').value = data.titularCuenta;
+                }
+                
+                if (data.observacionesPago && document.getElementById('observacionesPago')) {
+                    document.getElementById('observacionesPago').value = data.observacionesPago;
+                }
+                
+                console.log('Datos de pago del cliente cargados');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar datos de pago del cliente:', error);
+    }
+};
+
+CRMApp.prototype.setupServicesFunctionality = function() {
+    console.log('Configurando funcionalidad de servicios...');
+    
+    // Initialize services array
+    this.contractServices = [];
+    
+    // Setup service type selection
+    const tipoServicioSelect = document.getElementById('tipoServicio');
+    if (tipoServicioSelect) {
+        tipoServicioSelect.addEventListener('change', () => {
+            this.handleServiceTypeChange();
+        });
+    }
+    
+    // Setup select plans button
+    const selectPlansBtn = document.getElementById('selectPlansBtn');
+    if (selectPlansBtn) {
+        selectPlansBtn.addEventListener('click', () => {
+            this.openPlansSelection();
+        });
+    }
+    
+    // Setup notes button
+    const notesBtn = document.getElementById('notesBtn');
+    if (notesBtn) {
+        notesBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de notas en desarrollo', 'info');
+        });
+    }
+    
+    // Load client services data
+    this.loadClientServicesData();
+    
+    // Render initial table
+    this.renderServicesTable();
+    
+    console.log('Funcionalidad de servicios configurada');
+};
+
+CRMApp.prototype.handleServiceTypeChange = function() {
+    const tipoServicio = document.getElementById('tipoServicio').value;
+    const selectPlansBtn = document.getElementById('selectPlansBtn');
+    
+    if (tipoServicio) {
+        selectPlansBtn.disabled = false;
+        selectPlansBtn.style.opacity = '1';
+    } else {
+        selectPlansBtn.disabled = true;
+        selectPlansBtn.style.opacity = '0.6';
+    }
+    
+    console.log('Tipo de servicio seleccionado:', tipoServicio);
+};
+
+CRMApp.prototype.openPlansSelection = function() {
+    const tipoServicio = document.getElementById('tipoServicio').value;
+    
+    if (!tipoServicio) {
+        this.showNotification('Seleccione un tipo de servicio primero', 'warning');
+        return;
+    }
+    
+    // Simulate plans selection modal
+    this.showNotification(`Abriendo selección de planes para ${tipoServicio.toUpperCase()}...`, 'info');
+    
+    // Simulate adding a plan after 1 second
+    setTimeout(() => {
+        this.addSamplePlan(tipoServicio);
+    }, 1000);
+};
+
+CRMApp.prototype.addSamplePlan = function(serviceType) {
+    const planId = Date.now();
+    const serviceTypeText = serviceType.toUpperCase();
+    
+    // Generate sample plan data based on service type
+    let planData;
+    switch (serviceType) {
+        case 'internet':
+            planData = {
+                id: planId,
+                tipo: 'Internet',
+                ubicacion: 'Casa Principal',
+                dispositivo: 'Router WiFi',
+                tarjetaModem: 'MOD-001',
+                estado: 'active',
+                registrado: this.formatDate(new Date()),
+                ultimoCorte: '-',
+                ultimaReconexion: '-',
+                vencimiento: this.formatDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)),
+                paquetes: 'Básico 50MB',
+                radius: 'RAD-001'
+            };
+            break;
+        case 'tv':
+            planData = {
+                id: planId,
+                tipo: 'TV',
+                ubicacion: 'Sala',
+                dispositivo: 'Decodificador',
+                tarjetaModem: 'TV-001',
+                estado: 'active',
+                registrado: this.formatDate(new Date()),
+                ultimoCorte: '-',
+                ultimaReconexion: '-',
+                vencimiento: this.formatDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)),
+                paquetes: 'Premium HD',
+                radius: 'TV-001'
+            };
+            break;
+        case 'duo':
+            planData = {
+                id: planId,
+                tipo: 'DUO',
+                ubicacion: 'Casa Principal',
+                dispositivo: 'Combo Router+TV',
+                tarjetaModem: 'DUO-001',
+                estado: 'active',
+                registrado: this.formatDate(new Date()),
+                ultimoCorte: '-',
+                ultimaReconexion: '-',
+                vencimiento: this.formatDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)),
+                paquetes: 'Internet + TV',
+                radius: 'DUO-001'
+            };
+            break;
+    }
+    
+    this.contractServices.push(planData);
+    this.renderServicesTable();
+    this.showNotification(`Plan ${serviceTypeText} agregado exitosamente`, 'success');
+};
+
+CRMApp.prototype.renderServicesTable = function() {
+    const tableBody = document.getElementById('plansTableBody');
+    const emptyPlans = document.getElementById('emptyPlans');
+    const plansTable = document.getElementById('plansTable');
+    
+    if (!tableBody || !emptyPlans || !plansTable) return;
+    
+    if (this.contractServices.length === 0) {
+        tableBody.innerHTML = '';
+        emptyPlans.style.display = 'flex';
+        plansTable.style.display = 'none';
+        return;
+    }
+    
+    emptyPlans.style.display = 'none';
+    plansTable.style.display = 'table';
+    
+    tableBody.innerHTML = this.contractServices.map(service => `
+        <tr>
+            <td>${service.tipo}</td>
+            <td>${service.ubicacion}</td>
+            <td>${service.dispositivo}</td>
+            <td>${service.tarjetaModem}</td>
+            <td><span class="status-badge ${service.estado}">${this.getStatusText(service.estado)}</span></td>
+            <td>${service.registrado}</td>
+            <td>${service.ultimoCorte}</td>
+            <td>${service.ultimaReconexion}</td>
+            <td>${service.vencimiento}</td>
+            <td>${service.paquetes}</td>
+            <td>
+                <button class="btn-delete" onclick="window.crm.deleteService(${service.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+            <td>${service.radius}</td>
+        </tr>
+    `).join('');
+};
+
+CRMApp.prototype.getStatusText = function(status) {
+    const statusTexts = {
+        'active': 'Activo',
+        'inactive': 'Inactivo',
+        'pending': 'Pendiente'
+    };
+    return statusTexts[status] || status;
+};
+
+CRMApp.prototype.deleteService = function(serviceId) {
+    console.log(`Eliminando servicio ID: ${serviceId}`);
+    
+    this.contractServices = this.contractServices.filter(s => s.id !== serviceId);
+    this.renderServicesTable();
+    
+    this.showNotification('Servicio eliminado exitosamente', 'success');
+};
+
+CRMApp.prototype.formatDate = function(date) {
+    return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+};
+
+CRMApp.prototype.loadClientServicesData = function() {
+    console.log('Cargando datos de servicios del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) return;
+    
+    try {
+        const client = JSON.parse(clientData);
+        
+        // Load saved services data if available
+        const savedServicesData = localStorage.getItem('contractServicesData');
+        if (savedServicesData) {
+            const servicesData = JSON.parse(savedServicesData);
+            const clientId = client.id;
+            
+            if (servicesData[clientId]) {
+                this.contractServices = servicesData[clientId];
+                this.renderServicesTable();
+                console.log('Datos de servicios del cliente cargados');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar datos de servicios del cliente:', error);
+    }
+};
+
+CRMApp.prototype.setupReferencesFunctionality = function() {
+    console.log('Configurando funcionalidad de referencias...');
+    
+    // Initialize references array
+    this.contractReferences = [];
+    
+    // Setup add reference button
+    const addReferenceBtn = document.getElementById('addReferenceBtn');
+    if (addReferenceBtn) {
+        addReferenceBtn.addEventListener('click', () => {
+            this.addReference();
+        });
+    }
+    
+    // Load client references data
+    this.loadClientReferencesData();
+    
+    // Render initial table
+    this.renderReferencesTable();
+    
+    console.log('Funcionalidad de referencias configurada');
+};
+
+CRMApp.prototype.addReference = function() {
+    console.log('Agregando nueva referencia...');
+    
+    // Get form values
+    const nombres = document.getElementById('nombresReferencia').value.trim();
+    const identificacion = document.getElementById('identificacionReferencia').value.trim();
+    const parentesco = document.getElementById('parentescoReferencia').value;
+    const telefono = document.getElementById('telefonoReferencia').value.trim();
+    
+    // Validate required fields
+    if (!nombres || !identificacion || !telefono) {
+        this.showNotification('Por favor complete todos los campos requeridos', 'warning');
+        return;
+    }
+    
+    // Check for duplicate identification
+    const existingReference = this.contractReferences.find(ref => ref.identificacion === identificacion);
+    if (existingReference) {
+        this.showNotification('Ya existe una referencia con esta identificación', 'warning');
+        return;
+    }
+    
+    // Create new reference
+    const newReference = {
+        id: Date.now(),
+        nombres: nombres,
+        identificacion: identificacion,
+        parentesco: parentesco || 'No especificado',
+        telefono: telefono,
+        fechaAgregado: new Date().toISOString()
+    };
+    
+    // Add to array
+    this.contractReferences.push(newReference);
+    
+    // Render table
+    this.renderReferencesTable();
+    
+    // Clear form
+    this.clearReferenceForm();
+    
+    // Show success message
+    this.showNotification('Referencia agregada exitosamente', 'success');
+    
+    console.log('Referencia agregada:', newReference);
+};
+
+CRMApp.prototype.clearReferenceForm = function() {
+    document.getElementById('nombresReferencia').value = '';
+    document.getElementById('identificacionReferencia').value = '';
+    document.getElementById('parentescoReferencia').value = '';
+    document.getElementById('telefonoReferencia').value = '';
+};
+
+CRMApp.prototype.renderReferencesTable = function() {
+    const tableBody = document.getElementById('referencesTableBody');
+    const emptyReferences = document.getElementById('emptyReferences');
+    const referencesTable = document.getElementById('referencesTable');
+    
+    if (!tableBody || !emptyReferences || !referencesTable) return;
+    
+    if (this.contractReferences.length === 0) {
+        tableBody.innerHTML = '';
+        emptyReferences.style.display = 'flex';
+        referencesTable.style.display = 'none';
+        return;
+    }
+    
+    emptyReferences.style.display = 'none';
+    referencesTable.style.display = 'table';
+    
+    tableBody.innerHTML = this.contractReferences.map(reference => `
+        <tr>
+            <td>${reference.nombres}</td>
+            <td>${reference.identificacion}</td>
+            <td>${this.getParentescoText(reference.parentesco)}</td>
+            <td>${reference.telefono}</td>
+            <td>
+                <button class="btn-edit" onclick="window.crm.editReference(${reference.id})">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn-delete" onclick="window.crm.deleteReference(${reference.id})">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </td>
+        </tr>
+    `).join('');
+};
+
+CRMApp.prototype.getParentescoText = function(parentesco) {
+    const parentescoTexts = {
+        'padre': 'PADRE',
+        'madre': 'MADRE',
+        'hermano': 'HERMANO(A)',
+        'amigo': 'AMIGO(A)',
+        'abuelo': 'ABUELO(A)',
+        'tio': 'TIO(A)',
+        'esposo': 'ESPOSO(A)',
+        'hijo': 'HIJO(A)',
+        'otros': 'OTROS',
+        'No especificado': 'No especificado'
+    };
+    return parentescoTexts[parentesco] || parentesco;
+};
+
+CRMApp.prototype.editReference = function(referenceId) {
+    console.log(`Editando referencia ID: ${referenceId}`);
+    
+    const reference = this.contractReferences.find(r => r.id === referenceId);
+    if (!reference) return;
+    
+    // Fill form with reference data
+    document.getElementById('nombresReferencia').value = reference.nombres;
+    document.getElementById('identificacionReferencia').value = reference.identificacion;
+    document.getElementById('parentescoReferencia').value = reference.parentesco;
+    document.getElementById('telefonoReferencia').value = reference.telefono;
+    
+    // Remove from array (will be re-added when form is submitted)
+    this.deleteReference(referenceId, false);
+    
+    this.showNotification('Referencia cargada para edición', 'info');
+};
+
+CRMApp.prototype.deleteReference = function(referenceId, showNotification = true) {
+    console.log(`Eliminando referencia ID: ${referenceId}`);
+    
+    this.contractReferences = this.contractReferences.filter(r => r.id !== referenceId);
+    this.renderReferencesTable();
+    
+    if (showNotification) {
+        this.showNotification('Referencia eliminada exitosamente', 'success');
+    }
+};
+
+CRMApp.prototype.loadClientReferencesData = function() {
+    console.log('Cargando datos de referencias del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) return;
+    
+    try {
+        const client = JSON.parse(clientData);
+        
+        // Load saved references data if available
+        const savedReferencesData = localStorage.getItem('contractReferencesData');
+        if (savedReferencesData) {
+            const referencesData = JSON.parse(savedReferencesData);
+            const clientId = client.id;
+            
+            if (referencesData[clientId]) {
+                this.contractReferences = referencesData[clientId];
+                this.renderReferencesTable();
+                console.log('Datos de referencias del cliente cargados');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar datos de referencias del cliente:', error);
+    }
+};
+
+// Attachments functionality
+CRMApp.prototype.setupAttachmentsFunctionality = function() {
+    console.log('Configurando funcionalidad de adjuntos...');
+    
+    // Initialize attachments data
+    this.contractAttachments = {
+        photos: [],
+        signatures: [],
+        files: []
+    };
+    
+    // Setup document type selection
+    this.setupDocumentTypeSelection();
+    
+    // Setup attachment type toggle
+    this.setupAttachmentTypeToggle();
+    
+    // Setup photo functionality
+    this.setupPhotoFunctionality();
+    
+    // Setup signature functionality
+    this.setupSignatureFunctionality();
+    
+    // Setup file functionality
+    this.setupFileFunctionality();
+    
+    // Load client attachments data
+    this.loadClientAttachmentsData();
+    
+    console.log('Funcionalidad de adjuntos configurada');
+};
+
+CRMApp.prototype.setupDocumentTypeSelection = function() {
+    const documentSelect = document.getElementById('tipoDocumento');
+    if (documentSelect) {
+        documentSelect.addEventListener('change', (e) => {
+            console.log('Tipo de documento seleccionado:', e.target.value);
+            this.showNotification('Tipo de documento seleccionado', 'info');
+        });
+    }
+};
+
+CRMApp.prototype.setupAttachmentTypeToggle = function() {
+    const toggleButtons = document.querySelectorAll('.toggle-btn');
+    const photoSection = document.getElementById('photoSection');
+    const fileSection = document.getElementById('fileSection');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            toggleButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            const type = button.getAttribute('data-type');
+            
+            if (type === 'foto') {
+                photoSection.style.display = 'block';
+                fileSection.style.display = 'none';
+            } else if (type === 'archivo') {
+                photoSection.style.display = 'none';
+                fileSection.style.display = 'block';
+            }
+            
+            console.log('Tipo de adjunto cambiado a:', type);
+        });
+    });
+};
+
+CRMApp.prototype.setupPhotoFunctionality = function() {
+    const accessCameraBtn = document.getElementById('accessCameraBtn');
+    const selectPhotoBtn = document.getElementById('selectPhotoBtn');
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoImage = document.getElementById('photoImage');
+    
+    // Access camera button
+    if (accessCameraBtn) {
+        accessCameraBtn.addEventListener('click', () => {
+            this.accessCamera();
+        });
+    }
+    
+    // Select photo button
+    if (selectPhotoBtn) {
+        selectPhotoBtn.addEventListener('click', () => {
+            this.selectPhoto();
+        });
+    }
+    
+    // Photo placeholder click
+    if (photoPlaceholder) {
+        photoPlaceholder.addEventListener('click', () => {
+            this.selectPhoto();
+        });
+    }
+};
+
+CRMApp.prototype.accessCamera = function() {
+    console.log('Accediendo a la cámara...');
+    
+    // Check if getUserMedia is supported
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                // Create a modal for camera preview
+                this.showCameraModal(stream);
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+                this.showNotification('No se pudo acceder a la cámara', 'error');
+            });
+    } else {
+        this.showNotification('La cámara no está disponible en este dispositivo', 'warning');
+    }
+};
+
+CRMApp.prototype.showCameraModal = function(stream) {
+    // Create camera modal
+    const modal = document.createElement('div');
+    modal.className = 'camera-modal';
+    modal.innerHTML = `
+        <div class="camera-modal-content">
+            <div class="camera-header">
+                <h4>Capturar Foto</h4>
+                <button class="close-camera" onclick="this.closest('.camera-modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="camera-preview">
+                <video id="cameraVideo" autoplay></video>
+                <canvas id="cameraCanvas" style="display: none;"></canvas>
+            </div>
+            <div class="camera-actions">
+                <button class="btn btn-success" id="capturePhotoBtn">
+                    <i class="fas fa-camera"></i> Capturar
+                </button>
+                <button class="btn btn-secondary" onclick="this.closest('.camera-modal').remove()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Start video stream
+    const video = document.getElementById('cameraVideo');
+    video.srcObject = stream;
+    
+    // Capture photo
+    document.getElementById('capturePhotoBtn').addEventListener('click', () => {
+        this.capturePhoto(video, stream);
+    });
+};
+
+CRMApp.prototype.capturePhoto = function(video, stream) {
+    const canvas = document.getElementById('cameraCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    ctx.drawImage(video, 0, 0);
+    
+    // Convert to data URL
+    const dataURL = canvas.toDataURL('image/jpeg');
+    
+    // Stop camera stream
+    stream.getTracks().forEach(track => track.stop());
+    
+    // Close modal
+    document.querySelector('.camera-modal').remove();
+    
+    // Set photo
+    this.setPhoto(dataURL);
+};
+
+CRMApp.prototype.selectPhoto = function() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.setPhoto(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    input.click();
+};
+
+CRMApp.prototype.setPhoto = function(dataURL) {
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoImage = document.getElementById('photoImage');
+    
+    if (photoPlaceholder && photoPreview && photoImage) {
+        photoImage.src = dataURL;
+        photoPlaceholder.style.display = 'none';
+        photoPreview.style.display = 'block';
+        
+        // Save photo to attachments
+        this.contractAttachments.photos.push({
+            id: Date.now(),
+            dataURL: dataURL,
+            timestamp: new Date().toISOString()
+        });
+        
+        this.showNotification('Foto capturada exitosamente', 'success');
+        console.log('Foto guardada en adjuntos');
+    }
+};
+
+CRMApp.prototype.setupSignatureFunctionality = function() {
+    const canvas = document.getElementById('signatureCanvas');
+    const clearBtn = document.getElementById('clearSignatureBtn');
+    const saveBtn = document.getElementById('saveSignatureBtn');
+    const opticalBtn = document.getElementById('opticalPenBtn');
+    const scannerBtn = document.getElementById('scannedSignatureBtn');
+    const saveFinalBtn = document.getElementById('saveFinalSignatureBtn');
+    
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [lastX, lastY] = this.getMousePos(canvas, e);
+    });
+    
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        
+        const [currentX, currentY] = this.getMousePos(canvas, e);
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(currentX, currentY);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        
+        [lastX, lastY] = [currentX, currentY];
+    });
+    
+    canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+    });
+    
+    canvas.addEventListener('mouseout', () => {
+        isDrawing = false;
+    });
+    
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousedown', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    });
+    
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    });
+    
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        const mouseEvent = new MouseEvent('mouseup', {});
+        canvas.dispatchEvent(mouseEvent);
+    });
+    
+    // Clear button
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            this.showNotification('Firma limpiada', 'info');
+        });
+    }
+    
+    // Save button
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            this.saveSignature(canvas);
+        });
+    }
+    
+    // Optical pen button
+    if (opticalBtn) {
+        opticalBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de lápiz óptico no disponible', 'info');
+        });
+    }
+    
+    // Scanner button
+    if (scannerBtn) {
+        scannerBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de escáner no disponible', 'info');
+        });
+    }
+    
+    // Save final button
+    if (saveFinalBtn) {
+        saveFinalBtn.addEventListener('click', () => {
+            this.saveSignature(canvas);
+        });
+    }
+};
+
+CRMApp.prototype.getMousePos = function(canvas, e) {
+    const rect = canvas.getBoundingClientRect();
+    return [
+        e.clientX - rect.left,
+        e.clientY - rect.top
+    ];
+};
+
+CRMApp.prototype.saveSignature = function(canvas) {
+    const dataURL = canvas.toDataURL('image/png');
+    
+    // Save signature to attachments
+    this.contractAttachments.signatures.push({
+        id: Date.now(),
+        dataURL: dataURL,
+        timestamp: new Date().toISOString()
+    });
+    
+    this.showNotification('Firma guardada exitosamente', 'success');
+    console.log('Firma guardada en adjuntos');
+};
+
+CRMApp.prototype.setupFileFunctionality = function() {
+    const dropzone = document.getElementById('fileDropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    
+    if (!dropzone || !fileInput || !fileList) return;
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        this.handleFiles(e.target.files);
+    });
+    
+    // Dropzone click
+    dropzone.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    // Drag and drop
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.style.background = '#e3f2fd';
+    });
+    
+    dropzone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropzone.style.background = '#f8f9fa';
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.style.background = '#f8f9fa';
+        this.handleFiles(e.dataTransfer.files);
+    });
+};
+
+CRMApp.prototype.handleFiles = function(files) {
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const fileData = {
+                id: Date.now(),
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                dataURL: e.target.result,
+                timestamp: new Date().toISOString()
+            };
+            
+            this.contractAttachments.files.push(fileData);
+            this.renderFileList();
+            this.showNotification(`Archivo ${file.name} agregado`, 'success');
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
+CRMApp.prototype.renderFileList = function() {
+    const fileList = document.getElementById('fileList');
+    if (!fileList) return;
+    
+    if (this.contractAttachments.files.length === 0) {
+        fileList.innerHTML = '';
+        return;
+    }
+    
+    fileList.innerHTML = this.contractAttachments.files.map(file => `
+        <div class="file-item">
+            <div class="file-item-info">
+                <i class="fas fa-file file-item-icon"></i>
+                <div class="file-item-details">
+                    <p class="file-item-name">${file.name}</p>
+                    <p class="file-item-size">${this.formatFileSize(file.size)}</p>
+                </div>
+            </div>
+            <div class="file-item-actions">
+                <button class="btn-remove" onclick="window.crm.removeFile(${file.id})">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.formatFileSize = function(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+CRMApp.prototype.removeFile = function(fileId) {
+    this.contractAttachments.files = this.contractAttachments.files.filter(f => f.id !== fileId);
+    this.renderFileList();
+    this.showNotification('Archivo eliminado', 'success');
+};
+
+CRMApp.prototype.loadClientAttachmentsData = function() {
+    console.log('Cargando datos de adjuntos del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) return;
+    
+    try {
+        const client = JSON.parse(clientData);
+        
+        // Load saved attachments data if available
+        const savedAttachmentsData = localStorage.getItem('contractAttachmentsData');
+        if (savedAttachmentsData) {
+            const attachmentsData = JSON.parse(savedAttachmentsData);
+            const clientId = client.id;
+            
+            if (attachmentsData[clientId]) {
+                this.contractAttachments = attachmentsData[clientId];
+                this.renderFileList();
+                console.log('Datos de adjuntos del cliente cargados');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar datos de adjuntos del cliente:', error);
+    }
+};
+
+CRMApp.prototype.calculateEndDate = function(startDate, durationMonths) {
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + durationMonths);
+    return end.toISOString().split('T')[0];
+};
+
+CRMApp.prototype.previewContract = function(clientId) {
+    const client = this.contractReadyClients.find(c => c.id == clientId);
+    if (!client) return;
+
+    const modal = document.getElementById('contractPreviewModal');
+    const content = document.getElementById('contractPreviewContent');
+    
+    if (content) {
+        content.innerHTML = `
+            <div class="contract-preview">
+                <h3>CONTRATO DE SERVICIOS DE INTERNET</h3>
+                <div class="contract-section">
+                    <h4>INFORMACIÓN DEL CLIENTE</h4>
+                    <p><strong>Nombre:</strong> ${client.name}</p>
+                    <p><strong>Empresa:</strong> ${client.company}</p>
+                    <p><strong>Email:</strong> ${client.email}</p>
+                    <p><strong>Teléfono:</strong> ${client.phone}</p>
+                    <p><strong>Identificación:</strong> ${client.clientInfo.identification} - ${client.clientInfo.idNumber}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <h4>DETALLES DEL SERVICIO</h4>
+                    <p><strong>Plan:</strong> ${client.serviceDetails.plan}</p>
+                    <p><strong>Velocidad:</strong> ${client.serviceDetails.speed}</p>
+                    <p><strong>Precio Mensual:</strong> $${client.serviceDetails.price}</p>
+                    <p><strong>Duración:</strong> ${client.serviceDetails.duration} meses</p>
+                </div>
+                
+                <div class="contract-section">
+                    <h4>CONDICIONES DEL CONTRATO</h4>
+                    <p><strong>Fecha de Inicio:</strong> ${client.contractInfo.contractDate}</p>
+                    <p><strong>Fecha de Finalización:</strong> ${this.calculateEndDate(client.contractInfo.contractDate, client.serviceDetails.duration)}</p>
+                    <p><strong>Tipo de Cobro:</strong> ${client.contractInfo.collectionType}</p>
+                    <p><strong>Día de Cobro:</strong> ${client.contractInfo.collectionDay}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <h4>TERMINOS Y CONDICIONES</h4>
+                    <p>1. El cliente se compromete a pagar el servicio mensualmente.</p>
+                    <p>2. El contrato tiene una duración de ${client.serviceDetails.duration} meses.</p>
+                    <p>3. El cliente puede cancelar el servicio con 30 días de anticipación.</p>
+                    <p>4. La empresa se reserva el derecho de suspender el servicio por falta de pago.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (modal) {
+        modal.style.display = 'block';
+    }
+};
+
+CRMApp.prototype.saveContract = function(clientId) {
+    console.log('Guardando contrato para cliente ID:', clientId);
+    
+    const client = this.contractReadyClients.find(c => c.id == clientId);
+    if (!client) {
+        console.error('Cliente no encontrado para guardar contrato');
+        alert('Error: Cliente no encontrado');
+        return;
+    }
+
+    try {
+        const contractData = {
+            id: Date.now(),
+            clientId: clientId,
+            clientName: client.name,
+            contractNumber: document.getElementById('contractNumber').value,
+            status: 'generado',
+            contractType: document.getElementById('contractType').value,
+            value: parseInt(document.getElementById('monthlyPrice').value),
+            startDate: document.getElementById('contractStartDate').value,
+            endDate: document.getElementById('contractEndDate').value,
+            signatureDate: document.getElementById('signatureDate').value,
+            generatedDate: new Date().toISOString().split('T')[0],
+            advisor: client.advisor,
+            notes: document.getElementById('contractNotes').value
+        };
+
+        console.log('Datos del contrato:', contractData);
+
+        // Inicializar contractsData si no existe
+        if (!this.contractsData) {
+            this.contractsData = [];
+        }
+
+        this.contractsData.push(contractData);
+        this.saveData();
+        
+        console.log('Contrato guardado exitosamente');
+        
+        // Cerrar modal
+        const modal = document.getElementById('contractGenerationModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+        
+        // Mostrar notificación
+        this.showNotification('Contrato generado exitosamente', 'success');
+        
+        // Actualizar la lista de clientes
+        this.updateClientsListGrid();
+        
+        console.log('Proceso de guardado completado');
+        
+    } catch (error) {
+        console.error('Error al guardar contrato:', error);
+        alert('Error al guardar el contrato: ' + error.message);
+    }
+};
+
+CRMApp.prototype.refreshClientsList = function() {
+    this.updateClientsListGrid();
+    this.showNotification('Lista de clientes actualizada', 'info');
+};
+
+CRMApp.prototype.exportClientsList = function() {
+    // Simulate export functionality
+    this.showNotification('Exportando lista de clientes...', 'info');
+    setTimeout(() => {
+        this.showNotification('Lista exportada exitosamente', 'success');
+    }, 2000);
+};
+
+CRMApp.prototype.updateContractsGrid = function() {
+    const contractsGrid = document.getElementById('contractsGrid');
+    if (!contractsGrid) return;
+
+    contractsGrid.innerHTML = this.contractsData.map(contract => `
+        <div class="contract-card">
+            <div class="contract-header">
+                <h3>${contract.clientName}</h3>
+                <span class="contract-status status-${contract.status}">${contract.status}</span>
+            </div>
+            <div class="contract-info">
+                <p><strong>Número:</strong> ${contract.contractNumber}</p>
+                <p><strong>Tipo:</strong> ${contract.contractType}</p>
+                <p><strong>Valor:</strong> $${contract.value}/mes</p>
+                <p><strong>Inicio:</strong> ${contract.startDate}</p>
+                <p><strong>Fin:</strong> ${contract.endDate}</p>
+                <p><strong>Asesor:</strong> ${contract.advisor}</p>
+            </div>
+            <div class="contract-actions">
+                <button class="btn btn-primary" onclick="window.crm.viewContractDetail(${contract.id})">Ver Detalle</button>
+                <button class="btn btn-success" onclick="window.crm.downloadContract(${contract.id})">Descargar</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateTemplatesGrid = function() {
+    const templatesGrid = document.getElementById('templatesGrid');
+    if (!templatesGrid) return;
+
+    templatesGrid.innerHTML = this.contractTemplates.map(template => `
+        <div class="template-card">
+            <div class="template-header">
+                <h3>${template.name}</h3>
+                <span class="template-type">${template.type}</span>
+            </div>
+            <div class="template-info">
+                <p>${template.description}</p>
+                <p><strong>Creado:</strong> ${template.createdAt}</p>
+            </div>
+            <div class="template-actions">
+                <button class="btn btn-primary" onclick="window.crm.editTemplate(${template.id})">Editar</button>
+                <button class="btn btn-success" onclick="window.crm.useTemplate(${template.id})">Usar</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateReports = function() {
+    const reportsContent = document.getElementById('reportsContent');
+    if (!reportsContent) return;
+
+    reportsContent.innerHTML = `
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>Reporte de Contratos Generados</h3>
+                <p>Total: ${this.contractsData.length} contratos</p>
+                <button class="btn btn-primary">Generar PDF</button>
+            </div>
+            <div class="report-card">
+                <h3>Reporte de Clientes Pendientes</h3>
+                <p>Pendientes: ${this.contractReadyClients.filter(c => c.status === 'aceptado').length}</p>
+                <button class="btn btn-primary">Generar PDF</button>
+            </div>
+            <div class="report-card">
+                <h3>Reporte de Valor de Contratos</h3>
+                <p>Valor total: $${this.contractsData.reduce((sum, c) => sum + c.value, 0).toLocaleString()}</p>
+                <button class="btn btn-primary">Generar PDF</button>
+            </div>
+        </div>
+    `;
+};
+
+CRMApp.prototype.redirectToRole = function() {
+    if (!this.isAuthenticated) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    // Redirect based on role
+    if (this.currentRole === 'admin') {
+        window.location.href = 'admin.html';
+    } else if (this.currentRole === 'manager') {
+        window.location.href = 'manager.html';
+    } else if (this.currentRole === 'advisor') {
+        window.location.href = 'advisor.html';
+    } else if (this.currentRole === 'client-success') {
+        window.location.href = 'client-success.html';
+    } else if (this.currentRole === 'contract-generator') {
+        window.location.href = 'contract-generator.html';
+    } else {
+        window.location.href = 'index.html';
+    }
+};
+
+CRMApp.prototype.initContractGenerationPage = function() {
+    console.log('Inicializando página de generación de contratos...');
+    this.loadClientData();
+    this.setupWizardNavigation();
+    this.setupContractFormFunctionality();
+    this.setupContractGenerationPageEventListeners();
+};
+
+CRMApp.prototype.loadClientData = function() {
+    console.log('Cargando datos del cliente...');
+    
+    const clientData = localStorage.getItem('currentContractClient');
+    if (!clientData) {
+        console.error('No se encontraron datos del cliente');
+        this.showNotification('No se encontraron datos del cliente', 'error');
+        return;
+    }
+    
+    try {
+        const client = JSON.parse(clientData);
+        console.log('Cliente cargado:', client);
+        
+        // Llenar campos del formulario con datos del cliente
+        this.populateFormWithClientData(client);
+        
+    } catch (error) {
+        console.error('Error al parsear datos del cliente:', error);
+        this.showNotification('Error al cargar datos del cliente', 'error');
+    }
+};
+
+CRMApp.prototype.populateFormWithClientData = function(client) {
+    console.log('Poblando formulario con datos del cliente...');
+    
+    // Información básica del cliente
+    if (document.getElementById('firstName')) {
+        document.getElementById('firstName').value = client.name.split(' ')[0] || '';
+    }
+    if (document.getElementById('lastName')) {
+        document.getElementById('lastName').value = client.name.split(' ').slice(1).join(' ') || '';
+    }
+    if (document.getElementById('clientEmail')) {
+        document.getElementById('clientEmail').value = client.email || '';
+    }
+    if (document.getElementById('clientPhone')) {
+        document.getElementById('clientPhone').value = client.phone || '';
+    }
+    if (document.getElementById('fullName')) {
+        document.getElementById('fullName').value = client.clientInfo.fullName || '';
+    }
+    
+    // Identificación
+    if (document.getElementById('identificationNumber')) {
+        document.getElementById('identificationNumber').value = client.clientInfo.idNumber || '';
+    }
+    
+    // Tipo de identificación
+    const identificationType = client.clientInfo.identification;
+    if (identificationType) {
+        const radio = document.querySelector(`input[name="identificationType"][value="${identificationType}"]`);
+        if (radio) {
+            radio.checked = true;
+        }
+    }
+    
+    // Código de contrato
+    if (document.getElementById('contractCode')) {
+        document.getElementById('contractCode').value = `CTR-${String(client.id).padStart(3, '0')}-2024`;
+    }
+    
+    // Tipo de contrato
+    if (document.getElementById('contractType')) {
+        document.getElementById('contractType').value = client.contractType || '';
+    }
+    
+    // Fechas
+    if (document.getElementById('contractDate')) {
+        document.getElementById('contractDate').value = client.contractInfo.contractDate || '';
+    }
+    if (document.getElementById('signatureDate')) {
+        document.getElementById('signatureDate').value = client.contractInfo.signatureDate || '';
+    }
+    if (document.getElementById('birthDate')) {
+        document.getElementById('birthDate').value = client.clientInfo.birthDate || '';
+    }
+    if (document.getElementById('duration')) {
+        document.getElementById('duration').value = client.serviceDetails.duration || '';
+    }
+    if (document.getElementById('expirationDate')) {
+        document.getElementById('expirationDate').value = this.calculateEndDate(client.contractInfo.contractDate, client.serviceDetails.duration);
+    }
+    
+    // Información de pago
+    if (document.getElementById('collectionType')) {
+        document.getElementById('collectionType').value = client.contractInfo.collectionType || '';
+    }
+    if (document.getElementById('collectionDay')) {
+        document.getElementById('collectionDay').value = client.contractInfo.collectionDay || '';
+    }
+    
+    // Estado del cliente
+    if (document.getElementById('clientCondition')) {
+        document.getElementById('clientCondition').value = client.contractInfo.clientCondition || '';
+    }
+    
+    console.log('Formulario poblado exitosamente');
+};
+
+CRMApp.prototype.setupContractGenerationPageEventListeners = function() {
+    console.log('Configurando event listeners de la página de generación...');
+    
+    // Cancel button
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            if (confirm('¿Está seguro de que desea cancelar la generación del contrato?')) {
+                window.location.href = 'contract-generator.html';
+            }
+        });
+    }
+    
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            this.logout();
+        });
+    }
+    
+    // Invoice data button
+    const invoiceDataBtn = document.getElementById('invoiceDataBtn');
+    if (invoiceDataBtn) {
+        invoiceDataBtn.addEventListener('click', () => {
+            this.showNotification('Funcionalidad de Datos Factura en desarrollo', 'info');
+        });
+    }
+    
+    console.log('Event listeners configurados');
+};
+
+CRMApp.prototype.showNotification = function(message, type = 'info') {
+    console.log(`Notificación ${type}:`, message);
+    
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    // Estilos según el tipo
+    if (type === 'success') {
+        notification.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+    } else if (type === 'error') {
+        notification.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+    } else if (type === 'warning') {
+        notification.style.background = 'linear-gradient(135deg, #ffc107, #e0a800)';
+    } else {
+        notification.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
+    }
+    
+    notification.textContent = message;
+    
+    // Agregar al DOM
+    document.body.appendChild(notification);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }, 3000);
+    
+    // Agregar estilos CSS para las animaciones si no existen
+    if (!document.getElementById('notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+};
+
+// Contract Filters Functions
+CRMApp.prototype.applyContractFilters = function() {
+    console.log('Aplicando filtros de contratos...');
+    
+    const serviceFilter = document.getElementById('contractServiceFilter').value;
+    const dateFilter = document.getElementById('contractDateFilter').value;
+    const searchFilter = document.getElementById('contractSearchFilter').value;
+    
+    let filteredContracts = [...this.contractsData];
+    
+    // Filter by service
+    if (serviceFilter) {
+        filteredContracts = filteredContracts.filter(contract => contract.service === serviceFilter);
+    }
+    
+    // Filter by date
+    if (dateFilter) {
+        const now = new Date();
+        filteredContracts = filteredContracts.filter(contract => {
+            const contractDate = new Date(contract.startDate);
+            switch (dateFilter) {
+                case 'today':
+                    return contractDate.toDateString() === now.toDateString();
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return contractDate >= weekAgo;
+                case 'month':
+                    return contractDate.getMonth() === now.getMonth() && contractDate.getFullYear() === now.getFullYear();
+                case 'quarter':
+                    const quarter = Math.floor(now.getMonth() / 3);
+                    return Math.floor(contractDate.getMonth() / 3) === quarter && contractDate.getFullYear() === now.getFullYear();
+                case 'year':
+                    return contractDate.getFullYear() === now.getFullYear();
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    // Filter by search
+    if (searchFilter) {
+        const searchLower = searchFilter.toLowerCase();
+        filteredContracts = filteredContracts.filter(contract => 
+            contract.clientName.toLowerCase().includes(searchLower) ||
+            contract.contractNumber.toLowerCase().includes(searchLower) ||
+            contract.service.toLowerCase().includes(searchLower)
+        );
+    }
+    
+    this.renderContractsList(filteredContracts);
+    this.updateContractsCount(filteredContracts.length);
+    
+    this.showNotification(`Filtros aplicados: ${filteredContracts.length} contratos encontrados`, 'info');
+};
+
+CRMApp.prototype.clearContractFilters = function() {
+    console.log('Limpiando filtros de contratos...');
+    
+    // Reset all filter values
+    document.getElementById('contractServiceFilter').value = '';
+    document.getElementById('contractDateFilter').value = '';
+    document.getElementById('contractSearchFilter').value = '';
+    
+    // Render all contracts
+    this.renderContractsList();
+    this.updateContractsCount(this.contractsData.length);
+    
+    this.showNotification('Filtros limpiados', 'info');
+};
+
+// Contract Generator Admin Functions
+CRMApp.prototype.initContractGeneratorAdmin = function() {
+    console.log('Inicializando Contract Generator Admin...');
+    
+    // Check if we're on the admin page with contract generator section
+    const contractGeneratorSection = document.getElementById('contract-generator-section');
+    if (!contractGeneratorSection) {
+        console.log('No estamos en la sección de Contract Generator Admin');
+        return;
+    }
+    
+    // Load contract data
+    this.loadContractDataForAdmin();
+    
+    // Initialize reports
+    this.initContractReports();
+    
+    // Initialize analytics
+    this.initContractAnalytics();
+    
+    console.log('Contract Generator Admin inicializado correctamente');
+};
+
+// Load Contract Data for Admin
+CRMApp.prototype.loadContractDataForAdmin = function() {
+    console.log('Cargando datos de contratos para admin...');
+    
+    try {
+        const savedData = localStorage.getItem('crmData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            this.contractsData = data.contractsData || [];
+        }
+        
+        // If no data exists, initialize with mock data
+        if (!this.contractsData || this.contractsData.length === 0) {
+            this.initContractDataForAdmin();
+        }
+        
+        console.log('Contratos cargados para admin:', this.contractsData.length);
+        
+    } catch (error) {
+        console.error('Error cargando datos de contratos:', error);
+        this.initContractDataForAdmin();
+    }
+};
+
+// Initialize Contract Data for Admin
+CRMApp.prototype.initContractDataForAdmin = function() {
+    console.log('Inicializando datos de contratos para admin...');
+    
+    // Create mock contract data for admin
+    this.contractsData = [
+        {
+            id: 'contract-001',
+            contractNumber: 'CT-2024-001',
+            clientName: 'Juan Pérez',
+            clientCompany: 'Empresa ABC',
+            status: 'activo',
+            startDate: '2024-01-15',
+            endDate: '2025-01-15',
+            value: 15000,
+            service: 'internet',
+            advisor: 'Asesor 1'
+        },
+        {
+            id: 'contract-002',
+            contractNumber: 'CT-2024-002',
+            clientName: 'María García',
+            clientCompany: 'Corporación XYZ',
+            status: 'pendiente',
+            startDate: '2024-01-16',
+            endDate: '2025-01-16',
+            value: 25000,
+            service: 'telefonia',
+            advisor: 'Asesor 2'
+        },
+        {
+            id: 'contract-003',
+            contractNumber: 'CT-2024-003',
+            clientName: 'Carlos López',
+            clientCompany: 'Industrias DEF',
+            status: 'activo',
+            startDate: '2024-01-17',
+            endDate: '2025-01-17',
+            value: 30000,
+            service: 'combo',
+            advisor: 'Asesor 1'
+        },
+        {
+            id: 'contract-004',
+            contractNumber: 'CT-2024-004',
+            clientName: 'Ana Rodríguez',
+            clientCompany: 'Servicios GHI',
+            status: 'vencido',
+            startDate: '2023-12-01',
+            endDate: '2024-01-01',
+            value: 12000,
+            service: 'cable',
+            advisor: 'Asesor 3'
+        },
+        {
+            id: 'contract-005',
+            contractNumber: 'CT-2024-005',
+            clientName: 'Luis Martínez',
+            clientCompany: 'Tecnología JKL',
+            status: 'activo',
+            startDate: '2024-01-19',
+            endDate: '2025-01-19',
+            value: 18000,
+            service: 'internet',
+            advisor: 'Asesor 2'
+        }
+    ];
+    
+    console.log('Datos de contratos inicializados para admin:', this.contractsData.length);
+    
+    // Save to localStorage
+    this.saveData();
+};
+
+// Initialize Contract Reports
+CRMApp.prototype.initContractReports = function() {
+    console.log('Inicializando reportes de contratos...');
+    
+    // Generate charts
+    this.generateContractCharts();
+    
+    // Load contracts table
+    this.loadContractsTable();
+};
+
+// Generate Contract Charts
+CRMApp.prototype.generateContractCharts = function() {
+    console.log('Generando gráficos de contratos...');
+    
+    // Contracts by Status Chart
+    this.createContractsByStatusChart();
+    
+    // Contracts by Month Chart
+    this.createContractsByMonthChart();
+};
+
+// Create Contracts by Status Chart
+CRMApp.prototype.createContractsByStatusChart = function() {
+    const ctx = document.getElementById('contractsByStatusChart');
+    if (!ctx) return;
+    
+    const contracts = this.contractsData || [];
+    const statusCounts = contracts.reduce((acc, contract) => {
+        acc[contract.status] = (acc[contract.status] || 0) + 1;
+        return acc;
+    }, {});
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(statusCounts).map(status => this.getContractStatusText(status)),
+            datasets: [{
+                data: Object.values(statusCounts),
+                backgroundColor: [
+                    '#28a745', // Activo - Verde
+                    '#ffc107', // Pendiente - Amarillo
+                    '#dc3545'  // Vencido - Rojo
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+};
+
+// Create Contracts by Month Chart
+CRMApp.prototype.createContractsByMonthChart = function() {
+    const ctx = document.getElementById('contractsByMonthChart');
+    if (!ctx) return;
+    
+    const contracts = this.contractsData || [];
+    const monthlyData = contracts.reduce((acc, contract) => {
+        const month = new Date(contract.startDate).getMonth();
+        acc[month] = (acc[month] || 0) + 1;
+        return acc;
+    }, {});
+    
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const data = months.map((month, index) => monthlyData[index] || 0);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Contratos',
+                data: data,
+                backgroundColor: '#3498db'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+};
+
+// Load Contracts Table
+CRMApp.prototype.loadContractsTable = function() {
+    console.log('Cargando tabla de contratos...');
+    
+    const tableBody = document.getElementById('contractsTableBody');
+    if (!tableBody) return;
+    
+    const contracts = this.contractsData || [];
+    
+    if (contracts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6">No hay contratos disponibles</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = contracts.map(contract => `
+        <tr>
+            <td>${contract.clientName}</td>
+            <td>${contract.contractNumber}</td>
+            <td><span class="status-badge ${contract.status}">${this.getContractStatusText(contract.status)}</span></td>
+            <td>${this.formatDate(contract.startDate)}</td>
+            <td>$${contract.value.toLocaleString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="window.crm.viewContractDetail('${contract.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+            </td>
+        </tr>
+    `).join('');
+};
+
+// Initialize Contract Analytics
+CRMApp.prototype.initContractAnalytics = function() {
+    console.log('Inicializando analytics de contratos...');
+    
+    // Generate analytics charts
+    this.generateAnalyticsCharts();
+    
+    // Load insights
+    this.loadContractInsights();
+};
+
+// Generate Analytics Charts
+CRMApp.prototype.generateAnalyticsCharts = function() {
+    console.log('Generando gráficos de analytics...');
+    
+    // Performance Chart
+    this.createPerformanceChart();
+    
+    // Trends Chart
+    this.createTrendsChart();
+};
+
+// Create Performance Chart
+CRMApp.prototype.createPerformanceChart = function() {
+    const ctx = document.getElementById('performanceChart');
+    if (!ctx) return;
+    
+    // Mock performance data
+    const performanceData = {
+        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+        datasets: [{
+            label: 'Contratos Generados',
+            data: [12, 19, 15, 25],
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            fill: true
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: performanceData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+};
+
+// Create Trends Chart
+CRMApp.prototype.createTrendsChart = function() {
+    const ctx = document.getElementById('trendsChart');
+    if (!ctx) return;
+    
+    // Mock trends data
+    const trendsData = {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Valor Total',
+            data: [45000, 52000, 48000, 61000, 55000, 67000],
+            backgroundColor: '#2ecc71'
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: trendsData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+};
+
+// Load Contract Insights
+CRMApp.prototype.loadContractInsights = function() {
+    console.log('Cargando insights de contratos...');
+    
+    const insightsContent = document.getElementById('contractInsights');
+    if (!insightsContent) return;
+    
+    // Mock insights data
+    const insights = [
+        {
+            icon: '📈',
+            title: 'Recomendación',
+            text: 'Los contratos de servicios tienen un 15% más de probabilidad de renovación que los de productos.'
+        },
+        {
+            icon: '⚠️',
+            title: 'Alerta',
+            text: '3 contratos están próximos a vencer en los próximos 30 días.'
+        },
+        {
+            icon: '💡',
+            title: 'Insight',
+            text: 'El 80% de los contratos se generan en los primeros 15 días del mes.'
+        }
+    ];
+    
+    insightsContent.innerHTML = insights.map(insight => `
+        <div class="insight-item">
+            <div class="insight-icon">${insight.icon}</div>
+            <div class="insight-text">
+                <h5>${insight.title}</h5>
+                <p>${insight.text}</p>
+            </div>
+        </div>
+    `).join('');
+};
+
+// Generate Contract Report
+CRMApp.prototype.generateContractReport = function() {
+    console.log('Generando reporte de contratos...');
+    
+    const dateFrom = document.getElementById('reportDateFrom').value;
+    const dateTo = document.getElementById('reportDateTo').value;
+    const status = document.getElementById('reportStatus').value;
+    
+    let filteredContracts = [...this.contractsData];
+    
+    // Apply filters
+    if (dateFrom && dateTo) {
+        const fromDate = new Date(dateFrom);
+        const toDate = new Date(dateTo);
+        filteredContracts = filteredContracts.filter(contract => {
+            const contractDate = new Date(contract.startDate);
+            return contractDate >= fromDate && contractDate <= toDate;
+        });
+    }
+    
+    if (status) {
+        filteredContracts = filteredContracts.filter(contract => contract.status === status);
+    }
+    
+    console.log(`Reporte generado: ${filteredContracts.length} contratos encontrados`);
+    
+    // Update charts and table with filtered data
+    this.updateContractCharts(filteredContracts);
+    this.updateContractsTable(filteredContracts);
+    
+    this.showNotification(`Reporte generado: ${filteredContracts.length} contratos encontrados`, 'success');
+};
+
+// Update Contract Charts
+CRMApp.prototype.updateContractCharts = function(contracts) {
+    // Update charts with filtered data
+    this.createContractsByStatusChart();
+    this.createContractsByMonthChart();
+};
+
+// Update Contracts Table
+CRMApp.prototype.updateContractsTable = function(contracts) {
+    const tableBody = document.getElementById('contractsTableBody');
+    if (!tableBody) return;
+    
+    if (contracts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6">No se encontraron contratos con los filtros aplicados</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = contracts.map(contract => `
+        <tr>
+            <td>${contract.clientName}</td>
+            <td>${contract.contractNumber}</td>
+            <td><span class="status-badge ${contract.status}">${this.getContractStatusText(contract.status)}</span></td>
+            <td>${this.formatDate(contract.startDate)}</td>
+            <td>$${contract.value.toLocaleString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="window.crm.viewContractDetail('${contract.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+            </td>
+        </tr>
+    `).join('');
+};
+
+// Get Contract Status Text
+CRMApp.prototype.getContractStatusText = function(status) {
+    const statusMap = {
+        'activo': 'Activo',
+        'pendiente': 'Pendiente',
+        'vencido': 'Vencido'
+    };
+    return statusMap[status] || status;
+};
+
+// Contract Generator Admin Page Functions
+CRMApp.prototype.initContractGeneratorAdminPage = function() {
+    console.log('Inicializando Contract Generator Admin Page...');
+    
+    // Check if we're on the contract generator admin page
+    const contractGeneratorAdmin = document.querySelector('.contract-generator-admin');
+    if (!contractGeneratorAdmin) {
+        console.log('No estamos en la página de Contract Generator Admin');
+        return;
+    }
+    
+    // Load contract data
+    this.loadContractDataForAdmin();
+    
+    // Setup navigation
+    this.setupContractGeneratorPageNavigation();
+    
+    // Initialize dashboard
+    this.initContractGeneratorDashboard();
+    
+    console.log('Contract Generator Admin Page inicializado correctamente');
+};
+
+// Setup Contract Generator Page Navigation
+CRMApp.prototype.setupContractGeneratorPageNavigation = function() {
+    console.log('Configurando navegación de Contract Generator Page...');
+    
+    const navTabs = document.querySelectorAll('.nav-tab');
+    
+    navTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active class from all tabs
+            navTabs.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tab.classList.add('active');
+            
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Show target section
+            const targetSection = tab.getAttribute('data-section');
+            const targetElement = document.getElementById(targetSection);
+            if (targetElement) {
+                targetElement.classList.add('active');
+            }
+            
+            // Load section content
+            this.loadContractGeneratorPageSection(targetSection);
+        });
+    });
+};
+
+// Load Contract Generator Page Section
+CRMApp.prototype.loadContractGeneratorPageSection = function(section) {
+    console.log('Cargando sección de Contract Generator Page:', section);
+    
+    switch (section) {
+        case 'dashboard':
+            this.loadContractGeneratorDashboard();
+            break;
+        case 'reports':
+            this.loadContractGeneratorReports();
+            break;
+        case 'analytics':
+            this.loadContractGeneratorAnalytics();
+            break;
+        case 'contracts':
+            this.loadContractGeneratorContracts();
+            break;
+    }
+};
+
+// Initialize Contract Generator Dashboard
+CRMApp.prototype.initContractGeneratorDashboard = function() {
+    console.log('Inicializando dashboard de Contract Generator...');
+    
+    // Load dashboard content
+    this.loadContractGeneratorDashboard();
+};
+
+// Load Contract Generator Dashboard
+CRMApp.prototype.loadContractGeneratorDashboard = function() {
+    console.log('Cargando dashboard de Contract Generator...');
+    
+    // Update stats
+    this.updateContractGeneratorStats();
+    
+    // Load recent contracts
+    this.loadRecentContractsForDashboard();
+    
+    // Generate charts
+    this.generateContractGeneratorCharts();
+};
+
+// Update Contract Generator Stats
+CRMApp.prototype.updateContractGeneratorStats = function() {
+    console.log('Actualizando estadísticas de Contract Generator...');
+    
+    const totalContracts = document.getElementById('totalContractsCount');
+    const activeContracts = document.getElementById('activeContractsCount');
+    const pendingContracts = document.getElementById('pendingContractsCount');
+    const totalValue = document.getElementById('totalValueCount');
+    
+    const contracts = this.contractsData || [];
+    
+    if (totalContracts) totalContracts.textContent = contracts.length;
+    if (activeContracts) activeContracts.textContent = contracts.filter(c => c.status === 'activo').length;
+    if (pendingContracts) pendingContracts.textContent = contracts.filter(c => c.status === 'pendiente').length;
+    
+    const totalValueAmount = contracts.reduce((sum, contract) => sum + (contract.value || 0), 0);
+    if (totalValue) totalValue.textContent = `$${totalValueAmount.toLocaleString()}`;
+};
+
+// Load Recent Contracts for Dashboard
+CRMApp.prototype.loadRecentContractsForDashboard = function() {
+    console.log('Cargando contratos recientes para dashboard...');
+    
+    const recentContractsList = document.getElementById('recentContractsList');
+    if (!recentContractsList) return;
+    
+    const contracts = this.contractsData || [];
+    const recentContracts = contracts.slice(0, 5); // Get first 5 contracts
+    
+    if (recentContracts.length === 0) {
+        recentContractsList.innerHTML = '<p>No hay contratos recientes</p>';
+        return;
+    }
+    
+    recentContractsList.innerHTML = recentContracts.map(contract => `
+        <div class="contract-item">
+            <div class="contract-info">
+                <h5>${contract.contractNumber}</h5>
+                <p>${contract.clientName} - ${contract.clientCompany}</p>
+            </div>
+            <div class="contract-status">
+                <span class="status-badge ${contract.status}">${this.getContractStatusText(contract.status)}</span>
+                <span class="contract-value">$${contract.value.toLocaleString()}</span>
+            </div>
+        </div>
+    `).join('');
+};
+
+// Generate Contract Generator Charts
+CRMApp.prototype.generateContractGeneratorCharts = function() {
+    console.log('Generando gráficos de Contract Generator...');
+    
+    // Contracts by Status Chart
+    this.createContractGeneratorStatusChart();
+    
+    // Contracts by Month Chart
+    this.createContractGeneratorMonthChart();
+};
+
+// Create Contract Generator Status Chart
+CRMApp.prototype.createContractGeneratorStatusChart = function() {
+    const ctx = document.getElementById('contractsByStatusChart');
+    if (!ctx) return;
+    
+    const contracts = this.contractsData || [];
+    const statusCounts = contracts.reduce((acc, contract) => {
+        acc[contract.status] = (acc[contract.status] || 0) + 1;
+        return acc;
+    }, {});
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(statusCounts).map(status => this.getContractStatusText(status)),
+            datasets: [{
+                data: Object.values(statusCounts),
+                backgroundColor: [
+                    '#27ae60', // Activo - Verde
+                    '#f39c12', // Pendiente - Naranja
+                    '#e74c3c'  // Vencido - Rojo
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+};
+
+// Create Contract Generator Month Chart
+CRMApp.prototype.createContractGeneratorMonthChart = function() {
+    const ctx = document.getElementById('contractsByMonthChart');
+    if (!ctx) return;
+    
+    const contracts = this.contractsData || [];
+    const monthlyData = contracts.reduce((acc, contract) => {
+        const month = new Date(contract.startDate).getMonth();
+        acc[month] = (acc[month] || 0) + 1;
+        return acc;
+    }, {});
+    
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const data = months.map((month, index) => monthlyData[index] || 0);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Contratos',
+                data: data,
+                backgroundColor: '#3498db',
+                borderColor: '#2980b9',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e9ecef'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+};
+
+// Load Contract Generator Reports
+CRMApp.prototype.loadContractGeneratorReports = function() {
+    console.log('Cargando reportes de Contract Generator...');
+    
+    // Generate report charts
+    this.generateContractGeneratorReportCharts();
+    
+    // Load contracts table
+    this.loadContractGeneratorContractsTable();
+};
+
+// Generate Contract Generator Report Charts
+CRMApp.prototype.generateContractGeneratorReportCharts = function() {
+    console.log('Generando gráficos de reportes...');
+    
+    // Report Status Chart
+    this.createContractGeneratorReportStatusChart();
+    
+    // Report Trend Chart
+    this.createContractGeneratorReportTrendChart();
+};
+
+// Create Contract Generator Report Status Chart
+CRMApp.prototype.createContractGeneratorReportStatusChart = function() {
+    const ctx = document.getElementById('reportStatusChart');
+    if (!ctx) return;
+    
+    const contracts = this.contractsData || [];
+    const statusCounts = contracts.reduce((acc, contract) => {
+        acc[contract.status] = (acc[contract.status] || 0) + 1;
+        return acc;
+    }, {});
+    
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(statusCounts).map(status => this.getContractStatusText(status)),
+            datasets: [{
+                data: Object.values(statusCounts),
+                backgroundColor: [
+                    '#27ae60',
+                    '#f39c12',
+                    '#e74c3c'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+};
+
+// Create Contract Generator Report Trend Chart
+CRMApp.prototype.createContractGeneratorReportTrendChart = function() {
+    const ctx = document.getElementById('reportTrendChart');
+    if (!ctx) return;
+    
+    const contracts = this.contractsData || [];
+    const monthlyData = contracts.reduce((acc, contract) => {
+        const month = new Date(contract.startDate).getMonth();
+        acc[month] = (acc[month] || 0) + 1;
+        return acc;
+    }, {});
+    
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const data = months.map((month, index) => monthlyData[index] || 0);
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Contratos',
+                data: data,
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+};
+
+// Load Contract Generator Contracts Table
+CRMApp.prototype.loadContractGeneratorContractsTable = function() {
+    console.log('Cargando tabla de contratos para reportes...');
+    
+    const tableBody = document.getElementById('contractsTableBody');
+    if (!tableBody) return;
+    
+    const contracts = this.contractsData || [];
+    
+    if (contracts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7">No hay contratos disponibles</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = contracts.map(contract => `
+        <tr>
+            <td>${contract.clientName}</td>
+            <td>${contract.contractNumber}</td>
+            <td><span class="status-badge ${contract.status}">${this.getContractStatusText(contract.status)}</span></td>
+            <td>${contract.service}</td>
+            <td>${this.formatDate(contract.startDate)}</td>
+            <td>$${contract.value.toLocaleString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="window.crm.viewContractDetail('${contract.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Update table count
+    const tableCount = document.getElementById('reportTableCount');
+    if (tableCount) {
+        tableCount.textContent = `${contracts.length} contratos`;
+    }
+};
+
+// Load Contract Generator Analytics
+CRMApp.prototype.loadContractGeneratorAnalytics = function() {
+    console.log('Cargando analytics de Contract Generator...');
+    
+    // Generate analytics charts
+    this.generateContractGeneratorAnalyticsCharts();
+    
+    // Load insights
+    this.loadContractGeneratorInsights();
+};
+
+// Generate Contract Generator Analytics Charts
+CRMApp.prototype.generateContractGeneratorAnalyticsCharts = function() {
+    console.log('Generando gráficos de analytics...');
+    
+    // Performance Chart
+    this.createContractGeneratorPerformanceChart();
+    
+    // Trends Chart
+    this.createContractGeneratorTrendsChart();
+};
+
+// Create Contract Generator Performance Chart
+CRMApp.prototype.createContractGeneratorPerformanceChart = function() {
+    const ctx = document.getElementById('performanceChart');
+    if (!ctx) return;
+    
+    // Mock performance data
+    const performanceData = {
+        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+        datasets: [{
+            label: 'Contratos Generados',
+            data: [12, 19, 15, 25],
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: performanceData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+};
+
+// Create Contract Generator Trends Chart
+CRMApp.prototype.createContractGeneratorTrendsChart = function() {
+    const ctx = document.getElementById('trendsChart');
+    if (!ctx) return;
+    
+    // Mock trends data
+    const trendsData = {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Valor Total',
+            data: [45000, 52000, 48000, 61000, 55000, 67000],
+            backgroundColor: '#2ecc71',
+            borderColor: '#27ae60',
+            borderWidth: 1,
+            borderRadius: 4
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: trendsData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+};
+
+// Load Contract Generator Insights
+CRMApp.prototype.loadContractGeneratorInsights = function() {
+    console.log('Cargando insights de Contract Generator...');
+    
+    const insightsContent = document.getElementById('contractInsights');
+    if (!insightsContent) return;
+    
+    // Mock insights data
+    const insights = [
+        {
+            icon: 'fas fa-chart-line',
+            title: 'Recomendación',
+            text: 'Los contratos de servicios tienen un 15% más de probabilidad de renovación que los de productos.'
+        },
+        {
+            icon: 'fas fa-exclamation-triangle',
+            title: 'Alerta',
+            text: '3 contratos están próximos a vencer en los próximos 30 días.'
+        },
+        {
+            icon: 'fas fa-lightbulb',
+            title: 'Insight',
+            text: 'El 80% de los contratos se generan en los primeros 15 días del mes.'
+        }
+    ];
+    
+    insightsContent.innerHTML = insights.map(insight => `
+        <div class="insight-item">
+            <div class="insight-icon">
+                <i class="${insight.icon}"></i>
+            </div>
+            <div class="insight-content">
+                <h4>${insight.title}</h4>
+                <p>${insight.text}</p>
+            </div>
+        </div>
+    `).join('');
+};
+
+// Load Contract Generator Contracts
+CRMApp.prototype.loadContractGeneratorContracts = function() {
+    console.log('Cargando gestión de contratos...');
+    
+    // Load contracts management table
+    this.loadContractGeneratorContractsManagementTable();
+};
+
+// Load Contract Generator Contracts Management Table
+CRMApp.prototype.loadContractGeneratorContractsManagementTable = function() {
+    console.log('Cargando tabla de gestión de contratos...');
+    
+    const tableBody = document.getElementById('contractsManagementTableBody');
+    if (!tableBody) return;
+    
+    const contracts = this.contractsData || [];
+    
+    if (contracts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8">No hay contratos disponibles</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = contracts.map(contract => `
+        <tr>
+            <td>
+                <input type="checkbox" class="form-checkbox">
+            </td>
+            <td>${contract.clientName}</td>
+            <td>${contract.contractNumber}</td>
+            <td><span class="status-badge ${contract.status}">${this.getContractStatusText(contract.status)}</span></td>
+            <td>${contract.service}</td>
+            <td>${this.formatDate(contract.startDate)}</td>
+            <td>$${contract.value.toLocaleString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="window.crm.viewContractDetail('${contract.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+            </td>
+        </tr>
+    `).join('');
+};
+
+// Clear Report Filters
+CRMApp.prototype.clearReportFilters = function() {
+    console.log('Limpiando filtros de reporte...');
+    
+    document.getElementById('reportDateFrom').value = '';
+    document.getElementById('reportDateTo').value = '';
+    document.getElementById('reportStatus').value = '';
+    document.getElementById('reportService').value = '';
+    
+    this.showNotification('Filtros limpiados', 'info');
+};
+
+// Export Report
+CRMApp.prototype.exportReport = function() {
+    console.log('Exportando reporte...');
+    
+    this.showNotification('Funcionalidad de exportación en desarrollo', 'info');
+};
+
+// Print Report
+CRMApp.prototype.printReport = function() {
+    console.log('Imprimiendo reporte...');
+    
+    window.print();
+};
+
+// Generate AI Insights
+CRMApp.prototype.generateAIInsights = function() {
+    console.log('Generando insights de IA...');
+    
+    this.showNotification('Generando insights de IA...', 'info');
+    
+    // Simulate AI processing
+    setTimeout(() => {
+        this.loadContractGeneratorInsights();
+        this.showNotification('Insights de IA generados exitosamente', 'success');
+    }, 2000);
 };

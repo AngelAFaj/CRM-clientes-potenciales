@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Generación de Contratos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header contract-generator-theme">
+            <div class="header-left">
+                <h1>Generación de Contratos</h1>
+                <span class="user-role">Generador de Contratos</span>
+            </div>
+            <div class="header-right">
+                <span id="userInfo">Contract Generator User</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav contract-generator-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#clients-list" class="nav-link" data-section="clients-list">Clientes para Contrato</a></li>
+                <li><a href="#contracts" class="nav-link" data-section="contracts">Contratos Generados</a></li>
+                <li><a href="#templates" class="nav-link" data-section="templates">Plantillas</a></li>
+                <li><a href="#reports" class="nav-link" data-section="reports">Reportes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Contract Generation Page -->
+            <section id="contract-generation" class="content-section active contract-generator-theme">
+                <div class="contract-generation-header">
+                    <h2>Generar Contrato</h2>
+                    <p>Complete la información del contrato paso a paso</p>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="contract-wizard-nav">
+                    <div class="wizard-tab active" data-step="informacion">
+                        <div class="tab-icon">📄</div>
+                        <div class="tab-text">Información</div>
+                    </div>
+                    <div class="wizard-tab" data-step="contactos">
+                        <div class="tab-icon">📞</div>
+                        <div class="tab-text">Contactos</div>
+                    </div>
+                    <div class="wizard-tab" data-step="ubicacion">
+                        <div class="tab-icon">📍</div>
+                        <div class="tab-text">Ubicación</div>
+                    </div>
+                    <div class="wizard-tab" data-step="medios-pago">
+                        <div class="tab-icon">💰</div>
+                        <div class="tab-text">Medios pago</div>
+                    </div>
+                    <div class="wizard-tab" data-step="planes">
+                        <div class="tab-icon">📋</div>
+                        <div class="tab-text">Planes</div>
+                    </div>
+                    <div class="wizard-tab" data-step="referencias">
+                        <div class="tab-icon">👤</div>
+                        <div class="tab-text">Referencias</div>
+                    </div>
+                    <div class="wizard-tab" data-step="adjuntos">
+                        <div class="tab-icon">📎</div>
+                        <div class="tab-text">Adjuntos</div>
+                    </div>
+                    <div class="wizard-tab" data-step="finalizar">
+                        <div class="tab-icon">✅</div>
+                        <div class="tab-text">Finalizar</div>
+                    </div>
+                </div>
+
+                <!-- Step Content -->
+                <div class="wizard-content">
+                    <!-- Step 1: Información -->
+                    <div class="wizard-step active" id="step-informacion">
+                        <div class="contract-info-header">
+                            <h4>Información Contrato</h4>
+                            <button type="button" class="btn btn-success" id="invoiceDataBtn">Datos Factura</button>
+                        </div>
+                        
+                        <div class="contract-form-grid">
+                            <!-- Left Column - Client Info & Identification -->
+                            <div class="form-column">
+                                <!-- Client Basic Info -->
+                                <div class="form-section client-info-section">
+                                    <h5>👤 Información del Cliente</h5>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="firstName">Nombres:</label>
+                                            <input type="text" id="firstName" placeholder="NOMBRES DEL CLIENTE" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lastName">Apellidos:</label>
+                                            <input type="text" id="lastName" placeholder="APELLIDOS DEL CLIENTE" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="clientEmail">Email:</label>
+                                            <div class="input-with-icon">
+                                                <input type="email" id="clientEmail" placeholder="EMAIL DEL CLIENTE" required>
+                                                <span class="input-icon">📧</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="clientPhone">Teléfono:</label>
+                                            <div class="input-with-icon">
+                                                <input type="tel" id="clientPhone" placeholder="TELEFONO DEL CLIENTE" required>
+                                                <span class="input-icon">📞</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fullName">Nombres Completos:</label>
+                                        <input type="text" id="fullName" placeholder="NOMBRES COMPLETOS DEL CLIENTE" required>
+                                    </div>
+                                </div>
+
+                                <!-- Identification Section -->
+                                <div class="form-section identification-section">
+                                    <h5>🆔 Identificación</h5>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="identificationType" value="RUC">
+                                            <span>RUC</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="identificationType" value="CEDULA" checked>
+                                            <span>CÉDULA</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="identificationType" value="PASAPORTE">
+                                            <span>PASAPORTE</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="identificationType" value="CONSUMIDOR_FINAL">
+                                            <span>CONSUMIDOR FINAL</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="identificationNumber">Número de Identificación:</label>
+                                        <input type="text" id="identificationNumber" placeholder="Número de identificación" required>
+                                    </div>
+                                </div>
+
+                                <!-- Contract Details -->
+                                <div class="form-section contract-details-section">
+                                    <h5>📋 Detalles del Contrato</h5>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="contractCode">Código contrato:</label>
+                                            <input type="text" id="contractCode" placeholder="CODIGO" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="contractType">Tipo contrato:</label>
+                                            <div class="select-with-button">
+                                                <select id="contractType" required>
+                                                    <option value="">Seleccione...</option>
+                                                    <option value="servicios">Servicios</option>
+                                                    <option value="productos">Productos</option>
+                                                    <option value="mixto">Mixto</option>
+                                                </select>
+                                                <button type="button" class="btn btn-sm btn-primary">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="vendor">Vendedor:</label>
+                                            <select id="vendor">
+                                                <option value="">Seleccione vendedor...</option>
+                                                <option value="vendedor1">Vendedor 1</option>
+                                                <option value="vendedor2">Vendedor 2</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="advisor">Asesor:</label>
+                                            <select id="advisor">
+                                                <option value="">Seleccione asesor...</option>
+                                                <option value="asesor1">Asesor 1</option>
+                                                <option value="asesor2">Asesor 2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Middle Column -->
+                            <div class="form-column">
+                                <!-- Dates Section -->
+                                <div class="form-section dates-section">
+                                    <h5>📅 Fechas Importantes</h5>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="contractDate">Fecha Contrato:</label>
+                                            <input type="date" id="contractDate">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="signatureDate">Fecha Firma:</label>
+                                            <input type="date" id="signatureDate">
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="birthDate">Fecha Nacimiento:</label>
+                                            <input type="date" id="birthDate">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="age">Edad (años):</label>
+                                            <input type="text" id="age" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="duration">Duración (meses):</label>
+                                            <input type="number" id="duration" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="expirationDate">Fecha Vencimiento:</label>
+                                            <input type="date" id="expirationDate">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Section -->
+                                <div class="form-section payment-section">
+                                    <h5>💰 Información de Pago</h5>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="collectionType">Tipo de cobro:</label>
+                                            <select id="collectionType" required>
+                                                <option value="Prepago">Prepago</option>
+                                                <option value="Postpago" selected>Postpago</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="receiptType">Comprobante:</label>
+                                            <select id="receiptType">
+                                                <option value="">Seleccione...</option>
+                                                <option value="factura">Factura</option>
+                                                <option value="recibo">Recibo</option>
+                                                <option value="nota_venta">Nota de Venta</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="collectionDay">Día Cobro:</label>
+                                            <input type="number" id="collectionDay" min="1" max="31">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cutOffDay">Día Corte:</label>
+                                            <input type="number" id="cutOffDay" value="30" min="1" max="31">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="penalty">$ Penalidad:</label>
+                                        <input type="number" id="penalty" value="0" min="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="form-column">
+                                <!-- Client Status Section -->
+                                <div class="form-section status-section">
+                                    <h5>🏷️ Estado del Cliente</h5>
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="clientType">Tipo de Cliente:</label>
+                                            <select id="clientType">
+                                                <option value="">Seleccione...</option>
+                                                <option value="residencial">Residencial</option>
+                                                <option value="comercial">Comercial</option>
+                                                <option value="corporativo">Corporativo</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="clientCondition">Condición:</label>
+                                            <select id="clientCondition" required>
+                                                <option value="Normal" selected>Normal</option>
+                                                <option value="VIP">VIP</option>
+                                                <option value="Premium">Premium</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <h6>Facturable Lotes:</h6>
+                                        <div class="radio-group">
+                                            <label class="radio-label">
+                                                <input type="radio" name="billableLots" value="no" checked>
+                                                <span>No</span>
+                                            </label>
+                                            <label class="radio-label">
+                                                <input type="radio" name="billableLots" value="si">
+                                                <span>Sí</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nickname">Sobrenombre:</label>
+                                        <input type="text" id="nickname" placeholder="Sobrenombre del cliente">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="observations">Observaciones:</label>
+                                        <textarea id="observations" rows="2" placeholder="Observaciones adicionales..."></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Client Avatar -->
+                                <div class="form-section">
+                                    <div class="client-avatar">
+                                        <div class="avatar-placeholder">
+                                            <span class="avatar-icon">👤</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Contactos -->
+                    <div class="wizard-step" id="step-contactos">
+                        <div class="contract-info-header">
+                            <h4>Contactos Contrato</h4>
+                        </div>
+                        
+                        <div class="contacts-form">
+                            <div class="contact-input-row">
+                                <div class="form-group">
+                                    <label for="contactType">Tipo *</label>
+                                    <select id="contactType" required>
+                                        <option value="">Seleccione una opción...</option>
+                                        <option value="celular">CELULAR</option>
+                                        <option value="fud">FUD</option>
+                                        <option value="fax">FAX</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactPhone">Teléfono *</label>
+                                    <div class="input-with-button">
+                                        <input type="tel" id="contactPhone" placeholder="Número de teléfono" required>
+                                        <button type="button" class="btn btn-success btn-add" id="addPhoneBtn">+</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactEmail">Email *</label>
+                                    <div class="input-with-button">
+                                        <input type="email" id="contactEmail" placeholder="Correo electrónico" required>
+                                        <button type="button" class="btn btn-success btn-add" id="addEmailBtn">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lista de contactos agregados -->
+                            <div class="contacts-list" id="contactsList">
+                                <!-- Los contactos se agregarán dinámicamente aquí -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Ubicación -->
+                    <div class="wizard-step" id="step-ubicacion">
+                        <div class="contract-info-header">
+                            <h4>Ubicación Contrato</h4>
+                        </div>
+                        
+                        <!-- Sub-navigation -->
+                        <div class="location-sub-nav">
+                            <div class="sub-nav-tab active" data-subsection="direccion">
+                                <span>Dirección</span>
+                            </div>
+                            <div class="sub-nav-tab" data-subsection="georeferencia">
+                                <span>Georeferencia / Disponibilidad</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Dirección Section -->
+                        <div class="location-section active" id="direccion-section">
+                            <div class="location-form">
+                                <div class="location-form-grid">
+                                    <!-- Left Column -->
+                                    <div class="form-column">
+                                        <div class="form-group">
+                                            <label for="provincia">* Provincia:</label>
+                                            <select id="provincia" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="pichincha">Pichincha</option>
+                                                <option value="guayas">Guayas</option>
+                                                <option value="azuay">Azuay</option>
+                                                <option value="manabi">Manabí</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="parroquia">Parroquia:</label>
+                                            <select id="parroquia">
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="centro">Centro</option>
+                                                <option value="norte">Norte</option>
+                                                <option value="sur">Sur</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tipoDireccion">Tipo Dirección:</label>
+                                            <select id="tipoDireccion">
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="residencial">Residencial</option>
+                                                <option value="comercial">Comercial</option>
+                                                <option value="industrial">Industrial</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tipoConjunto">* Tipo de Conjunto:</label>
+                                            <select id="tipoConjunto" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="casa">Casa</option>
+                                                <option value="apartamento">Apartamento</option>
+                                                <option value="condominio">Condominio</option>
+                                                <option value="edificio">Edificio</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="ruta">Ruta:</label>
+                                            <select id="ruta">
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="panamericana">Panamericana</option>
+                                                <option value="via_principal">Vía Principal</option>
+                                                <option value="via_secundaria">Vía Secundaria</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="callePrincipal">Calle Principal:</label>
+                                            <input type="text" id="callePrincipal" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="direccionCompleta">* Dirección Completa:</label>
+                                            <input type="text" id="direccionCompleta" value="0" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="referencia">Referencia:</label>
+                                            <input type="text" id="referencia" placeholder="REFERENCIA">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Middle Column -->
+                                    <div class="form-column">
+                                        <div class="form-group">
+                                            <label for="canton">* Cantón:</label>
+                                            <select id="canton" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="quito">Quito</option>
+                                                <option value="guayaquil">Guayaquil</option>
+                                                <option value="cuenca">Cuenca</option>
+                                                <option value="manta">Manta</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sector">* Sector:</label>
+                                            <select id="sector" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="centro">Centro</option>
+                                                <option value="norte">Norte</option>
+                                                <option value="sur">Sur</option>
+                                                <option value="este">Este</option>
+                                                <option value="oeste">Oeste</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="calleDireccion">Calle Dirección:</label>
+                                            <select id="calleDireccion">
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="principal">Principal</option>
+                                                <option value="secundaria">Secundaria</option>
+                                                <option value="transversal">Transversal</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tipoVivienda">* Tipo Vivienda:</label>
+                                            <select id="tipoVivienda" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="casa">Casa</option>
+                                                <option value="apartamento">Apartamento</option>
+                                                <option value="duplex">Dúplex</option>
+                                                <option value="penthouse">Penthouse</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-warning btn-rutas">Rutas</button>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="ordenRuta">Orden Ruta:</label>
+                                            <input type="text" id="ordenRuta">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="numero">Número:</label>
+                                            <input type="text" id="numero">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Column -->
+                                    <div class="form-column">
+                                        <div class="form-group">
+                                            <label for="ciudad">* Ciudad:</label>
+                                            <select id="ciudad" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="quito">Quito</option>
+                                                <option value="guayaquil">Guayaquil</option>
+                                                <option value="cuenca">Cuenca</option>
+                                                <option value="manta">Manta</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="barrio">* Barrio:</label>
+                                            <select id="barrio" required>
+                                                <option value="">Seleccione una opción...</option>
+                                                <option value="centro">Centro</option>
+                                                <option value="norte">Norte</option>
+                                                <option value="sur">Sur</option>
+                                                <option value="este">Este</option>
+                                                <option value="oeste">Oeste</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="calle">Calle:</label>
+                                            <input type="text" id="calle">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="codigoRuta">Código Ruta:</label>
+                                            <div class="input-with-button">
+                                                <input type="text" id="codigoRuta">
+                                                <button type="button" class="btn btn-info btn-sm">Notas</button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="calleSecundaria">Calle Secundaria:</label>
+                                            <input type="text" id="calleSecundaria" placeholder="CALLE SECUNDARIA">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Georeferencia Section -->
+                        <div class="location-section" id="georeferencia-section">
+                            <div class="georeferencia-container">
+                                <!-- Header Section -->
+                                <div class="georeferencia-header">
+                                    <h5>Georeferencia / Disponibilidad</h5>
+                                    <div class="country-selector">
+                                        <input type="text" id="pais" value="Ecuador" readonly>
+                                        <button type="button" class="btn btn-success btn-search" id="searchLocation">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-info btn-diamond" id="diamondBtn">
+                                            <i class="fas fa-gem"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Map and Data Section -->
+                                <div class="georeferencia-content">
+                                    <!-- Map Section -->
+                                    <div class="map-container">
+                                        <div class="map-placeholder" id="mapContainer">
+                                            <div class="map-overlay">
+                                                <div class="map-info">
+                                                    <h6>Mapa Interactivo</h6>
+                                                    <p>Seleccione la ubicación en el mapa</p>
+                                                    <button type="button" class="btn btn-primary btn-sm" id="openMap">
+                                                        <i class="fas fa-map-marker-alt"></i> Abrir Mapa
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Data Input Section -->
+                                    <div class="georeferencia-data">
+                                        <div class="coordinates-section">
+                                            <div class="form-group">
+                                                <label for="latitud">* Latitud:</label>
+                                                <input type="text" id="latitud" value="-1.831239" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="longitud">* Longitud:</label>
+                                                <input type="text" id="longitud" value="-78.18340599999999" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="infrastructure-section">
+                                            <div class="form-group">
+                                                <label for="poste">Poste:</label>
+                                                <input type="text" id="poste" placeholder="Número de poste">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="cajaNap">Caja - Nap:</label>
+                                                <input type="text" id="cajaNap" placeholder="Código de caja">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="puerto">Puerto:</label>
+                                                <input type="text" id="puerto" placeholder="Número de puerto">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="busquedaNaps">Búsqueda NAPS:</label>
+                                                <div class="input-with-button">
+                                                    <input type="text" id="busquedaNaps" placeholder="Buscar NAPS">
+                                                    <button type="button" class="btn btn-success btn-sm" id="searchNaps">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="notes-section">
+                                            <button type="button" class="btn btn-info btn-sm" id="notesBtn">
+                                                <i class="fas fa-sticky-note"></i> Notas
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Button -->
+                                <div class="georeferencia-actions">
+                                    <button type="button" class="btn btn-primary btn-save" id="saveGeoreferencia">
+                                        <i class="fas fa-plus"></i> Guardar / Modificar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Medios de Pago -->
+                    <div class="wizard-step" id="step-medios-pago">
+                        <div class="contract-info-header">
+                            <h4>Medios de Pago</h4>
+                        </div>
+                        
+                        <div class="payment-form">
+                            <div class="payment-methods">
+                                <div class="form-group">
+                                    <label for="formaPago">Forma de Pago:</label>
+                                    <select id="formaPago" class="payment-select">
+                                        <option value="">Seleccione una forma de pago...</option>
+                                        <option value="banco_pichincha_ah2213822815">BANCO PICHINCHA AH2213822815</option>
+                                        <option value="banco_pichincha_ct2100298478">BANCO PICHINCHA CT2100298478</option>
+                                        <option value="banco_promerica_ah12006886111">BANCO PROMERICA AH12006886111</option>
+                                        <option value="cheques">CHEQUES</option>
+                                        <option value="credito">CREDITO</option>
+                                        <option value="credito_inv">CREDITO INV</option>
+                                        <option value="cruce_facturas_servicios">CRUCE FACTURAS SERVICIOS</option>
+                                        <option value="cuenta_tvmundo_2100144415">CUENTA TVMUNDO 2100144415</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="payment-details" id="paymentDetails">
+                                    <div class="form-group">
+                                        <label for="numeroCuenta">Número de Cuenta:</label>
+                                        <input type="text" id="numeroCuenta" placeholder="Ingrese número de cuenta">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="tipoCuenta">Tipo de Cuenta:</label>
+                                        <select id="tipoCuenta">
+                                            <option value="">Seleccione tipo de cuenta...</option>
+                                            <option value="ahorro">Ahorro</option>
+                                            <option value="corriente">Corriente</option>
+                                            <option value="credito">Crédito</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="banco">Banco:</label>
+                                        <input type="text" id="banco" placeholder="Nombre del banco">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="titularCuenta">Titular de la Cuenta:</label>
+                                        <input type="text" id="titularCuenta" placeholder="Nombre del titular">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="observacionesPago">Observaciones:</label>
+                                        <textarea id="observacionesPago" rows="3" placeholder="Observaciones sobre el método de pago..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-summary" id="paymentSummary">
+                                    <h5>Resumen del Método de Pago</h5>
+                                    <div class="summary-content" id="summaryContent">
+                                        <p class="text-muted">Seleccione una forma de pago para ver el resumen</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Planes -->
+                    <div class="wizard-step" id="step-planes">
+                        <div class="contract-info-header">
+                            <h4>Servicios Contrato</h4>
+                        </div>
+                        
+                        <div class="services-form">
+                            <div class="service-selection">
+                                <div class="form-group">
+                                    <label for="tipoServicio">Tipo Servicio:</label>
+                                    <select id="tipoServicio" class="service-select">
+                                        <option value="">Seleccione tipo de servicio...</option>
+                                        <option value="internet">INTERNET</option>
+                                        <option value="tv">TV</option>
+                                        <option value="duo">DUO</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-success btn-select-plans" id="selectPlansBtn">
+                                        <i class="fas fa-plus"></i> Seleccionar Planes
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Plans Table -->
+                            <div class="plans-table-container">
+                                <table class="plans-table" id="plansTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Ubicación</th>
+                                            <th>Dispositivo</th>
+                                            <th>Tarjeta / Modem</th>
+                                            <th>Estado</th>
+                                            <th>Registrado</th>
+                                            <th>Último Corte</th>
+                                            <th>Última Reconexión</th>
+                                            <th>Vencimiento</th>
+                                            <th>Paquetes</th>
+                                            <th>Eliminar</th>
+                                            <th>Radius</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="plansTableBody">
+                                        <!-- Los planes se agregarán dinámicamente aquí -->
+                                    </tbody>
+                                </table>
+                                
+                                <!-- Empty state -->
+                                <div class="empty-plans" id="emptyPlans">
+                                    <div class="empty-plans-content">
+                                        <i class="fas fa-list-alt"></i>
+                                        <h5>No hay planes seleccionados</h5>
+                                        <p>Seleccione un tipo de servicio y haga clic en "Seleccionar Planes" para agregar planes al contrato.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes Button -->
+                            <div class="notes-section">
+                                <button type="button" class="btn btn-info btn-notes" id="notesBtn">
+                                    <i class="fas fa-sticky-note"></i> Notas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 6: Referencias -->
+                    <div class="wizard-step" id="step-referencias">
+                        <div class="contract-info-header">
+                            <h4>Referencias</h4>
+                        </div>
+                        
+                        <div class="references-form">
+                            <!-- Add Reference Form -->
+                            <div class="reference-form">
+                                <div class="reference-fields">
+                                    <div class="form-group">
+                                        <label for="nombresReferencia">Nombres: *</label>
+                                        <input type="text" id="nombresReferencia" placeholder="NOMBRES DE LA REFERENCIA" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="identificacionReferencia">Identificación: *</label>
+                                        <input type="text" id="identificacionReferencia" placeholder="IDENTIFICACION DE LA REFERENCIA" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="parentescoReferencia">Parentesco:</label>
+                                        <select id="parentescoReferencia">
+                                            <option value="">Seleccione una opción...</option>
+                                            <option value="padre">PADRE</option>
+                                            <option value="madre">MADRE</option>
+                                            <option value="hermano">HERMANO(A)</option>
+                                            <option value="amigo">AMIGO(A)</option>
+                                            <option value="abuelo">ABUELO(A)</option>
+                                            <option value="tio">TIO(A)</option>
+                                            <option value="esposo">ESPOSO(A)</option>
+                                            <option value="hijo">HIJO(A)</option>
+                                            <option value="otros">OTROS</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="telefonoReferencia">Teléfono: *</label>
+                                        <input type="tel" id="telefonoReferencia" placeholder="Número de teléfono" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-success btn-add-reference" id="addReferenceBtn">
+                                        <i class="fas fa-plus"></i> Agregar Referencia
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- References List -->
+                            <div class="references-list" id="referencesList">
+                                <div class="references-header">
+                                    <h5>Referencias Agregadas</h5>
+                                </div>
+                                
+                                <div class="references-table-container">
+                                    <table class="references-table" id="referencesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombres</th>
+                                                <th>Identificación</th>
+                                                <th>Parentesco</th>
+                                                <th>Teléfono</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="referencesTableBody">
+                                            <!-- Las referencias se agregarán dinámicamente aquí -->
+                                        </tbody>
+                                    </table>
+                                    
+                                    <!-- Empty state -->
+                                    <div class="empty-references" id="emptyReferences">
+                                        <div class="empty-references-content">
+                                            <i class="fas fa-users"></i>
+                                            <h5>No hay referencias agregadas</h5>
+                                            <p>Use el formulario de arriba para agregar referencias al contrato.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 7: Adjuntos -->
+                    <div class="wizard-step" id="step-adjuntos">
+                        <div class="contract-info-header">
+                            <h4>Adjuntos Contratos</h4>
+                        </div>
+                        
+                        <div class="attachments-form">
+                            <!-- Document Selection -->
+                            <div class="document-selection">
+                                <div class="form-group">
+                                    <label for="tipoDocumento">* Documento:</label>
+                                    <select id="tipoDocumento" class="document-select">
+                                        <option value="">Seleccione una opción...</option>
+                                        <option value="cedula">Cédula de Identidad</option>
+                                        <option value="pasaporte">Pasaporte</option>
+                                        <option value="ruc">RUC</option>
+                                        <option value="certificado">Certificado</option>
+                                        <option value="contrato">Contrato</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="attachment-type">
+                                    <label>Adjunto:</label>
+                                    <div class="attachment-toggle">
+                                        <button type="button" class="toggle-btn active" data-type="foto">
+                                            <i class="fas fa-camera"></i> Foto
+                                        </button>
+                                        <button type="button" class="toggle-btn" data-type="archivo">
+                                            <i class="fas fa-file"></i> Archivo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Photo Section -->
+                            <div class="photo-section" id="photoSection">
+                                <div class="photo-container">
+                                    <h5>Foto abonado</h5>
+                                    <div class="photo-upload">
+                                        <div class="photo-placeholder" id="photoPlaceholder">
+                                            <i class="fas fa-user-circle"></i>
+                                            <p>Foto del abonado</p>
+                                        </div>
+                                        <div class="photo-preview" id="photoPreview" style="display: none;">
+                                            <img id="photoImage" src="" alt="Foto del abonado">
+                                        </div>
+                                        <div class="photo-actions">
+                                            <button type="button" class="btn btn-primary btn-camera" id="accessCameraBtn">
+                                                <i class="fas fa-arrow-right"></i> Acceder a la cámara
+                                            </button>
+                                            <button type="button" class="btn btn-primary btn-select" id="selectPhotoBtn">
+                                                <i class="fas fa-image"></i> Seleccionar foto
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Signature Section -->
+                            <div class="signature-section" id="signatureSection">
+                                <div class="signature-container">
+                                    <h5>Firma abonado</h5>
+                                    <div class="signature-pad">
+                                        <canvas id="signatureCanvas" width="400" height="200"></canvas>
+                                        <div class="signature-actions">
+                                            <button type="button" class="btn btn-warning btn-clear" id="clearSignatureBtn">
+                                                <i class="fas fa-broom"></i> Limpiar
+                                            </button>
+                                            <button type="button" class="btn btn-primary btn-save" id="saveSignatureBtn">
+                                                <i class="fas fa-save"></i> Guardar
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-optical" id="opticalPenBtn">
+                                                <i class="fas fa-pen"></i> Firma con lápiz óptico
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-scanner" id="scannedSignatureBtn">
+                                                <i class="fas fa-scanner"></i> Firma escaneada
+                                            </button>
+                                            <button type="button" class="btn btn-primary btn-save-final" id="saveFinalSignatureBtn">
+                                                <i class="fas fa-save"></i> Guardar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- File Section (Hidden by default) -->
+                            <div class="file-section" id="fileSection" style="display: none;">
+                                <div class="file-container">
+                                    <h5>Archivo adjunto</h5>
+                                    <div class="file-upload">
+                                        <div class="file-dropzone" id="fileDropzone">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Arrastra y suelta archivos aquí o haz clic para seleccionar</p>
+                                            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                        </div>
+                                        <div class="file-list" id="fileList">
+                                            <!-- Los archivos se mostrarán aquí -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-step" id="step-finalizar">
+                        <h4>Finalizar Contrato</h4>
+                        <p>Paso 8: Finalizar</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="wizard-navigation">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                    <button type="button" class="btn btn-outline" id="prevStep" style="display: none;">Anterior</button>
+                    <button type="button" class="btn btn-primary" id="nextStep">Siguiente</button>
+                    <button type="button" class="btn btn-info" id="previewBtn" style="display: none;">Vista Previa</button>
+                    <button type="button" class="btn btn-success" id="generateBtn" style="display: none;">Generar Contrato</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando contract generation page...');
+            if (window.crm && typeof window.crm.initContractGenerationPage === 'function') {
+                window.crm.initContractGenerationPage();
+            } else {
+                console.error('CRM App no está disponible o initContractGenerationPage no es una función');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Contract Generator - Generador de Contratos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header contract-generator-theme">
+            <div class="header-left">
+                <h1>CRM Contract Generator</h1>
+                <span class="user-role">Generador de Contratos</span>
+            </div>
+            <div class="header-right">
+                <span id="userInfo">Contract Generator User</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav contract-generator-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#clients-list" class="nav-link" data-section="clients-list">Lista de Clientes</a></li>
+                <li><a href="#contracts" class="nav-link" data-section="contracts">Contratos</a></li>
+                <li><a href="#reports" class="nav-link" data-section="reports">Reportes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active contract-generator-theme">
+                <h2>Dashboard Generador de Contratos</h2>
+                <div class="contract-generator-stats-grid">
+                    <div class="stat-card">
+                        <h3>Clientes Pendientes</h3>
+                        <div class="stat-number" id="pendingClientsCount">0</div>
+                        <div class="stat-change positive">+5 esta semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Contratos Generados</h3>
+                        <div class="stat-number" id="generatedContractsCount">0</div>
+                        <div class="stat-change positive">+12 este mes</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Contratos Pendientes</h3>
+                        <div class="stat-number" id="pendingContractsCount">0</div>
+                        <div class="stat-change neutral">En proceso</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Contratos Firmados</h3>
+                        <div class="stat-number" id="signedContractsCount">0</div>
+                        <div class="stat-change positive">+8 esta semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Valor Total Contratos</h3>
+                        <div class="stat-number" id="totalContractValue">$0</div>
+                        <div class="stat-change positive">+$25,000 este mes</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tiempo Promedio</h3>
+                        <div class="stat-number" id="avgProcessingTime">0h</div>
+                        <div class="stat-change positive">-2h vs mes anterior</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>Clientes Recientes</h3>
+                        <div id="recentClientsWidget">
+                            <!-- Recent clients will be populated here -->
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h3>Contratos por Estado</h3>
+                        <div id="contractsByStatusWidget">
+                            <!-- Contracts by status will be populated here -->
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h3>Alertas del Sistema</h3>
+                        <div id="systemAlertsWidget">
+                            <!-- System alerts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients List Section -->
+            <section id="clients-list" class="content-section">
+                <div class="clients-list-header">
+                    <h2>Lista de Clientes para Contratos</h2>
+                    <div class="clients-list-controls">
+                        <button id="refreshClientsBtn" class="btn btn-secondary">Actualizar Lista</button>
+                        <button id="exportClientsBtn" class="btn btn-outline">Exportar</button>
+                    </div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="clients-filters">
+                    <div class="filter-group">
+                        <label for="clientStatusFilter">Estado del Cliente:</label>
+                        <select id="clientStatusFilter">
+                            <option value="">Todos</option>
+                            <option value="aceptado">Aceptado</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_proceso">En Proceso</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="contractTypeFilter">Tipo de Contrato:</label>
+                        <select id="contractTypeFilter">
+                            <option value="">Todos</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="productos">Productos</option>
+                            <option value="mixto">Mixto</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateRangeFilter">Rango de Fechas:</label>
+                        <input type="date" id="dateFrom">
+                        <input type="date" id="dateTo">
+                    </div>
+                </div>
+
+                <!-- Lista de Clientes -->
+                <div class="clients-stats">
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Clientes:</span>
+                            <span class="stat-value" id="totalClientsCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Pendientes:</span>
+                            <span class="stat-value" id="pendingClientsCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">En Proceso:</span>
+                            <span class="stat-value" id="inProcessClientsCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="clientsListGrid">
+                    <!-- Clients list will be populated here -->
+                </div>
+            </section>
+
+            <!-- Contracts Section -->
+            <section id="contracts" class="content-section">
+                <h2>Gestión de Contratos</h2>
+                <div class="contracts-filters">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label for="contractServiceFilter">Tipo de Servicio:</label>
+                            <select id="contractServiceFilter">
+                                <option value="">Todos los servicios</option>
+                                <option value="internet">Internet</option>
+                                <option value="telefonia">Telefonía</option>
+                                <option value="cable">Cable</option>
+                                <option value="combo">Combo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="contractDateFilter">Filtro por Fecha:</label>
+                            <select id="contractDateFilter">
+                                <option value="">Todas las fechas</option>
+                                <option value="today">Hoy</option>
+                                <option value="week">Esta semana</option>
+                                <option value="month">Este mes</option>
+                                <option value="quarter">Este trimestre</option>
+                                <option value="year">Este año</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="contractSearchFilter">Buscar:</label>
+                            <input type="text" id="contractSearchFilter" placeholder="Cliente, contrato, servicio...">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" onclick="window.crm.applyContractFilters()">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.crm.clearContractFilters()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="contractsGrid">
+                    <!-- Contracts will be populated here -->
+                </div>
+            </section>
+
+
+            <!-- Reports Section -->
+            <section id="reports" class="content-section">
+                <h2>Reportes de Contratos</h2>
+                <div class="reports-controls">
+                    <button id="generateReportBtn" class="btn btn-primary">Generar Reporte</button>
+                    <button id="exportDataBtn" class="btn btn-secondary">Exportar Datos</button>
+                </div>
+                <div id="reportsContent">
+                    <!-- Reports will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Client Detail Modal -->
+    <div id="clientDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="clientDetailTitle">Detalle del Cliente</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="clientDetailContent">
+                <!-- Client details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Generation Modal -->
+    <div id="contractGenerationModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>Generar Contrato</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Contract generation form will be populated here -->
+                <div id="contractFormContainer">
+                    <!-- Contract form will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Preview Modal -->
+    <div id="contractPreviewModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>Vista Previa del Contrato</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="contractPreviewContent">
+                    <!-- Contract preview will be populated here -->
+                </div>
+                <div class="modal-actions">
+                    <button id="editContractBtn" class="btn btn-secondary">Editar</button>
+                    <button id="generateContractBtn" class="btn btn-primary">Generar Contrato</button>
+                    <button id="downloadContractBtn" class="btn btn-success">Descargar PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize contract generator interface
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando contract generator...');
+            if (window.crm && typeof window.crm.initContractGenerator === 'function') {
+                window.crm.initContractGenerator();
+            } else {
+                console.error('CRM App no está disponible');
+            }
+        });
+    </script>
+</body>
+</html>
