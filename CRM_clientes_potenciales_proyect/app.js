@@ -96,6 +96,22 @@ class CRMApp {
                 createdAt: new Date('2024-01-01'),
                 createdBy: 'Sistema',
                 managerId: 2 // ID del gerente asignado
+            },
+            { 
+                id: 6, 
+                username: 'client-success', 
+                password: 'success123', 
+                role: 'client-success', 
+                name: 'Client Success Manager',
+                firstName: 'Client',
+                lastName: 'Success',
+                email: 'client-success@empresa.com',
+                phone: '+1234567895',
+                cedula: '1234567895',
+                address: 'Oficina Client Success, Ciudad',
+                isActive: true,
+                createdAt: new Date('2024-01-01'),
+                createdBy: 'Sistema'
             }
         ];
         
@@ -2003,6 +2019,7 @@ class CRMApp {
         ensure('admin', 'admin123', 'admin', 'Admin Demo');
         ensure('manager', 'manager123', 'manager', 'Gerente Demo');
         ensure('advisor', 'advisor123', 'advisor', 'Asesor Demo');
+        ensure('client-success', 'success123', 'client-success', 'Client Success Demo');
         
         // Guardar si fue necesario
         try { this.saveData(); } catch(e) { console.warn('No se pudo guardar datos demo:', e); }
@@ -2044,6 +2061,26 @@ class CRMApp {
         
         // Initialize dynamic KPIs system
         this.initializeDynamicKPIs();
+    }
+    
+    redirectToRole() {
+        if (!this.isAuthenticated) {
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        // Redirect based on role
+        if (this.currentRole === 'admin') {
+            window.location.href = 'admin.html';
+        } else if (this.currentRole === 'manager') {
+            window.location.href = 'manager.html';
+        } else if (this.currentRole === 'advisor') {
+            window.location.href = 'advisor.html';
+        } else if (this.currentRole === 'client-success') {
+            window.location.href = 'client-success.html';
+        } else {
+            window.location.href = 'index.html';
+        }
     }
     
     // Sistema Dinámico de KPIs
@@ -13291,6 +13328,700 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global functions for HTML onclick handlers
 window.crm = window.crm || new CRMApp();
+
+// Client Success Manager functionality
+CRMApp.prototype.initClientSuccess = function() {
+    console.log('Inicializando Client Success Manager...');
+    this.setupClientSuccessEventListeners();
+    this.loadClientSuccessData();
+    this.updateClientSuccessDashboard();
+};
+
+CRMApp.prototype.setupClientSuccessEventListeners = function() {
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            this.showClientSuccessSection(section);
+        });
+    });
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => this.logout());
+    }
+
+    // Add Client Modal
+    const addClientBtn = document.getElementById('addClientBtn');
+    if (addClientBtn) {
+        addClientBtn.addEventListener('click', () => this.showAddClientModal());
+    }
+
+    // Add Client Form
+    const addClientForm = document.getElementById('addClientForm');
+    if (addClientForm) {
+        addClientForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.addNewClient();
+        });
+    }
+
+    // Modal close handlers
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('close')) {
+            this.closeModal(e.target.closest('.modal'));
+        }
+    });
+};
+
+CRMApp.prototype.showClientSuccessSection = function(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Show selected section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+
+    // Add active class to nav link
+    const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+
+    // Load section-specific data
+    switch(sectionId) {
+        case 'dashboard':
+            this.updateClientSuccessDashboard();
+            break;
+        case 'clients':
+            this.updateClientsGrid();
+            break;
+        case 'billing':
+            this.updateBillingGrid();
+            break;
+        case 'collections':
+            this.updateCollectionsGrid();
+            break;
+        case 'contracts':
+            this.updateContractsGrid();
+            break;
+        case 'tickets':
+            this.updateTicketsGrid();
+            break;
+        case 'ai-analysis':
+            this.updateAIAnalysis();
+            break;
+        case 'reports':
+            this.updateReports();
+            break;
+    }
+};
+
+CRMApp.prototype.loadClientSuccessData = function() {
+    // Initialize client success data
+    if (!this.existingClients) {
+        this.existingClients = [
+            {
+                id: 1,
+                name: 'Empresa ABC',
+                email: 'contacto@empresaabc.com',
+                phone: '+1234567890',
+                segment: 'enterprise',
+                value: 'alto',
+                health: 'excelente',
+                monthlyValue: 5000,
+                contractStartDate: '2024-01-15',
+                contractEndDate: '2025-01-15',
+                satisfaction: 9.2,
+                lastInteraction: '2024-12-01',
+                riskScore: 0.1,
+                status: 'activo'
+            },
+            {
+                id: 2,
+                name: 'Startup XYZ',
+                email: 'info@startupxyz.com',
+                phone: '+1234567891',
+                segment: 'startup',
+                value: 'medio',
+                health: 'bueno',
+                monthlyValue: 1500,
+                contractStartDate: '2024-06-01',
+                contractEndDate: '2025-06-01',
+                satisfaction: 8.5,
+                lastInteraction: '2024-11-28',
+                riskScore: 0.3,
+                status: 'activo'
+            },
+            {
+                id: 3,
+                name: 'SME Corp',
+                email: 'ventas@smecorp.com',
+                phone: '+1234567892',
+                segment: 'sme',
+                value: 'bajo',
+                health: 'riesgo',
+                monthlyValue: 800,
+                contractStartDate: '2024-03-01',
+                contractEndDate: '2025-03-01',
+                satisfaction: 6.2,
+                lastInteraction: '2024-11-15',
+                riskScore: 0.8,
+                status: 'riesgo'
+            }
+        ];
+    }
+
+    // Initialize billing data
+    if (!this.billingData) {
+        this.billingData = [
+            {
+                id: 1,
+                clientId: 1,
+                clientName: 'Empresa ABC',
+                invoiceNumber: 'INV-001',
+                amount: 5000,
+                dueDate: '2024-12-15',
+                status: 'pagado',
+                paidDate: '2024-12-10'
+            },
+            {
+                id: 2,
+                clientId: 2,
+                clientName: 'Startup XYZ',
+                invoiceNumber: 'INV-002',
+                amount: 1500,
+                dueDate: '2024-12-20',
+                status: 'pendiente',
+                paidDate: null
+            },
+            {
+                id: 3,
+                clientId: 3,
+                clientName: 'SME Corp',
+                invoiceNumber: 'INV-003',
+                amount: 800,
+                dueDate: '2024-11-30',
+                status: 'vencido',
+                paidDate: null
+            }
+        ];
+    }
+
+    // Initialize tickets data
+    if (!this.ticketsData) {
+        this.ticketsData = [
+            {
+                id: 1,
+                clientId: 1,
+                clientName: 'Empresa ABC',
+                title: 'Problema de conectividad',
+                description: 'Lentitud en la conexión',
+                priority: 'media',
+                status: 'resuelto',
+                createdAt: '2024-11-25',
+                resolvedAt: '2024-11-26',
+                resolutionTime: 24
+            },
+            {
+                id: 2,
+                clientId: 2,
+                clientName: 'Startup XYZ',
+                title: 'Configuración de red',
+                description: 'Necesita ayuda con configuración',
+                priority: 'baja',
+                status: 'en_proceso',
+                createdAt: '2024-11-30',
+                resolvedAt: null,
+                resolutionTime: null
+            },
+            {
+                id: 3,
+                clientId: 3,
+                clientName: 'SME Corp',
+                title: 'Corte de servicio',
+                description: 'Servicio interrumpido',
+                priority: 'alta',
+                status: 'abierto',
+                createdAt: '2024-12-01',
+                resolvedAt: null,
+                resolutionTime: null
+            }
+        ];
+    }
+};
+
+CRMApp.prototype.updateClientSuccessDashboard = function() {
+    const activeClients = this.existingClients.filter(c => c.status === 'activo').length;
+    const avgSatisfaction = this.existingClients.reduce((sum, c) => sum + c.satisfaction, 0) / this.existingClients.length;
+    const churnRisk = this.existingClients.filter(c => c.riskScore > 0.6).length;
+    const avgClientValue = this.existingClients.reduce((sum, c) => sum + c.monthlyValue, 0) / this.existingClients.length;
+    const resolvedTickets = this.ticketsData.filter(t => t.status === 'resuelto').length;
+    const avgResolutionTime = this.ticketsData.filter(t => t.resolutionTime).reduce((sum, t) => sum + t.resolutionTime, 0) / this.ticketsData.filter(t => t.resolutionTime).length;
+
+    // Update dashboard stats
+    document.getElementById('activeClientsCount').textContent = activeClients;
+    document.getElementById('avgSatisfaction').textContent = avgSatisfaction.toFixed(1) + '%';
+    document.getElementById('churnRiskCount').textContent = churnRisk;
+    document.getElementById('avgClientValue').textContent = '$' + avgClientValue.toFixed(0);
+    document.getElementById('resolvedTickets').textContent = resolvedTickets;
+    document.getElementById('avgResolutionTime').textContent = (avgResolutionTime || 0).toFixed(0) + 'h';
+
+    // Update AI alerts
+    this.updateAIAlerts();
+    this.updateRiskClients();
+    this.updateUpcomingRenewals();
+};
+
+CRMApp.prototype.updateAIAlerts = function() {
+    const alertsWidget = document.getElementById('aiAlertsWidget');
+    if (!alertsWidget) return;
+
+    const alerts = [
+        {
+            type: 'warning',
+            message: '3 clientes muestran riesgo de churn alto',
+            priority: 'alta'
+        },
+        {
+            type: 'info',
+            message: '2 contratos próximos a vencer en 30 días',
+            priority: 'media'
+        },
+        {
+            type: 'success',
+            message: 'Satisfacción promedio aumentó 2% este mes',
+            priority: 'baja'
+        }
+    ];
+
+    alertsWidget.innerHTML = alerts.map(alert => `
+        <div class="alert alert-${alert.type}">
+            <strong>${alert.priority.toUpperCase()}:</strong> ${alert.message}
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateRiskClients = function() {
+    const riskWidget = document.getElementById('riskClientsWidget');
+    if (!riskWidget) return;
+
+    const riskClients = this.existingClients.filter(c => c.riskScore > 0.6);
+    
+    riskWidget.innerHTML = riskClients.map(client => `
+        <div class="risk-client-item">
+            <div class="client-name">${client.name}</div>
+            <div class="risk-score">Riesgo: ${(client.riskScore * 100).toFixed(0)}%</div>
+            <div class="client-value">Valor: $${client.monthlyValue}</div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateUpcomingRenewals = function() {
+    const renewalsWidget = document.getElementById('upcomingRenewalsWidget');
+    if (!renewalsWidget) return;
+
+    const upcomingRenewals = this.existingClients.filter(c => {
+        const endDate = new Date(c.contractEndDate);
+        const today = new Date();
+        const daysUntilRenewal = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+        return daysUntilRenewal <= 30 && daysUntilRenewal > 0;
+    });
+
+    renewalsWidget.innerHTML = upcomingRenewals.map(client => `
+        <div class="renewal-item">
+            <div class="client-name">${client.name}</div>
+            <div class="renewal-date">Vence: ${client.contractEndDate}</div>
+            <div class="renewal-value">Valor: $${client.monthlyValue}</div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateClientsGrid = function() {
+    const clientsGrid = document.getElementById('clientsGrid');
+    if (!clientsGrid) return;
+
+    const totalClients = this.existingClients.length;
+    const healthyClients = this.existingClients.filter(c => c.health === 'excelente' || c.health === 'bueno').length;
+    const riskClients = this.existingClients.filter(c => c.health === 'riesgo').length;
+
+    // Update stats
+    document.getElementById('totalClientsCount').textContent = totalClients;
+    document.getElementById('healthyClientsCount').textContent = healthyClients;
+    document.getElementById('riskClientsCount').textContent = riskClients;
+
+    // Update grid
+    clientsGrid.innerHTML = this.existingClients.map(client => `
+        <div class="client-card" data-client-id="${client.id}">
+            <div class="client-header">
+                <h3>${client.name}</h3>
+                <span class="client-status status-${client.status}">${client.status}</span>
+            </div>
+            <div class="client-info">
+                <p><strong>Email:</strong> ${client.email}</p>
+                <p><strong>Teléfono:</strong> ${client.phone}</p>
+                <p><strong>Segmento:</strong> ${client.segment}</p>
+                <p><strong>Valor:</strong> $${client.monthlyValue}/mes</p>
+                <p><strong>Satisfacción:</strong> ${client.satisfaction}/10</p>
+                <p><strong>Salud:</strong> <span class="health-${client.health}">${client.health}</span></p>
+            </div>
+            <div class="client-actions">
+                <button class="btn btn-primary" onclick="window.crm.viewClientDetail(${client.id})">Ver Detalle</button>
+                <button class="btn btn-secondary" onclick="window.crm.viewAIAnalysis(${client.id})">Análisis IA</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateBillingGrid = function() {
+    const billingGrid = document.getElementById('billingGrid');
+    if (!billingGrid) return;
+
+    billingGrid.innerHTML = this.billingData.map(billing => `
+        <div class="billing-card">
+            <div class="billing-header">
+                <h3>${billing.clientName}</h3>
+                <span class="billing-status status-${billing.status}">${billing.status}</span>
+            </div>
+            <div class="billing-info">
+                <p><strong>Factura:</strong> ${billing.invoiceNumber}</p>
+                <p><strong>Monto:</strong> $${billing.amount}</p>
+                <p><strong>Vencimiento:</strong> ${billing.dueDate}</p>
+                <p><strong>Estado:</strong> ${billing.status}</p>
+                ${billing.paidDate ? `<p><strong>Pagado:</strong> ${billing.paidDate}</p>` : ''}
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateCollectionsGrid = function() {
+    const collectionsGrid = document.getElementById('collectionsGrid');
+    if (!collectionsGrid) return;
+
+    const collectionsData = this.billingData.map(billing => ({
+        ...billing,
+        collectionStatus: billing.status === 'vencido' ? 'moroso' : 
+                         billing.status === 'pendiente' ? 'vencido' : 'al_dia'
+    }));
+
+    collectionsGrid.innerHTML = collectionsData.map(collection => `
+        <div class="collection-card">
+            <div class="collection-header">
+                <h3>${collection.clientName}</h3>
+                <span class="collection-status status-${collection.collectionStatus}">${collection.collectionStatus}</span>
+            </div>
+            <div class="collection-info">
+                <p><strong>Factura:</strong> ${collection.invoiceNumber}</p>
+                <p><strong>Monto:</strong> $${collection.amount}</p>
+                <p><strong>Vencimiento:</strong> ${collection.dueDate}</p>
+                <p><strong>Días de atraso:</strong> ${this.calculateDaysOverdue(collection.dueDate)}</p>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateContractsGrid = function() {
+    const contractsGrid = document.getElementById('contractsGrid');
+    if (!contractsGrid) return;
+
+    contractsGrid.innerHTML = this.existingClients.map(client => `
+        <div class="contract-card">
+            <div class="contract-header">
+                <h3>${client.name}</h3>
+                <span class="contract-status status-${client.status}">${client.status}</span>
+            </div>
+            <div class="contract-info">
+                <p><strong>Inicio:</strong> ${client.contractStartDate}</p>
+                <p><strong>Vencimiento:</strong> ${client.contractEndDate}</p>
+                <p><strong>Valor Mensual:</strong> $${client.monthlyValue}</p>
+                <p><strong>Días restantes:</strong> ${this.calculateDaysUntilRenewal(client.contractEndDate)}</p>
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateTicketsGrid = function() {
+    const ticketsGrid = document.getElementById('ticketsGrid');
+    if (!ticketsGrid) return;
+
+    ticketsGrid.innerHTML = this.ticketsData.map(ticket => `
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <h3>${ticket.title}</h3>
+                <span class="ticket-priority priority-${ticket.priority}">${ticket.priority}</span>
+            </div>
+            <div class="ticket-info">
+                <p><strong>Cliente:</strong> ${ticket.clientName}</p>
+                <p><strong>Descripción:</strong> ${ticket.description}</p>
+                <p><strong>Estado:</strong> ${ticket.status}</p>
+                <p><strong>Creado:</strong> ${ticket.createdAt}</p>
+                ${ticket.resolvedAt ? `<p><strong>Resuelto:</strong> ${ticket.resolvedAt}</p>` : ''}
+                ${ticket.resolutionTime ? `<p><strong>Tiempo resolución:</strong> ${ticket.resolutionTime}h</p>` : ''}
+            </div>
+        </div>
+    `).join('');
+};
+
+CRMApp.prototype.updateAIAnalysis = function() {
+    // Churn Prediction
+    const churnPrediction = document.getElementById('churnPrediction');
+    if (churnPrediction) {
+        const highRiskClients = this.existingClients.filter(c => c.riskScore > 0.6);
+        churnPrediction.innerHTML = `
+            <div class="ai-analysis-item">
+                <h4>Clientes en Riesgo Alto</h4>
+                <p>${highRiskClients.length} clientes con probabilidad de churn > 60%</p>
+                <div class="risk-clients">
+                    ${highRiskClients.map(client => `
+                        <div class="risk-item">
+                            <span>${client.name}</span>
+                            <span class="risk-score">${(client.riskScore * 100).toFixed(0)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Personalized Recommendations
+    const personalizedRecommendations = document.getElementById('personalizedRecommendations');
+    if (personalizedRecommendations) {
+        personalizedRecommendations.innerHTML = `
+            <div class="ai-analysis-item">
+                <h4>Recomendaciones Personalizadas</h4>
+                <ul>
+                    <li>Contactar a SME Corp - riesgo alto de churn</li>
+                    <li>Ofrecer upgrade a Startup XYZ - buen rendimiento</li>
+                    <li>Programar reunión con Empresa ABC - renovación próxima</li>
+                </ul>
+            </div>
+        `;
+    }
+
+    // Sentiment Analysis
+    const sentimentAnalysis = document.getElementById('sentimentAnalysis');
+    if (sentimentAnalysis) {
+        sentimentAnalysis.innerHTML = `
+            <div class="ai-analysis-item">
+                <h4>Análisis de Sentimientos</h4>
+                <div class="sentiment-chart">
+                    <div class="sentiment-item positive">
+                        <span>Positivo: 65%</span>
+                    </div>
+                    <div class="sentiment-item neutral">
+                        <span>Neutral: 25%</span>
+                    </div>
+                    <div class="sentiment-item negative">
+                        <span>Negativo: 10%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Intelligent Segmentation
+    const intelligentSegmentation = document.getElementById('intelligentSegmentation');
+    if (intelligentSegmentation) {
+        intelligentSegmentation.innerHTML = `
+            <div class="ai-analysis-item">
+                <h4>Segmentación Inteligente</h4>
+                <div class="segmentation-chart">
+                    <div class="segment-item enterprise">
+                        <span>Enterprise: 1 cliente</span>
+                    </div>
+                    <div class="segment-item sme">
+                        <span>SME: 1 cliente</span>
+                    </div>
+                    <div class="segment-item startup">
+                        <span>Startup: 1 cliente</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+};
+
+CRMApp.prototype.updateReports = function() {
+    const reportsContent = document.getElementById('reportsContent');
+    if (!reportsContent) return;
+
+    reportsContent.innerHTML = `
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>Reporte de Satisfacción</h3>
+                <p>Satisfacción promedio: ${(this.existingClients.reduce((sum, c) => sum + c.satisfaction, 0) / this.existingClients.length).toFixed(1)}/10</p>
+                <button class="btn btn-primary">Generar PDF</button>
+            </div>
+            <div class="report-card">
+                <h3>Análisis de Retención</h3>
+                <p>Clientes en riesgo: ${this.existingClients.filter(c => c.riskScore > 0.6).length}</p>
+                <button class="btn btn-primary">Generar PDF</button>
+            </div>
+            <div class="report-card">
+                <h3>Métricas de Valor</h3>
+                <p>Valor promedio: $${(this.existingClients.reduce((sum, c) => sum + c.monthlyValue, 0) / this.existingClients.length).toFixed(0)}</p>
+                <button class="btn btn-primary">Generar PDF</button>
+            </div>
+        </div>
+    `;
+};
+
+CRMApp.prototype.showAddClientModal = function() {
+    const modal = document.getElementById('addClientModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+};
+
+CRMApp.prototype.addNewClient = function() {
+    const form = document.getElementById('addClientForm');
+    const formData = new FormData(form);
+    
+    const newClient = {
+        id: Date.now(),
+        name: document.getElementById('clientName').value,
+        email: document.getElementById('clientEmail').value,
+        phone: document.getElementById('clientPhone').value,
+        segment: document.getElementById('clientSegment').value,
+        value: document.getElementById('clientValue').value,
+        monthlyValue: parseInt(document.getElementById('monthlyValue').value),
+        contractStartDate: document.getElementById('contractStartDate').value,
+        contractEndDate: this.calculateContractEndDate(document.getElementById('contractStartDate').value),
+        satisfaction: 8.0,
+        lastInteraction: new Date().toISOString().split('T')[0],
+        riskScore: 0.2,
+        status: 'activo',
+        health: 'bueno'
+    };
+
+    this.existingClients.push(newClient);
+    this.saveData();
+    this.closeModal(document.getElementById('addClientModal'));
+    this.updateClientsGrid();
+    this.showNotification('Cliente agregado exitosamente', 'success');
+    
+    // Reset form
+    form.reset();
+};
+
+CRMApp.prototype.viewClientDetail = function(clientId) {
+    const client = this.existingClients.find(c => c.id == clientId);
+    if (!client) return;
+
+    const modal = document.getElementById('clientDetailModal');
+    const content = document.getElementById('clientDetailContent');
+    
+    if (content) {
+        content.innerHTML = `
+            <div class="client-detail">
+                <h4>Información General</h4>
+                <p><strong>Nombre:</strong> ${client.name}</p>
+                <p><strong>Email:</strong> ${client.email}</p>
+                <p><strong>Teléfono:</strong> ${client.phone}</p>
+                <p><strong>Segmento:</strong> ${client.segment}</p>
+                <p><strong>Valor:</strong> $${client.monthlyValue}/mes</p>
+                
+                <h4>Métricas de Salud</h4>
+                <p><strong>Satisfacción:</strong> ${client.satisfaction}/10</p>
+                <p><strong>Salud:</strong> ${client.health}</p>
+                <p><strong>Riesgo de Churn:</strong> ${(client.riskScore * 100).toFixed(0)}%</p>
+                
+                <h4>Información de Contrato</h4>
+                <p><strong>Inicio:</strong> ${client.contractStartDate}</p>
+                <p><strong>Vencimiento:</strong> ${client.contractEndDate}</p>
+                <p><strong>Última Interacción:</strong> ${client.lastInteraction}</p>
+            </div>
+        `;
+    }
+    
+    if (modal) {
+        modal.style.display = 'block';
+    }
+};
+
+CRMApp.prototype.viewAIAnalysis = function(clientId) {
+    const client = this.existingClients.find(c => c.id == clientId);
+    if (!client) return;
+
+    const modal = document.getElementById('aiAnalysisModal');
+    const content = document.getElementById('aiAnalysisContent');
+    
+    if (content) {
+        content.innerHTML = `
+            <div class="ai-analysis-detail">
+                <h4>Análisis de IA para ${client.name}</h4>
+                
+                <div class="analysis-section">
+                    <h5>Predicción de Churn</h5>
+                    <p>Probabilidad de churn: <strong>${(client.riskScore * 100).toFixed(0)}%</strong></p>
+                    <div class="risk-bar">
+                        <div class="risk-fill" style="width: ${client.riskScore * 100}%"></div>
+                    </div>
+                </div>
+                
+                <div class="analysis-section">
+                    <h5>Recomendaciones</h5>
+                    <ul>
+                        ${client.riskScore > 0.6 ? '<li>Contactar inmediatamente - riesgo alto</li>' : ''}
+                        ${client.satisfaction < 7 ? '<li>Programar reunión de satisfacción</li>' : ''}
+                        <li>Enviar encuesta de satisfacción</li>
+                        <li>Revisar oportunidades de upselling</li>
+                    </ul>
+                </div>
+                
+                <div class="analysis-section">
+                    <h5>Segmentación</h5>
+                    <p>Cliente clasificado como: <strong>${client.segment}</strong></p>
+                    <p>Valor del cliente: <strong>${client.value}</strong></p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (modal) {
+        modal.style.display = 'block';
+    }
+};
+
+CRMApp.prototype.calculateDaysOverdue = function(dueDate) {
+    const due = new Date(dueDate);
+    const today = new Date();
+    const diffTime = today - due;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+};
+
+CRMApp.prototype.calculateDaysUntilRenewal = function(endDate) {
+    const end = new Date(endDate);
+    const today = new Date();
+    const diffTime = end - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+};
+
+CRMApp.prototype.calculateContractEndDate = function(startDate) {
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + 1);
+    return end.toISOString().split('T')[0];
+};
+
+CRMApp.prototype.closeModal = function(modal) {
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
 
 // Función global para verificar el estado de los gerentes de ventas
 window.checkManagers = function() {

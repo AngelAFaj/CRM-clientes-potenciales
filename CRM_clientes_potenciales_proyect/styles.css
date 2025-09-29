@@ -7811,3 +7811,685 @@ tr:hover {
     opacity: 1;
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
 }
+
+/* ========================================
+   CLIENT SUCCESS MANAGER STYLES
+   ======================================== */
+
+/* Client Success Theme */
+.client-success-theme {
+    --primary-color: #7c3aed;
+    --primary-light: #8b5cf6;
+    --primary-dark: #6d28d9;
+}
+
+.client-success-nav {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+}
+
+.client-success-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    transition: var(--transition);
+}
+
+.client-success-nav .nav-link:hover,
+.client-success-nav .nav-link.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Client Success Dashboard */
+.client-success-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.client-success-stats-grid .stat-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.client-success-stats-grid .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.client-success-stats-grid .stat-card.churn-risk {
+    border-left: 4px solid var(--danger-color);
+}
+
+.client-success-stats-grid .stat-card.churn-risk .stat-number {
+    color: var(--danger-color);
+}
+
+/* Dashboard Widgets */
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.widget {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.widget h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* AI Alerts */
+.alert {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    border-left: 4px solid;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    border-left-color: var(--warning-color);
+    color: var(--warning-dark);
+}
+
+.alert-info {
+    background: #dbeafe;
+    border-left-color: var(--info-color);
+    color: var(--info-dark);
+}
+
+.alert-success {
+    background: #d1fae5;
+    border-left-color: var(--success-color);
+    color: var(--success-dark);
+}
+
+/* Risk Clients Widget */
+.risk-client-item {
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+}
+
+.risk-client-item .client-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.risk-client-item .risk-score {
+    color: var(--danger-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.risk-client-item .client-value {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Renewal Items */
+.renewal-item {
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+}
+
+.renewal-item .client-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.renewal-item .renewal-date {
+    color: var(--warning-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.renewal-item .renewal-value {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Client Cards */
+.client-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    margin-bottom: var(--spacing-lg);
+}
+
+.client-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.client-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.client-header h3 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.client-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-activo {
+    background: #d1fae5;
+    color: var(--success-dark);
+}
+
+.status-riesgo {
+    background: #fef3c7;
+    color: var(--warning-dark);
+}
+
+.client-info {
+    margin-bottom: var(--spacing-md);
+}
+
+.client-info p {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.client-info strong {
+    color: var(--text-primary);
+}
+
+.health-excelente {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.health-bueno {
+    color: var(--info-color);
+    font-weight: 600;
+}
+
+.health-riesgo {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.client-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* Billing Cards */
+.billing-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.billing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.billing-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.billing-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pagado {
+    background: #d1fae5;
+    color: var(--success-dark);
+}
+
+.status-pendiente {
+    background: #fef3c7;
+    color: var(--warning-dark);
+}
+
+.status-vencido {
+    background: #fee2e2;
+    color: var(--danger-dark);
+}
+
+.billing-info p {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.billing-info strong {
+    color: var(--text-primary);
+}
+
+/* Collection Cards */
+.collection-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.collection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.collection-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.collection-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-al_dia {
+    background: #d1fae5;
+    color: var(--success-dark);
+}
+
+.status-vencido {
+    background: #fef3c7;
+    color: var(--warning-dark);
+}
+
+.status-moroso {
+    background: #fee2e2;
+    color: var(--danger-dark);
+}
+
+.collection-info p {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.collection-info strong {
+    color: var(--text-primary);
+}
+
+/* Contract Cards */
+.contract-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.contract-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.contract-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.contract-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.contract-info p {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.contract-info strong {
+    color: var(--text-primary);
+}
+
+/* Ticket Cards */
+.ticket-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.ticket-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.ticket-priority {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-alta {
+    background: #fee2e2;
+    color: var(--danger-dark);
+}
+
+.priority-media {
+    background: #fef3c7;
+    color: var(--warning-dark);
+}
+
+.priority-baja {
+    background: #d1fae5;
+    color: var(--success-dark);
+}
+
+.ticket-info p {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.ticket-info strong {
+    color: var(--text-primary);
+}
+
+/* AI Analysis Grid */
+.ai-analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.ai-widget {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.ai-widget h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.ai-analysis-item {
+    margin-bottom: var(--spacing-md);
+}
+
+.ai-analysis-item h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ai-analysis-item h5 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Risk Clients */
+.risk-clients {
+    margin-top: var(--spacing-sm);
+}
+
+.risk-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.risk-score {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+/* Sentiment Chart */
+.sentiment-chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.sentiment-item {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+}
+
+.sentiment-item.positive {
+    background: #d1fae5;
+    color: var(--success-dark);
+}
+
+.sentiment-item.neutral {
+    background: #e5e7eb;
+    color: var(--text-secondary);
+}
+
+.sentiment-item.negative {
+    background: #fee2e2;
+    color: var(--danger-dark);
+}
+
+/* Segmentation Chart */
+.segmentation-chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.segment-item {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+}
+
+.segment-item.enterprise {
+    background: #dbeafe;
+    color: var(--info-dark);
+}
+
+.segment-item.sme {
+    background: #fef3c7;
+    color: var(--warning-dark);
+}
+
+.segment-item.startup {
+    background: #d1fae5;
+    color: var(--success-dark);
+}
+
+/* Reports Grid */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.report-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.report-card h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.report-card p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Client Detail Modal */
+.client-detail {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.client-detail h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: var(--spacing-sm);
+}
+
+.client-detail p {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-secondary);
+}
+
+.client-detail strong {
+    color: var(--text-primary);
+}
+
+/* AI Analysis Detail */
+.ai-analysis-detail {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.analysis-section {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+}
+
+.analysis-section h5 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.risk-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: var(--spacing-sm);
+}
+
+.risk-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-color) 0%, var(--warning-color) 50%, var(--danger-color) 100%);
+    transition: width 0.3s ease;
+}
+
+.analysis-section ul {
+    margin-left: var(--spacing-md);
+}
+
+.analysis-section li {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+/* Responsive Design for Client Success */
+@media (max-width: 768px) {
+    .client-success-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+    
+    .ai-analysis-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .reports-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .client-actions {
+        flex-direction: column;
+    }
+    
+    .client-actions .btn {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+}

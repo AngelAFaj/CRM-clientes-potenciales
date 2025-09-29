@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Client Success - Panel de Seguimiento de Clientes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header client-success-theme">
+            <div class="header-left">
+                <h1>CRM Client Success</h1>
+                <span class="user-role">Client Success Manager</span>
+            </div>
+            <div class="header-right">
+                <span id="userInfo">Client Success User</span>
+                <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav client-success-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#clients" class="nav-link" data-section="clients">Clientes Existentes</a></li>
+                <li><a href="#billing" class="nav-link" data-section="billing">Facturación</a></li>
+                <li><a href="#collections" class="nav-link" data-section="collections">Cobros</a></li>
+                <li><a href="#contracts" class="nav-link" data-section="contracts">Contratos</a></li>
+                <li><a href="#tickets" class="nav-link" data-section="tickets">Tickets</a></li>
+                <li><a href="#ai-analysis" class="nav-link" data-section="ai-analysis">Análisis IA</a></li>
+                <li><a href="#reports" class="nav-link" data-section="reports">Reportes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active client-success-theme">
+                <h2>Dashboard Client Success</h2>
+                <div class="client-success-stats-grid">
+                    <div class="stat-card">
+                        <h3>Clientes Activos</h3>
+                        <div class="stat-number" id="activeClientsCount">0</div>
+                        <div class="stat-change positive">+5 este mes</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Satisfacción Promedio</h3>
+                        <div class="stat-number" id="avgSatisfaction">0%</div>
+                        <div class="stat-change positive">+2% vs mes anterior</div>
+                    </div>
+                    <div class="stat-card churn-risk">
+                        <h3>Riesgo de Churn</h3>
+                        <div class="stat-number" id="churnRiskCount">0</div>
+                        <div class="stat-change negative" id="churnRiskChange">Clientes en riesgo</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Valor Promedio Cliente</h3>
+                        <div class="stat-number" id="avgClientValue">$0</div>
+                        <div class="stat-change positive">+$50 vs mes anterior</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tickets Resueltos</h3>
+                        <div class="stat-number" id="resolvedTickets">0</div>
+                        <div class="stat-change positive">+12 esta semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tiempo Promedio Resolución</h3>
+                        <div class="stat-number" id="avgResolutionTime">0h</div>
+                        <div class="stat-change positive">-2h vs semana anterior</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>Alertas de IA</h3>
+                        <div id="aiAlertsWidget">
+                            <!-- AI alerts will be populated here -->
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h3>Clientes en Riesgo</h3>
+                        <div id="riskClientsWidget">
+                            <!-- Risk clients will be populated here -->
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h3>Próximas Renovaciones</h3>
+                        <div id="upcomingRenewalsWidget">
+                            <!-- Upcoming renewals will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section id="clients" class="content-section">
+                <div class="clients-header">
+                    <h2>Gestión de Clientes Existentes</h2>
+                    <button id="addClientBtn" class="btn btn-primary">+ Agregar Cliente</button>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="clients-filters">
+                    <div class="filter-group">
+                        <label for="clientHealthFilter">Salud del Cliente:</label>
+                        <select id="clientHealthFilter">
+                            <option value="">Todos</option>
+                            <option value="excelente">Excelente</option>
+                            <option value="bueno">Bueno</option>
+                            <option value="regular">Regular</option>
+                            <option value="riesgo">En Riesgo</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="clientValueFilter">Valor del Cliente:</label>
+                        <select id="clientValueFilter">
+                            <option value="">Todos</option>
+                            <option value="alto">Alto Valor</option>
+                            <option value="medio">Valor Medio</option>
+                            <option value="bajo">Bajo Valor</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="clientSegmentFilter">Segmento:</label>
+                        <select id="clientSegmentFilter">
+                            <option value="">Todos</option>
+                            <option value="enterprise">Enterprise</option>
+                            <option value="sme">SME</option>
+                            <option value="startup">Startup</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Clientes -->
+                <div class="clients-stats">
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Clientes:</span>
+                            <span class="stat-value" id="totalClientsCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Clientes Saludables:</span>
+                            <span class="stat-value" id="healthyClientsCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">En Riesgo:</span>
+                            <span class="stat-value" id="riskClientsCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="clientsGrid">
+                    <!-- Clients will be populated here -->
+                </div>
+            </section>
+
+            <!-- Billing Section -->
+            <section id="billing" class="content-section">
+                <h2>Integración Facturación</h2>
+                <div class="billing-filters">
+                    <div class="filter-group">
+                        <label for="billingStatusFilter">Estado:</label>
+                        <select id="billingStatusFilter">
+                            <option value="">Todos</option>
+                            <option value="pagado">Pagado</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="vencido">Vencido</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="billingDateFilter">Período:</label>
+                        <input type="date" id="billingDateFrom">
+                        <input type="date" id="billingDateTo">
+                    </div>
+                </div>
+                <div id="billingGrid">
+                    <!-- Billing data will be populated here -->
+                </div>
+            </section>
+
+            <!-- Collections Section -->
+            <section id="collections" class="content-section">
+                <h2>Integración Cobros</h2>
+                <div class="collections-filters">
+                    <div class="filter-group">
+                        <label for="collectionStatusFilter">Estado:</label>
+                        <select id="collectionStatusFilter">
+                            <option value="">Todos</option>
+                            <option value="al_dia">Al Día</option>
+                            <option value="vencido">Vencido</option>
+                            <option value="moroso">Moroso</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="collectionsGrid">
+                    <!-- Collections data will be populated here -->
+                </div>
+            </section>
+
+            <!-- Contracts Section -->
+            <section id="contracts" class="content-section">
+                <h2>Integración Contratos</h2>
+                <div class="contracts-filters">
+                    <div class="filter-group">
+                        <label for="contractStatusFilter">Estado:</label>
+                        <select id="contractStatusFilter">
+                            <option value="">Todos</option>
+                            <option value="activo">Activo</option>
+                            <option value="vencido">Vencido</option>
+                            <option value="renovado">Renovado</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="contractsGrid">
+                    <!-- Contracts data will be populated here -->
+                </div>
+            </section>
+
+            <!-- Tickets Section -->
+            <section id="tickets" class="content-section">
+                <h2>Integración Tickets de Soporte</h2>
+                <div class="tickets-filters">
+                    <div class="filter-group">
+                        <label for="ticketStatusFilter">Estado:</label>
+                        <select id="ticketStatusFilter">
+                            <option value="">Todos</option>
+                            <option value="abierto">Abierto</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="resuelto">Resuelto</option>
+                            <option value="cerrado">Cerrado</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="ticketPriorityFilter">Prioridad:</label>
+                        <select id="ticketPriorityFilter">
+                            <option value="">Todas</option>
+                            <option value="alta">Alta</option>
+                            <option value="media">Media</option>
+                            <option value="baja">Baja</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="ticketsGrid">
+                    <!-- Tickets data will be populated here -->
+                </div>
+            </section>
+
+            <!-- AI Analysis Section -->
+            <section id="ai-analysis" class="content-section">
+                <h2>Análisis con IA</h2>
+                <div class="ai-analysis-grid">
+                    <div class="ai-widget">
+                        <h3>Predicción de Churn</h3>
+                        <div id="churnPrediction">
+                            <!-- Churn prediction will be populated here -->
+                        </div>
+                    </div>
+                    <div class="ai-widget">
+                        <h3>Recomendaciones Personalizadas</h3>
+                        <div id="personalizedRecommendations">
+                            <!-- Personalized recommendations will be populated here -->
+                        </div>
+                    </div>
+                    <div class="ai-widget">
+                        <h3>Análisis de Sentimientos</h3>
+                        <div id="sentimentAnalysis">
+                            <!-- Sentiment analysis will be populated here -->
+                        </div>
+                    </div>
+                    <div class="ai-widget">
+                        <h3>Segmentación Inteligente</h3>
+                        <div id="intelligentSegmentation">
+                            <!-- Intelligent segmentation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="content-section">
+                <h2>Reportes y Analytics</h2>
+                <div class="reports-controls">
+                    <button id="generateReportBtn" class="btn btn-primary">Generar Reporte</button>
+                    <button id="exportDataBtn" class="btn btn-secondary">Exportar Datos</button>
+                </div>
+                <div id="reportsContent">
+                    <!-- Reports will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Client Detail Modal -->
+    <div id="clientDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="clientDetailTitle">Detalle del Cliente</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="clientDetailContent">
+                <!-- Client details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis Modal -->
+    <div id="aiAnalysisModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Análisis Detallado con IA</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="aiAnalysisContent">
+                <!-- AI analysis will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Client Modal -->
+    <div id="addClientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Nuevo Cliente</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addClientForm">
+                    <div class="form-group">
+                        <label for="clientName">Nombre del Cliente:</label>
+                        <input type="text" id="clientName" required placeholder="Ej: Empresa ABC">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientEmail">Email:</label>
+                        <input type="email" id="clientEmail" required placeholder="contacto@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientPhone">Teléfono:</label>
+                        <input type="tel" id="clientPhone" required placeholder="+1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientSegment">Segmento:</label>
+                        <select id="clientSegment" required>
+                            <option value="">Seleccionar segmento...</option>
+                            <option value="enterprise">Enterprise</option>
+                            <option value="sme">SME</option>
+                            <option value="startup">Startup</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientValue">Valor del Cliente:</label>
+                        <select id="clientValue" required>
+                            <option value="">Seleccionar valor...</option>
+                            <option value="alto">Alto Valor</option>
+                            <option value="medio">Valor Medio</option>
+                            <option value="bajo">Bajo Valor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contractStartDate">Fecha de Inicio de Contrato:</label>
+                        <input type="date" id="contractStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="monthlyValue">Valor Mensual:</label>
+                        <input type="number" id="monthlyValue" required placeholder="0">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelAddClient">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Agregar Cliente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize client success interface
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando client success...');
+            if (window.crm && typeof window.crm.initClientSuccess === 'function') {
+                window.crm.initClientSuccess();
+            } else {
+                console.error('CRM App no está disponible');
+            }
+        });
+    </script>
+</body>
+</html>
