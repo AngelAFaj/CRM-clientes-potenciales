@@ -7328,8 +7328,8 @@ class CRMApp {
                         <div class="detail-group">
                             <h4>Asignación</h4>
                             <p><strong>Asesor Asignado:</strong> ${lead.advisor || 'Sin asignar'}</p>
-                            <p><strong>Fecha de Creación:</strong> ${new Date(lead.createdAt).toLocaleDateString('es-ES')}</p>
-                            <p><strong>Última Actividad:</strong> ${new Date(lead.lastActivity).toLocaleDateString('es-ES')}</p>
+                            <p><strong>Fecha de Creación:</strong> ${this.formatDate(lead.createdAt)}</p>
+                            <p><strong>Última Actividad:</strong> ${this.formatDate(lead.lastActivity)}</p>
                         </div>
                         ${lead.notes ? `
                         <div class="detail-group">
@@ -8270,8 +8270,8 @@ class CRMApp {
                     <p><strong>Contacto:</strong> ${lead.contact}</p>
                     <p><strong>Asesor:</strong> <span class="advisor-name">${lead.advisor || 'Sin asignar'}</span></p>
                     <p><strong>Nivel de Interés:</strong> <span class="interest-level interest-${lead.interestLevel ? lead.interestLevel.toLowerCase().replace(' ', '-') : 'sin-definir'}">${lead.interestLevel || 'Sin definir'}</span></p>
-                    <p><strong>Fecha de Creación:</strong> ${new Date(lead.createdAt).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Última Actividad:</strong> ${new Date(lead.lastActivity).toLocaleDateString('es-ES')}</p>
+                    <p><strong>Fecha de Creación:</strong> ${this.formatDate(lead.createdAt)}</p>
+                    <p><strong>Última Actividad:</strong> ${this.formatDate(lead.lastActivity)}</p>
                 </div>
                 <div class="lead-notes">
                     <p><strong>Notas:</strong></p>
@@ -8333,10 +8333,10 @@ class CRMApp {
                     </div>
                     <div class="task-actions">
                         ${task.status !== 'completada' ? `
-                            <button class="btn btn-success" onclick="window.crm.showCompleteTaskModal(${task.id})">Completar</button>
+                            <button class="btn btn-success" onclick="window.crm.showCompleteTaskModal('${task.id}')">Completar</button>
                         ` : ''}
-                        <button class="btn btn-primary" onclick="window.crm.showTaskDetail(${task.id})">Ver Detalle</button>
-                        <button class="btn btn-danger" onclick="window.crm.confirmDeleteTask(${task.id})" title="Eliminar tarea">
+                        <button class="btn btn-primary" onclick="window.crm.showTaskDetail('${task.id}')">Ver Detalle</button>
+                        <button class="btn btn-danger" onclick="window.crm.confirmDeleteTask('${task.id}')" title="Eliminar tarea">
                             🗑️ Eliminar
                         </button>
                     </div>
@@ -8370,9 +8370,9 @@ class CRMApp {
                             <p>${task.notes || 'Sin descripción'}</p>
                         </div>
                         <div class="upcoming-task-actions">
-                            <button class="btn btn-sm btn-primary" onclick="crm.showTaskDetail(${task.id})">Ver</button>
+                            <button class="btn btn-sm btn-primary" onclick="crm.showTaskDetail('${task.id}')">Ver</button>
                             ${task.status !== 'completada' ? `
-                                <button class="btn btn-sm btn-success" onclick="crm.showCompleteTaskModal(${task.id})">Completar</button>
+                                <button class="btn btn-sm btn-success" onclick="crm.showCompleteTaskModal('${task.id}')">Completar</button>
                             ` : ''}
                         </div>
                     </div>
@@ -8646,9 +8646,9 @@ class CRMApp {
                         </div>
                         <div class="task-actions">
                             ${task.status !== 'completada' ? `
-                                <button class="btn btn-success" onclick="window.crm.showCompleteTaskModal(${task.id})">Completar</button>
+                                <button class="btn btn-success" onclick="window.crm.showCompleteTaskModal('${task.id}')">Completar</button>
                             ` : ''}
-                            <button class="btn btn-primary" onclick="window.crm.showTaskDetail(${task.id})">Ver Detalle</button>
+                            <button class="btn btn-primary" onclick="window.crm.showTaskDetail('${task.id}')">Ver Detalle</button>
                         </div>
                     </div>
                 `;
@@ -9092,9 +9092,9 @@ class CRMApp {
                     </div>
                 </div>
                 <div class="calendar-task-actions">
-                    <button class="btn btn-sm btn-primary" onclick="crm.showTaskDetail(${task.id})">Ver</button>
+                    <button class="btn btn-sm btn-primary" onclick="crm.showTaskDetail('${task.id}')">Ver</button>
                     ${task.status !== 'completada' ? `
-                        <button class="btn btn-sm btn-success" onclick="crm.showCompleteTaskModal(${task.id})">Completar</button>
+                        <button class="btn btn-sm btn-success" onclick="crm.showCompleteTaskModal('${task.id}')">Completar</button>
                     ` : ''}
                 </div>
             </div>
@@ -9312,6 +9312,19 @@ class CRMApp {
         }
         const statusClass = client.status.toLowerCase().replace(' ', '-');
         
+        // Formatear fecha de última actividad de forma segura
+        let lastActivityDate = 'Sin actividad';
+        try {
+            if (client.lastActivity) {
+                const date = new Date(client.lastActivity);
+                if (!isNaN(date.getTime())) {
+                    lastActivityDate = date.toLocaleDateString('es-ES');
+                }
+            }
+        } catch (error) {
+            console.error('Error al formatear fecha de última actividad:', error);
+        }
+        
         return `
             <div class="client-grid-item">
                 <div class="client-info-advisor">
@@ -9326,13 +9339,13 @@ class CRMApp {
                     ${client.status}
                 </div>
                 <div class="client-last-activity-advisor">
-                    ${new Date(client.lastActivity).toLocaleDateString('es-ES')}
+                    ${lastActivityDate}
                 </div>
                 <div class="client-actions-advisor">
-                    <button class="btn-view" onclick="window.crm.showLeadDetail(${client.id})" title="Ver detalles">
+                    <button class="btn-view" onclick="window.crm.showLeadDetail('${client.id}')" title="Ver detalles">
                         👁️ Ver
                     </button>
-                    <button class="btn-history" onclick="window.crm.viewAdvisorClientHistory(${client.id})" title="Ver historial">
+                    <button class="btn-history" onclick="window.crm.viewAdvisorClientHistory('${client.id}')" title="Ver historial">
                         📈 Historial
                     </button>
                 </div>
@@ -9383,18 +9396,18 @@ class CRMApp {
                 
                 <!-- Columna Actividad -->
                 <div style="text-align: center; color: #6c757d; font-size: 0.9rem; font-weight: 500;">
-                    ${new Date(lead.lastActivity).toLocaleDateString('es-ES')}
+                    ${this.formatDate(lead.lastActivity)}
                 </div>
                 
                 <!-- Columna Acciones -->
                 <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                    <button onclick="window.crm.showLeadDetail(${lead.id})" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem; transition: background-color 0.2s;" title="Ver detalles completos">
+                    <button onclick="window.crm.showLeadDetail('${lead.id}')" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem; transition: background-color 0.2s;" title="Ver detalles completos">
                         👁️ Ver
                     </button>
-                    <button onclick="window.crm.editAdvisorLead(${lead.id})" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem; transition: background-color 0.2s;" title="Editar información">
+                    <button onclick="window.crm.editAdvisorLead('${lead.id}')" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem; transition: background-color 0.2s;" title="Editar información">
                         ✏️ Editar
                     </button>
-                    <button onclick="window.crm.quickCreateTask(${lead.id})" style="padding: 0.5rem; background: #ffc107; color: #212529; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s;" title="Crear tarea rápida">
+                    <button onclick="window.crm.quickCreateTask('${lead.id}')" style="padding: 0.5rem; background: #ffc107; color: #212529; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s;" title="Crear tarea rápida">
                         ➕
                     </button>
                 </div>
@@ -9550,7 +9563,7 @@ class CRMApp {
                         </div>
                         <div>
                             <strong style="color: #495057;">📅 Última actividad:</strong><br>
-                            <span style="color: #6c757d;">${new Date(lead.lastActivity).toLocaleDateString('es-ES')}</span>
+                            <span style="color: #6c757d;">${this.formatDate(lead.lastActivity)}</span>
                         </div>
                     </div>
                     
@@ -9562,10 +9575,10 @@ class CRMApp {
                     ` : ''}
                     
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <button onclick="window.crm.showLeadDetail(${lead.id})" style="flex: 1; min-width: 120px; padding: 0.5rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                        <button onclick="window.crm.showLeadDetail('${lead.id}')" style="flex: 1; min-width: 120px; padding: 0.5rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
                             👁️ Ver Detalle
                         </button>
-                        <button onclick="window.crm.editAdvisorLead(${lead.id})" style="flex: 1; min-width: 120px; padding: 0.5rem; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                        <button onclick="window.crm.editAdvisorLead('${lead.id}')" style="flex: 1; min-width: 120px; padding: 0.5rem; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
                             ✏️ Editar
                         </button>
                     </div>
@@ -10850,7 +10863,7 @@ class CRMApp {
                             </svg>
                             Ver Detalle
                         </button>
-                        <button onclick="window.crm.showCompleteTaskModal(${task.id})" style="flex: 1; padding: 0.75rem 1rem; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <button onclick="window.crm.showCompleteTaskModal('${task.id}')" style="flex: 1; padding: 0.75rem 1rem; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
@@ -10974,14 +10987,14 @@ class CRMApp {
                 </div>
                 <div class="task-actions">
                     ${task.status !== 'completada' ? `
-                        <button class="btn btn-success btn-sm" onclick="window.crm.showCompleteTaskModal(${task.id})">
+                        <button class="btn btn-success btn-sm" onclick="window.crm.showCompleteTaskModal('${task.id}')">
                             Completar
                         </button>
                     ` : ''}
-                    <button class="btn btn-primary btn-sm" onclick="window.crm.showTaskDetail(${task.id})">
+                    <button class="btn btn-primary btn-sm" onclick="window.crm.showTaskDetail('${task.id}')">
                         Ver Detalle
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="window.crm.deleteTask(${task.id})">
+                    <button class="btn btn-danger btn-sm" onclick="window.crm.deleteTask('${task.id}')">
                         🗑️ Eliminar
                     </button>
                 </div>
@@ -11384,10 +11397,10 @@ class CRMApp {
                             <strong style="color: #495057;">Asesor Asignado:</strong> ${lead.advisor || 'Sin asignar'}
                         </div>
                         <div style="margin-bottom: 0.75rem;">
-                            <strong style="color: #495057;">Fecha de Creación:</strong> ${new Date(lead.createdAt).toLocaleDateString('es-ES')}
+                            <strong style="color: #495057;">Fecha de Creación:</strong> ${this.formatDate(lead.createdAt)}
                         </div>
                         <div style="margin-bottom: 0.75rem;">
-                            <strong style="color: #495057;">Última Actividad:</strong> ${lead.lastActivity ? new Date(lead.lastActivity).toLocaleDateString('es-ES') : 'Sin actividad'}
+                            <strong style="color: #495057;">Última Actividad:</strong> ${this.formatDate(lead.lastActivity)}
                         </div>
                     </div>
                 </div>
@@ -12711,7 +12724,7 @@ class CRMApp {
             const lastActivity = advisorLeads.length > 0 ? 
                 Math.max(...advisorLeads.map(lead => new Date(lead.lastActivity || lead.createdAt).getTime())) : null;
             const lastActivityText = lastActivity ? 
-                new Date(lastActivity).toLocaleDateString('es-ES') : 'Sin actividad';
+                this.formatDate(new Date(lastActivity)) : 'Sin actividad';
 
             return {
                 name: advisor.name,
@@ -14732,6 +14745,21 @@ CRMApp.prototype.deleteService = function(serviceId) {
 };
 
 CRMApp.prototype.formatDate = function(date) {
+    // Validar que date sea un objeto Date válido
+    if (!date) {
+        return 'Sin fecha';
+    }
+    
+    // Si es un string, intentar convertirlo a Date
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    
+    // Verificar que sea un objeto Date válido
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+        return 'Fecha inválida';
+    }
+    
     return date.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: '2-digit',
