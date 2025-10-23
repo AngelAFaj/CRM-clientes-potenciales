@@ -13175,66 +13175,6 @@ class CRMApp {
         this.showNotification(`Lead avanzado de ${currentState} a ${newState}`, 'success');
     }
 
-    qualifyClient(leadId) {
-        console.log('Calificando cliente:', leadId);
-        const lead = this.leads.find(l => l.id == leadId);
-        if (!lead) {
-            this.showNotification('Lead no encontrado', 'error');
-            return;
-        }
-
-        // Crear modal de calificación
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.display = 'block';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Calificar Cliente: ${lead.name}</h3>
-                    <span class="close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
-                </div>
-                <div class="modal-body">
-                    <form id="qualifyForm">
-                        <div class="form-group">
-                            <label for="interestLevel">Nivel de Interés:</label>
-                            <select id="interestLevel" required>
-                                <option value="">Seleccionar nivel...</option>
-                                <option value="1 - No me interesa">1 - No me interesa</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10 - Super interesado">10 - Super interesado</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="qualificationNotes">Notas de Calificación:</label>
-                            <textarea id="qualificationNotes" rows="4" placeholder="Describe el nivel de interés y próximos pasos..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="nextAction">Próxima Acción:</label>
-                            <select id="nextAction" required>
-                                <option value="">Seleccionar acción...</option>
-                                <option value="Llamada de seguimiento">Llamada de seguimiento</option>
-                                <option value="Enviar propuesta">Enviar propuesta</option>
-                                <option value="Reunión presencial">Reunión presencial</option>
-                                <option value="Enviar información adicional">Enviar información adicional</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">Cancelar</button>
-                    <button class="btn btn-primary" onclick="window.crm.saveQualification('${leadId}')">Guardar Calificación</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
 
     saveQualification(leadId) {
         const lead = this.leads.find(l => l.id == leadId);
