@@ -1301,6 +1301,7 @@ class CRMApp {
     init() {
         this.loadData();
         this.checkAuthentication();
+    this.showPendingNotification();
         
         // Inicializar eventos de ejemplo
         this.loadMockEvents();
@@ -1938,12 +1939,44 @@ class CRMApp {
             notification.classList.add('show');
         }, 100);
         
+        // Si el usuario hace hover, mantenemos la notificación visible
+        let hideTimeout = setTimeout(() => {
+            notification.classList.remove('show');
         setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 12000);
+
+        notification.addEventListener('mouseenter', () => {
+            clearTimeout(hideTimeout);
+        });
+
+        notification.addEventListener('mouseleave', () => {
+            hideTimeout = setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
+                    if (document.body.contains(notification)) {
                 document.body.removeChild(notification);
+                    }
             }, 300);
-        }, 3000);
+            }, 4000);
+        });
+    }
+
+    showPendingNotification() {
+        try {
+            const raw = localStorage.getItem('pendingNotification');
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (data && data.message) {
+                this.showNotification(data.message, data.type || 'info');
+            }
+            localStorage.removeItem('pendingNotification');
+        } catch (e) {
+            console.warn('No se pudo mostrar la notificación pendiente:', e);
+        }
     }
     
     formatDate(date) {
@@ -1985,10 +2018,16 @@ class CRMApp {
                 console.log('Datos del formulario:', { username, password, role });
                 
                 if (this.login(username, password, role)) {
-                    this.showNotification('Inicio de sesión exitoso', 'success');
-                    setTimeout(() => {
+                    // Guardar notificación para mostrarla en el panel de destino
+                    try {
+                        localStorage.setItem('pendingNotification', JSON.stringify({
+                            message: 'Inicio de sesión exitoso',
+                            type: 'success'
+                        }));
+                    } catch(e) {
+                        console.warn('No se pudo guardar la notificación pendiente:', e);
+                    }
                         this.redirectToRole();
-                    }, 1000);
                 } else {
                     this.showNotification('Credenciales incorrectas', 'error');
                 }
@@ -2032,8 +2071,13 @@ class CRMApp {
             return;
         }
         
+        this.showPendingNotification();
+        
         this.setupAdminEventListeners();
         this.updateAdminDashboard();
+        
+        // Establecer título inicial
+        this.updateHeaderTitle('crm-section');
         
         // Verificar si hay gerentes de ventas disponibles al inicializar
         this.createDefaultManager();
@@ -2046,6 +2090,8 @@ class CRMApp {
             this.redirectToRole();
             return;
         }
+        
+        this.showPendingNotification();
         
         this.setupManagerEventListeners();
         this.updateManagerDashboard();
@@ -2644,6 +2690,8 @@ class CRMApp {
             return;
         }
         
+        this.showPendingNotification();
+        
         // Sembrar datos de ejemplo para el asesor actual si no existen suficientes clientes
         this.ensureAdvisorSampleLeads(this.currentUser?.name);
         
@@ -2718,6 +2766,9 @@ class CRMApp {
                 this.showAdminSection(section);
             });
         });
+        
+        // Sidebar Navigation
+        this.setupAdminSidebarNavigation();
         
         // AI Analysis
         const runAIAnalysisBtn = document.getElementById('runAIAnalysis');
@@ -9527,7 +9578,7 @@ class CRMApp {
             setTimeout(() => {
                 notification.remove();
             }, 300);
-        }, 3000);
+        }, 12000);
     }
     
     createAdvisorLeadCard(lead) {
@@ -11459,6 +11510,9 @@ class CRMApp {
             activeButton.classList.add('active');
         }
         
+        // Actualizar título del header con animación
+        this.updateHeaderTitle(sectionName);
+        
         // Cargar contenido específico de la sección
         switch (sectionName) {
             case 'crm-section':
@@ -11469,6 +11523,48 @@ class CRMApp {
                 console.log('Cargando sección de usuarios...');
                 this.loadUsers();
                 break;
+        }
+    }
+    
+    updateHeaderTitle(sectionName) {
+        const headerTitle = document.getElementById('headerTitle');
+        if (!headerTitle) return;
+        
+        let newTitle = '';
+        switch (sectionName) {
+            case 'crm-section':
+                newTitle = 'CRM - Customer Relationship Management';
+                break;
+            case 'user-section':
+                newTitle = 'Gestión de Usuarios';
+                break;
+            default:
+                newTitle = 'CRM - Customer Relationship Management';
+        }
+        
+        // Solo actualizar si el título es diferente
+        if (headerTitle.textContent.trim() !== newTitle) {
+            // Animación de fade out con deslizamiento
+            headerTitle.style.transition = 'opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+            headerTitle.style.opacity = '0';
+            headerTitle.style.transform = 'translateY(-8px)';
+            
+            setTimeout(() => {
+                // Cambiar el texto
+                headerTitle.textContent = newTitle;
+                
+                // Resetear transform para animación de entrada
+                headerTitle.style.transform = 'translateY(8px)';
+                
+                // Forzar reflow para que la animación funcione
+                headerTitle.offsetHeight;
+                
+                // Animación de fade in con deslizamiento
+                setTimeout(() => {
+                    headerTitle.style.opacity = '1';
+                    headerTitle.style.transform = 'translateY(0)';
+                }, 10);
+            }, 250);
         }
     }
 
@@ -15794,7 +15890,7 @@ CRMApp.prototype.showNotification = function(message, type = 'info') {
     // Agregar al DOM
     document.body.appendChild(notification);
     
-    // Remover después de 3 segundos
+    // Remover después de 12 segundos
     setTimeout(() => {
         if (notification.parentNode) {
             notification.style.animation = 'slideOutRight 0.3s ease-in';
@@ -15804,7 +15900,7 @@ CRMApp.prototype.showNotification = function(message, type = 'info') {
                 }
             }, 300);
         }
-    }, 3000);
+    }, 12000);
     
     // Agregar estilos CSS para las animaciones si no existen
     if (!document.getElementById('notification-styles')) {

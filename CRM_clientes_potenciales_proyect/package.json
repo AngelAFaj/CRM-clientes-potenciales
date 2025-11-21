@@ -18,5 +18,8 @@
   "license": "MIT",
   "devDependencies": {
     "serve": "^14.2.0"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0"
   }
 }
