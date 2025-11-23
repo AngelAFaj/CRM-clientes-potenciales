@@ -106,27 +106,16 @@ body {
     font-weight: 400;
 }
 
-/* Admin Panel - Aplicar fondo oscuro del login */
+/* Admin Panel - Fondo Blanco */
 body:not(.login-page) {
-    background: linear-gradient(160deg, #01030b 0%, #050b1b 45%, #0c1a33 100%);
+    background: #ffffff;
     position: relative;
     overflow-x: hidden;
     min-height: 100vh;
 }
 
 body:not(.login-page)::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(circle at 12% 18%, rgba(59, 130, 246, 0.28), transparent 55%),
-        radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.20), transparent 60%),
-        radial-gradient(ellipse at 80% 78%, rgba(16, 185, 129, 0.20), transparent 65%),
-        radial-gradient(circle at 10% 85%, rgba(37, 99, 235, 0.22), transparent 60%);
-    filter: blur(12px);
-    opacity: 0.95;
-    z-index: 0;
-    pointer-events: none;
+    display: none;
 }
 
 /* CSS Variables - Diseño Empresarial */
@@ -763,7 +752,7 @@ body:not(.login-page)::before {
     transform: scale(1.05);
 }
 
-/* Main Content - Fondo Blanco con Gradiente Azul Sutil */
+/* Main Content - Fondo Blanco */
 .main-content {
     flex: 1;
     padding: clamp(1.25rem, 2vw, 1.75rem);
@@ -771,7 +760,7 @@ body:not(.login-page)::before {
     margin: 0 auto;
     width: 100%;
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(239, 246, 255, 0.3) 100%);
+    background: #ffffff;
     min-height: calc(100vh - 120px);
 }
 
@@ -836,7 +825,7 @@ body:not(.login-page)::before {
     color: #1e40af;
 }
 
-/* Sections - Fondo Blanco con Gradiente Azul Sutil */
+/* Sections - Cards con Degradado y Borde */
 .dashboard-section,
 .team-stats-section,
 .advisor-management-section,
@@ -851,10 +840,10 @@ body:not(.login-page)::before {
 .kpi-section,
 .ai-analysis-section,
 .team-overview-section {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(239, 246, 255, 0.2) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     padding: clamp(1.5rem, 2vw, 2rem);
     margin-bottom: 1.5rem;
     transition: all 0.3s ease;
@@ -906,8 +895,8 @@ body:not(.login-page)::before {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.15) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -950,11 +939,11 @@ body:not(.login-page)::before {
 /* KPIs Summary Section - Estilo Empresarial */
 .kpis-summary-section {
     margin: 1.5rem 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.2) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     padding: clamp(1.25rem, 1.8vw, 1.5rem);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -977,12 +966,12 @@ body:not(.login-page)::before {
 }
 
 .advisor-kpi-card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.15) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
     border-radius: 10px;
     padding: clamp(1rem, 1.4vw, 1.25rem);
     border-left: 3px solid #1e40af;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -1046,8 +1035,8 @@ body:not(.login-page)::before {
     flex-direction: column;
     align-items: center;
     padding: clamp(0.65rem, 1vw, 0.75rem);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.15) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 8px;
     text-align: center;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4183,8 +4172,8 @@ tr:hover {
 }
 
 .task-summary-card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.15) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 8px;
     padding: clamp(0.85rem, 1.2vw, 1rem);
     border-left: 3px solid #1e40af;
@@ -5725,12 +5714,12 @@ tr:hover {
 
 /* Estilos para la sección de análisis de IA del equipo - Estilo Empresarial */
 .ai-analysis-section {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.2) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     padding: clamp(1.25rem, 1.8vw, 1.5rem);
     margin-top: 1.5rem;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -5804,8 +5793,8 @@ tr:hover {
 }
 
 .ai-analysis-content {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.15) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     padding: clamp(1.25rem, 1.8vw, 1.5rem);
     min-height: 180px;
@@ -7391,8 +7380,8 @@ tr:hover {
     align-items: flex-end;
     margin-bottom: 1.5rem;
     padding: clamp(1rem, 1.5vw, 1.25rem);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.3) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     flex-wrap: wrap;
@@ -7451,11 +7440,11 @@ tr:hover {
     background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
     border-radius: 10px;
     padding: 0;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     display: flex;
     align-items: center;
     min-height: 90px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
@@ -7501,8 +7490,8 @@ tr:hover {
 
 /* General Metrics Table */
 .general-metrics-table {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.2) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     padding: clamp(1rem, 1.5vw, 1.25rem);
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
@@ -7523,8 +7512,8 @@ tr:hover {
 }
 
 .chart-container {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.2) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     padding: clamp(1rem, 1.5vw, 1.25rem);
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
@@ -7686,11 +7675,11 @@ tr:hover {
 }
 
 .manager-card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.2) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
     border-radius: 10px;
     padding: clamp(1.25rem, 1.8vw, 1.5rem);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -7875,11 +7864,11 @@ tr:hover {
 
 .leads-stats-table,
 .clients-stats-table {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.2) 100%);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: 10px;
     padding: clamp(1.25rem, 1.8vw, 1.5rem);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     margin: 1.5rem 0;
     font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
