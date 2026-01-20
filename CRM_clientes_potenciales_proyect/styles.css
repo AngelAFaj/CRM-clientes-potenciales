@@ -7667,6 +7667,86 @@ tr:hover {
     gap: 0.5rem;
 }
 
+/* Performance Line Chart Section */
+.performance-line-chart-section {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.95) 50%, rgba(239, 246, 255, 0.25) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 10px;
+    padding: clamp(1.25rem, 1.8vw, 1.5rem);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    margin: 1.5rem 0;
+    font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.chart-section-header {
+    margin-bottom: 1.5rem;
+}
+
+.chart-section-header h3 {
+    color: #1e293b;
+    font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    font-family: 'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.chart-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-filter-group label {
+    font-weight: 500;
+    color: #475569;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.chart-filter-group select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    color: #1e293b;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 150px;
+}
+
+.chart-filter-group select:hover {
+    border-color: #3b82f6;
+}
+
+.chart-filter-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.chart-container-wrapper {
+    position: relative;
+    height: 400px;
+    margin-top: 1rem;
+}
+
+.chart-container-wrapper canvas {
+    max-height: 100%;
+}
+
 .managers-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));

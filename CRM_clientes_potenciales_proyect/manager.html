@@ -529,8 +529,29 @@
         // Initialize manager interface
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM cargado, inicializando manager...');
-            if (window.crm && typeof window.crm.initManager === 'function') {
-                window.crm.initManager();
+            if (window.crm) {
+                // Verificar el rol del usuario y llamar la función apropiada
+                window.crm.checkAuthentication();
+                const currentRole = window.crm.currentRole;
+                
+                if (currentRole === 'admin') {
+                    // Si es admin, usar initManagerForAdmin
+                    if (typeof window.crm.initManagerForAdmin === 'function') {
+                        window.crm.initManagerForAdmin();
+                    } else {
+                        console.error('initManagerForAdmin no está disponible');
+                    }
+                } else if (currentRole === 'manager') {
+                    // Si es manager, usar initManager
+                    if (typeof window.crm.initManager === 'function') {
+                        window.crm.initManager();
+                    } else {
+                        console.error('initManager no está disponible');
+                    }
+                } else {
+                    console.error('Rol no válido para esta página:', currentRole);
+                    window.crm.redirectToRole();
+                }
             } else {
                 console.error('CRM App no está disponible');
             }

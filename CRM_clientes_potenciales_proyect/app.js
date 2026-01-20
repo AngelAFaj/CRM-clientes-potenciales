@@ -2093,8 +2093,18 @@ class CRMApp {
         
         this.showPendingNotification();
         
+        // Asegurar que la sección dashboard esté visible inmediatamente
+        const dashboardSection = document.getElementById('dashboard');
+        if (dashboardSection) {
+            dashboardSection.classList.add('active');
+        }
+        
         this.setupManagerEventListeners();
-        this.updateManagerDashboard();
+        
+        // Cargar dashboard de forma asíncrona para no bloquear la UI
+        requestAnimationFrame(() => {
+            this.updateManagerDashboard();
+        });
         
         // Initialize sequences display
         setTimeout(() => {
@@ -2654,24 +2664,43 @@ class CRMApp {
             return;
         }
         
+        this.showPendingNotification();
+        
+        // Actualizar header si es admin
+        if (this.currentRole === 'admin') {
+            this.updateManagerHeaderForAdmin();
+        }
+        
+        // Asegurar que la sección dashboard esté visible inmediatamente
+        const dashboardSection = document.getElementById('dashboard');
+        if (dashboardSection) {
+            dashboardSection.classList.add('active');
+        }
+        
         this.setupManagerEventListeners();
         this.setupAdminSidebarNavigation();
         this.setupAdminDashboardControls();
-        this.updateManagersDashboard();
-        this.updateAdvisorsKPIs();
-        // Métricas generales
-        this.setupGeneralMetricsFilters && this.setupGeneralMetricsFilters();
-        this.updateGeneralMetricsUI && this.updateGeneralMetricsUI();
-        // Estadísticas generales y por asesor
-        this.updateStatsGeneralUI && this.updateStatsGeneralUI();
-        this.setupAdvisorStatsFilters();
-        this.updateAdvisorStatsUI();
-        // Estadísticas de leads
-        this.setupLeadsStatsFilters && this.setupLeadsStatsFilters();
-        this.updateLeadsStatsUI && this.updateLeadsStatsUI();
-        // Estadísticas de clientes
-        this.setupClientsStatsFilters && this.setupClientsStatsFilters();
-        this.updateClientsStatsUI && this.updateClientsStatsUI();
+        
+        // Cargar datos de forma asíncrona para no bloquear la UI
+        requestAnimationFrame(() => {
+            this.updateManagersDashboard();
+            this.updateAdvisorsKPIs();
+            
+            // Métricas generales
+            this.setupGeneralMetricsFilters && this.setupGeneralMetricsFilters();
+            this.updateGeneralMetricsUI && this.updateGeneralMetricsUI();
+            // Estadísticas generales
+            this.updateStatsGeneralUI && this.updateStatsGeneralUI();
+            // Estadísticas de leads
+            this.setupLeadsStatsFilters && this.setupLeadsStatsFilters();
+            this.updateLeadsStatsUI && this.updateLeadsStatsUI();
+            // Estadísticas de clientes
+            this.setupClientsStatsFilters && this.setupClientsStatsFilters();
+            this.updateClientsStatsUI && this.updateClientsStatsUI();
+        });
+        
+        // Initialize dynamic KPIs system (necesario para la sección de Asesores)
+        this.initializeDynamicKPIs();
         
         // Initialize sequences display
         setTimeout(() => {
@@ -2681,6 +2710,27 @@ class CRMApp {
             // Agregar botón de prueba temporal
             this.addTestButton();
         }, 100);
+    }
+    
+    updateManagerHeaderForAdmin() {
+        // Actualizar el rol en el header
+        const userRoleElement = document.querySelector('.user-role');
+        if (userRoleElement) {
+            userRoleElement.textContent = 'Administrador';
+        }
+        
+        // Actualizar el nombre del usuario
+        const userInfoElement = document.getElementById('userInfo');
+        if (userInfoElement && this.currentUser) {
+            userInfoElement.textContent = this.currentUser.name || 'Admin User';
+        }
+        
+        // Cambiar el tema del header a admin-theme
+        const header = document.querySelector('.app-header');
+        if (header) {
+            header.classList.remove('manager-theme');
+            header.classList.add('admin-theme');
+        }
     }
     
     initAdvisor() {
@@ -2695,9 +2745,6 @@ class CRMApp {
         // Sembrar datos de ejemplo para el asesor actual si no existen suficientes clientes
         this.ensureAdvisorSampleLeads(this.currentUser?.name);
         
-        // Initialize calendar with current date
-        this.currentCalendarDate = new Date();
-        this.currentCalendarView = 'week';
         
         this.setupAdvisorEventListeners();
         this.updateAdvisorDashboard();
@@ -2978,18 +3025,64 @@ class CRMApp {
         // Logout
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.logout());
+            // Remover listener anterior si existe para evitar duplicados
+            logoutBtn.replaceWith(logoutBtn.cloneNode(true));
+            const newLogoutBtn = document.getElementById('logoutBtn');
+            if (newLogoutBtn) {
+                newLogoutBtn.addEventListener('click', () => this.logout());
+            }
         }
         
-        // Navigation
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = e.target.getAttribute('data-section');
-                this.showManagerSection(section);
+        // Navigation - Mejorado para manejar clics en elementos hijos
+        // Usar delegación de eventos para evitar problemas con elementos dinámicos
+        const navContainer = document.querySelector('.main-nav') || document.querySelector('nav');
+        if (navContainer) {
+            // Remover listener anterior si existe
+            if (this.navClickHandler) {
+                navContainer.removeEventListener('click', this.navClickHandler);
+            }
+            
+            // Crear nuevo handler
+            this.navClickHandler = (e) => {
+                const navLink = e.target.closest('.nav-link');
+                if (navLink) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const section = navLink.getAttribute('data-section');
+                    if (section) {
+                        console.log('Navegando a sección:', section);
+                        this.showManagerSection(section);
+                    } else {
+                        console.warn('No se encontró data-section en el enlace:', navLink);
+                    }
+                }
+            };
+            
+            navContainer.addEventListener('click', this.navClickHandler);
+        } else {
+            // Fallback: agregar listeners directamente a los enlaces
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                // Remover listeners anteriores
+                const newLink = link.cloneNode(true);
+                link.parentNode.replaceChild(newLink, link);
+                
+                // Agregar nuevo listener
+                newLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const section = newLink.getAttribute('data-section');
+                    if (section) {
+                        console.log('Navegando a sección:', section);
+                        this.showManagerSection(section);
+                    } else {
+                        console.warn('No se encontró data-section en el enlace:', newLink);
+                    }
+                });
             });
-        });
+        }
         
         // Period selector
         const periodSelect = document.getElementById('periodSelect');
@@ -3256,15 +3349,35 @@ class CRMApp {
     }
     
     showManagerSection(sectionName) {
-        // Hide all sections
+        if (!sectionName) {
+            console.warn('showManagerSection llamado sin sectionName');
+            return;
+        }
+        
+        console.log('Mostrando sección:', sectionName);
+        
+        // Hide all sections primero
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
+            // Asegurar que estén ocultas
+            section.style.display = 'none';
         });
         
-        // Show selected section
+        // Show selected section INMEDIATAMENTE para feedback visual instantáneo
         const targetSection = document.getElementById(sectionName);
         if (targetSection) {
             targetSection.classList.add('active');
+            // Forzar visibilidad con estilos inline
+            targetSection.style.display = 'block';
+            targetSection.style.visibility = 'visible';
+            targetSection.style.opacity = '1';
+            console.log('Sección activada y visible:', sectionName);
+            
+            // Scroll suave a la sección si es necesario
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            console.error('Sección no encontrada:', sectionName);
+            return;
         }
         
         // Update nav links
@@ -3277,37 +3390,39 @@ class CRMApp {
             activeLink.classList.add('active');
         }
         
-        // Update section content
-        switch (sectionName) {
-            case 'dashboard':
-                this.updateManagerDashboard();
-                break;
-            case 'team-stats':
-                this.updateManagerTeamStats();
-                break;
-            case 'advisor-management':
-                this.updateManagerAdvisorManagement();
-                break;
-            case 'user-management':
-                console.log('Cambiando a sección de gestión de usuarios...');
-                this.updateManagerUserManagement();
-                break;
-            case 'sequences':
-                console.log('Cambiando a sección de secuencias...');
-                this.updateManagerSequences();
-                break;
-            case 'calendar':
-                this.updateManagerCalendar();
-                break;
-            case 'leads':
-                console.log('Navegando a sección de leads del manager...');
-                this.updateManagerLeads();
-                break;
-            case 'clients':
-                console.log('Navegando a sección de clientes del manager...');
-                this.updateManagerClients();
-                break;
-        }
+        // Usar requestAnimationFrame para asegurar que la UI se actualice antes de cargar datos
+        // Esto hace que la sección se muestre inmediatamente, luego carga los datos
+        requestAnimationFrame(() => {
+            // Update section content de forma asíncrona para no bloquear la UI
+            setTimeout(() => {
+                switch (sectionName) {
+                    case 'dashboard':
+                        this.updateManagerDashboard();
+                        break;
+                    case 'team-stats':
+                        this.updateManagerTeamStats();
+                        break;
+                    case 'user-management':
+                        console.log('Cambiando a sección de gestión de usuarios...');
+                        this.updateManagerUserManagement();
+                        break;
+                    case 'sequences':
+                        console.log('Cambiando a sección de secuencias...');
+                        this.updateManagerSequences();
+                        break;
+                    case 'leads':
+                        console.log('Navegando a sección de leads del manager...');
+                        this.updateManagerLeads();
+                        break;
+                    case 'clients':
+                        console.log('Navegando a sección de clientes del manager...');
+                        this.updateManagerClients();
+                        break;
+                    default:
+                        console.warn('Sección desconocida:', sectionName);
+                }
+            }, 50); // Pequeño delay para asegurar que el DOM se actualizó
+        });
     }
     
     updateManagerDashboard() {
@@ -5594,6 +5709,23 @@ class CRMApp {
     updateManagerAdvisorManagement() {
         console.log('Actualizando gestión de asesores...');
         
+        // Asegurar que la sección esté visible
+        const advisorSection = document.getElementById('advisor-management');
+        if (advisorSection) {
+            advisorSection.classList.add('active');
+            console.log('Sección advisor-management activada');
+        } else {
+            console.error('No se encontró la sección advisor-management');
+        }
+        
+        // Asegurar que el sistema de KPIs dinámicos esté inicializado
+        if (!this.kpis) {
+            this.kpis = [];
+        }
+        
+        // Cargar KPIs configurados
+        this.loadKPIs();
+        
         // Configurar navegación de pantallas
         this.setupScreenNavigation();
         
@@ -5606,8 +5738,16 @@ class CRMApp {
         // Actualizar formulario de asignación de leads
         this.updateLeadAssignmentForm();
         
-        // Mostrar solo la primera pantalla
-        this.showScreen('advisor-kpis-screen');
+        // Mostrar solo la primera pantalla - usar requestAnimationFrame para asegurar que el DOM esté listo
+        requestAnimationFrame(() => {
+            const kpiScreen = document.getElementById('advisor-kpis-screen');
+            if (kpiScreen) {
+                kpiScreen.classList.add('active');
+                console.log('Pantalla advisor-kpis-screen activada');
+            } else {
+                console.error('No se encontró la pantalla advisor-kpis-screen');
+            }
+        });
     }
     
     setupScreenNavigation() {
@@ -5642,10 +5782,17 @@ class CRMApp {
     showScreen(screenId) {
         console.log('Mostrando pantalla:', screenId);
         
+        // Asegurar que la sección padre esté visible
+        const advisorSection = document.getElementById('advisor-management');
+        if (advisorSection) {
+            advisorSection.classList.add('active');
+        }
+        
         // Ocultar todas las pantallas
         const screens = document.querySelectorAll('.advisor-screen');
         screens.forEach(screen => {
             screen.classList.remove('active');
+            screen.style.display = 'none';
         });
         
         // Desactivar todos los botones
@@ -5658,7 +5805,15 @@ class CRMApp {
         const targetScreen = document.getElementById(screenId);
         if (targetScreen) {
             targetScreen.classList.add('active');
+            targetScreen.style.display = 'block';
             console.log('Pantalla activada:', screenId);
+            
+            // Forzar visibilidad con estilos inline para asegurar que se muestre
+            targetScreen.style.visibility = 'visible';
+            targetScreen.style.opacity = '1';
+            targetScreen.style.position = 'static';
+            targetScreen.style.left = 'auto';
+            targetScreen.style.top = 'auto';
             
             // Actualizar contenido específico según la pantalla
             if (screenId === 'lead-assignment-screen') {
@@ -5668,12 +5823,15 @@ class CRMApp {
             } else if (screenId === 'advisor-kpis-screen') {
                 setTimeout(() => {
                     this.updateAdvisorKPIForm();
+                    this.loadKPIs(); // Recargar KPIs cuando se muestra la pantalla
                 }, 100);
             } else if (screenId === 'advisor-stats-screen') {
                 setTimeout(() => {
                     this.updateAdvisorStatsTable();
                 }, 100);
             }
+        } else {
+            console.error('No se encontró la pantalla:', screenId);
         }
         
         // Activar el botón correspondiente
@@ -11622,6 +11780,711 @@ class CRMApp {
                 this.updateGeneralSalesReport && this.updateGeneralSalesReport();
             });
         }
+
+        // Initialize performance line chart
+        this.initializePerformanceLineChart();
+    }
+
+    // ====== Performance Line Chart Functions ======
+    initializePerformanceLineChart() {
+        console.log('Inicializando gráfico de líneas de rendimiento...');
+        
+        // Setup chart filters
+        const chartViewType = document.getElementById('chartViewType');
+        const chartPeriod = document.getElementById('chartPeriod');
+        const chartManagerFilter = document.getElementById('chartManagerFilter');
+        const chartAdvisorFilter = document.getElementById('chartAdvisorFilter');
+        const chartManagerFilterGroup = document.getElementById('chartManagerFilterGroup');
+        const chartAdvisorFilterGroup = document.getElementById('chartAdvisorFilterGroup');
+
+        if (!chartViewType || !chartPeriod) return;
+
+        // Populate manager filter
+        if (chartManagerFilter) {
+            this.populateChartManagerFilter();
+        }
+
+        // Populate advisor filter
+        if (chartAdvisorFilter) {
+            this.populateChartAdvisorFilter();
+        }
+
+        // Handle view type change
+        chartViewType.addEventListener('change', () => {
+            const viewType = chartViewType.value;
+            if (viewType === 'managers') {
+                if (chartManagerFilterGroup) chartManagerFilterGroup.style.display = 'flex';
+                if (chartAdvisorFilterGroup) chartAdvisorFilterGroup.style.display = 'none';
+            } else {
+                if (chartManagerFilterGroup) chartManagerFilterGroup.style.display = 'none';
+                if (chartAdvisorFilterGroup) chartAdvisorFilterGroup.style.display = 'flex';
+            }
+            this.updatePerformanceLineChart();
+        });
+
+        // Handle period change
+        chartPeriod.addEventListener('change', () => {
+            this.updatePerformanceLineChart();
+        });
+
+        // Handle manager filter change
+        if (chartManagerFilter) {
+            chartManagerFilter.addEventListener('change', () => {
+                this.updatePerformanceLineChart();
+            });
+        }
+
+        // Handle advisor filter change
+        if (chartAdvisorFilter) {
+            chartAdvisorFilter.addEventListener('change', () => {
+                this.updatePerformanceLineChart();
+            });
+        }
+
+        // Initial chart update (with delay to ensure data is ready)
+        setTimeout(() => {
+            this.updatePerformanceLineChart();
+        }, 500);
+    }
+
+    populateChartManagerFilter() {
+        const chartManagerFilter = document.getElementById('chartManagerFilter');
+        if (!chartManagerFilter) return;
+
+        const managers = this.users.filter(user => user.role === 'manager' && user.isActive);
+        chartManagerFilter.innerHTML = '<option value="all">Todos los Gerentes</option>';
+        
+        managers.forEach(manager => {
+            const option = document.createElement('option');
+            option.value = manager.id;
+            option.textContent = manager.name;
+            chartManagerFilter.appendChild(option);
+        });
+    }
+
+    populateChartAdvisorFilter() {
+        const chartAdvisorFilter = document.getElementById('chartAdvisorFilter');
+        if (!chartAdvisorFilter) return;
+
+        const advisors = this.users.filter(user => user.role === 'advisor' && user.isActive);
+        chartAdvisorFilter.innerHTML = '<option value="all">Todos los Asesores</option>';
+        
+        advisors.forEach(advisor => {
+            const option = document.createElement('option');
+            option.value = advisor.id;
+            option.textContent = advisor.name;
+            chartAdvisorFilter.appendChild(option);
+        });
+    }
+
+    async generateSimulatedData(viewType, periodDays, filterId) {
+        // Generate simulated leads, tasks, and activities for the period
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - periodDays);
+        
+        // Check if we already have enough simulated data in this period
+        const simulatedDataInPeriod = this.leads.filter(lead => {
+            try {
+                const leadDate = lead.createdAt ? new Date(lead.createdAt) : (lead.date ? new Date(lead.date) : null);
+                const isSimulated = lead.isSimulated || (lead.notes && lead.notes.includes('simulación'));
+                return isSimulated && leadDate && leadDate >= startDate && leadDate <= endDate;
+            } catch (e) {
+                return false;
+            }
+        });
+        
+        if (simulatedDataInPeriod.length >= 10) {
+            console.log(`Ya existen ${simulatedDataInPeriod.length} datos simulados en el período, usando los existentes`);
+            return;
+        }
+        
+        console.log(`Generando datos simulados para el período de ${periodDays} días...`);
+        
+        // Get target users
+        let targetUsers = [];
+        if (viewType === 'managers') {
+            if (filterId === 'all') {
+                targetUsers = this.users.filter(user => user.role === 'manager' && user.isActive);
+            } else {
+                targetUsers = this.users.filter(user => user.id == filterId && user.role === 'manager');
+            }
+        } else {
+            if (filterId === 'all') {
+                targetUsers = this.users.filter(user => user.role === 'advisor' && user.isActive);
+            } else {
+                targetUsers = this.users.filter(user => user.id == filterId && user.role === 'advisor');
+            }
+        }
+
+        if (targetUsers.length === 0) {
+            // Create default users if none exist and add them to users array
+            if (viewType === 'managers') {
+                const demoManager = { id: 9999, name: 'Gerente Demo', role: 'manager', isActive: true };
+                if (!this.users.find(u => u.id === 9999)) {
+                    this.users.push(demoManager);
+                }
+                targetUsers = [demoManager];
+            } else {
+                const demoAdvisor = { id: 9998, name: 'Asesor Demo', role: 'advisor', managerId: 9999, isActive: true };
+                if (!this.users.find(u => u.id === 9998)) {
+                    this.users.push(demoAdvisor);
+                }
+                targetUsers = [demoAdvisor];
+            }
+        }
+
+        // Get advisors for managers
+        let advisors = [];
+        if (viewType === 'managers') {
+            targetUsers.forEach(manager => {
+                const managerAdvisors = this.users.filter(u => u.role === 'advisor' && u.managerId === manager.id);
+                advisors.push(...managerAdvisors);
+            });
+            if (advisors.length === 0) {
+                // Create demo advisors for demo managers and add them to users
+                advisors = targetUsers.map(m => {
+                    const advisorId = 10000 + m.id;
+                    const advisorName = `Asesor de ${m.name}`;
+                    const advisor = { 
+                        id: advisorId, 
+                        name: advisorName, 
+                        role: 'advisor', 
+                        managerId: m.id,
+                        isActive: true
+                    };
+                    // Add to users if not already there
+                    if (!this.users.find(u => u.id === advisorId)) {
+                        this.users.push(advisor);
+                    }
+                    return advisor;
+                });
+            }
+        } else {
+            advisors = targetUsers;
+        }
+
+        const statuses = ['Calificar', 'Desarrollar', 'Proponer', 'Cierre', 'Cerrado', 'Perdido'];
+        const statusWeights = [0.25, 0.25, 0.20, 0.15, 0.10, 0.05]; // Probability distribution
+        
+        // Generate leads - create a realistic distribution over time
+        const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const totalLeads = Math.max(20, Math.min(200, daysDiff * 2)); // 2-3 leads per day, max 200
+        
+        const existingLeadIds = this.leads.length > 0 ? Math.max(...this.leads.map(l => l.id)) : 0;
+        let newLeadId = existingLeadIds + 1;
+        
+        for (let i = 0; i < totalLeads; i++) {
+            // Distribute leads more evenly across the period
+            const progress = i / totalLeads;
+            const randomVariation = (Math.random() - 0.5) * 0.3; // ±15% variation
+            const dayOffset = Math.floor((progress + randomVariation) * daysDiff);
+            const leadDate = new Date(startDate);
+            leadDate.setDate(leadDate.getDate() + Math.max(0, Math.min(daysDiff - 1, dayOffset)));
+            
+            // Random status based on weights
+            const rand = Math.random();
+            let statusIndex = 0;
+            let cumulative = 0;
+            for (let j = 0; j < statusWeights.length; j++) {
+                cumulative += statusWeights[j];
+                if (rand <= cumulative) {
+                    statusIndex = j;
+                    break;
+                }
+            }
+            const status = statuses[statusIndex];
+            
+            const advisor = advisors[Math.floor(Math.random() * advisors.length)];
+            const lastActivity = new Date(leadDate);
+            const daysSinceCreation = Math.min(30, Math.floor(Math.random() * 15));
+            lastActivity.setDate(lastActivity.getDate() + daysSinceCreation);
+            
+            const lead = {
+                id: newLeadId++,
+                name: `Lead Simulado ${i + 1}`,
+                company: `Empresa ${String.fromCharCode(65 + (i % 26))}${Math.floor(i / 26)}`,
+                email: `lead${i + 1}@empresa.com`,
+                phone: `+1234567${String(i).padStart(3, '0')}`,
+                status: status,
+                interest: 'Interesado',
+                interestLevel: 'Interesado',
+                advisor: advisor.name,
+                notes: 'Lead generado automáticamente para simulación',
+                createdAt: leadDate,
+                lastActivity: lastActivity > endDate ? endDate : lastActivity,
+                date: leadDate,
+                isSimulated: true
+            };
+            
+            this.leads.push(lead);
+        }
+
+        // Generate tasks - more tasks than leads
+        const totalTasks = Math.max(30, Math.min(300, daysDiff * 3)); // 3-4 tasks per day
+        const existingTaskIds = this.tasks.length > 0 ? Math.max(...this.tasks.map(t => t.id)) : 0;
+        let newTaskId = existingTaskIds + 1;
+        
+        for (let i = 0; i < totalTasks; i++) {
+            const progress = i / totalTasks;
+            const randomVariation = (Math.random() - 0.5) * 0.3;
+            const dayOffset = Math.floor((progress + randomVariation) * daysDiff);
+            const taskDate = new Date(startDate);
+            taskDate.setDate(taskDate.getDate() + Math.max(0, Math.min(daysDiff - 1, dayOffset)));
+            
+            const advisor = advisors[Math.floor(Math.random() * advisors.length)];
+            const taskTypes = ['Llamada', 'Mensaje', 'Correo', 'Reunión presencial'];
+            const taskType = taskTypes[Math.floor(Math.random() * taskTypes.length)];
+            
+            // Link to a random lead if available
+            const availableLeads = this.leads.filter(l => l.createdAt <= taskDate);
+            const linkedLeadId = availableLeads.length > 0 
+                ? availableLeads[Math.floor(Math.random() * availableLeads.length)].id 
+                : null;
+            
+            const task = {
+                id: newTaskId++,
+                title: `${taskType} - Tarea ${i + 1}`,
+                description: 'Tarea generada automáticamente para simulación',
+                advisor: advisor.name,
+                leadId: linkedLeadId,
+                type: taskType,
+                status: Math.random() > 0.3 ? 'completada' : 'pendiente',
+                createdAt: taskDate,
+                date: taskDate,
+                isSimulated: true
+            };
+            
+            this.tasks.push(task);
+        }
+
+        // Save the simulated data
+        this.saveData();
+        console.log(`Datos simulados generados: ${totalLeads} leads, ${totalTasks} tareas`);
+        
+        // Force a small delay to ensure data is saved
+        return new Promise(resolve => {
+            setTimeout(() => {
+                console.log('Datos simulados guardados correctamente');
+                resolve();
+            }, 100);
+        });
+    }
+
+    async getPerformanceMetricsData(viewType, periodDays, filterId) {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - periodDays);
+        
+        // Check if we have data for this period
+        const dataInPeriod = this.leads.filter(lead => {
+            try {
+                const leadDate = lead.createdAt ? new Date(lead.createdAt) : (lead.date ? new Date(lead.date) : null);
+                return leadDate && leadDate >= startDate && leadDate <= endDate;
+            } catch (e) {
+                return false;
+            }
+        });
+
+        // Generate simulated data if we don't have enough data (less than 10 leads in period)
+        if (dataInPeriod.length < 10) {
+            console.log(`Generando datos simulados para el gráfico (solo ${dataInPeriod.length} leads en el período)...`);
+            await this.generateSimulatedData(viewType, periodDays, filterId);
+            // After generating, refresh the data check
+            const refreshedData = this.leads.filter(lead => {
+                try {
+                    const leadDate = lead.createdAt ? new Date(lead.createdAt) : (lead.date ? new Date(lead.date) : null);
+                    return leadDate && leadDate >= startDate && leadDate <= endDate;
+                } catch (e) {
+                    return false;
+                }
+            });
+            console.log(`Después de generar datos simulados: ${refreshedData.length} leads en el período`);
+        }
+
+        // Generate date labels (daily for short periods, weekly/monthly for longer)
+        const labels = [];
+        const dates = [];
+        const currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+            dates.push(new Date(currentDate));
+            if (periodDays <= 30) {
+                labels.push(currentDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }));
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else if (periodDays <= 90) {
+                labels.push(currentDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }));
+                currentDate.setDate(currentDate.getDate() + 3);
+            } else {
+                labels.push(currentDate.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+        }
+
+        // Initialize data arrays
+        const totalLeads = new Array(dates.length).fill(0);
+        const totalContacts = new Array(dates.length).fill(0);
+        const closings = new Array(dates.length).fill(0);
+        const activeOpportunities = new Array(dates.length).fill(0);
+        const tasks = new Array(dates.length).fill(0);
+
+        let targetUsers = [];
+        
+        if (viewType === 'managers') {
+            if (filterId === 'all') {
+                targetUsers = this.users.filter(user => user.role === 'manager' && user.isActive);
+            } else {
+                targetUsers = this.users.filter(user => user.id == filterId && user.role === 'manager');
+            }
+        } else {
+            if (filterId === 'all') {
+                targetUsers = this.users.filter(user => user.role === 'advisor' && user.isActive);
+            } else {
+                targetUsers = this.users.filter(user => user.id == filterId && user.role === 'advisor');
+            }
+        }
+
+        // Process leads, contacts, and tasks
+        this.leads.forEach(lead => {
+            let leadDate;
+            try {
+                leadDate = lead.createdAt ? new Date(lead.createdAt) : (lead.date ? new Date(lead.date) : new Date());
+            } catch (e) {
+                leadDate = new Date();
+            }
+            
+            if (leadDate < startDate || leadDate > endDate) return;
+
+            // Check if lead belongs to target users
+            let belongsToTarget = false;
+            if (viewType === 'managers') {
+                const leadAdvisor = this.users.find(u => u.name === lead.advisor);
+                if (leadAdvisor && leadAdvisor.managerId) {
+                    belongsToTarget = targetUsers.some(m => m.id === leadAdvisor.managerId);
+                }
+            } else {
+                belongsToTarget = targetUsers.some(u => u.name === lead.advisor);
+            }
+
+            if (!belongsToTarget) return;
+
+            // Find the appropriate date index
+            let dateIndex = -1;
+            for (let i = 0; i < dates.length; i++) {
+                if (i === dates.length - 1) {
+                    if (leadDate <= dates[i]) {
+                        dateIndex = i;
+                        break;
+                    }
+                } else {
+                    if (leadDate >= dates[i] && leadDate < dates[i + 1]) {
+                        dateIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (dateIndex >= 0 && dateIndex < dates.length) {
+                totalLeads[dateIndex]++;
+                totalContacts[dateIndex]++; // Each lead is a contact
+                
+                if (lead.status === 'Cerrado' || lead.status === 'Cierre') {
+                    closings[dateIndex]++;
+                }
+            }
+        });
+
+        // Process tasks
+        this.tasks.forEach(task => {
+            let taskDate;
+            try {
+                taskDate = task.createdAt ? new Date(task.createdAt) : (task.date ? new Date(task.date) : new Date());
+            } catch (e) {
+                taskDate = new Date();
+            }
+            
+            if (taskDate < startDate || taskDate > endDate) return;
+
+            // Check if task belongs to target users
+            let belongsToTarget = false;
+            if (viewType === 'managers') {
+                const taskAdvisor = this.users.find(u => u.name === task.advisor);
+                if (taskAdvisor && taskAdvisor.managerId) {
+                    belongsToTarget = targetUsers.some(m => m.id === taskAdvisor.managerId);
+                }
+            } else {
+                belongsToTarget = targetUsers.some(u => u.name === task.advisor);
+            }
+
+            if (!belongsToTarget) return;
+
+            // Find the appropriate date index
+            let dateIndex = -1;
+            for (let i = 0; i < dates.length; i++) {
+                if (i === dates.length - 1) {
+                    if (taskDate <= dates[i]) {
+                        dateIndex = i;
+                        break;
+                    }
+                } else {
+                    if (taskDate >= dates[i] && taskDate < dates[i + 1]) {
+                        dateIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (dateIndex >= 0 && dateIndex < dates.length) {
+                tasks[dateIndex]++;
+            }
+        });
+
+        // Calculate active opportunities at each point in time
+        const activeOpportunitiesAtTime = [];
+        let activeCount = 0;
+        
+        // Process all leads to track active opportunities over time
+        for (let i = 0; i < dates.length; i++) {
+            const currentDate = dates[i];
+            const nextDate = i < dates.length - 1 ? dates[i + 1] : endDate;
+            
+            // Count leads that are active at this point in time
+            const activeAtThisTime = this.leads.filter(lead => {
+                try {
+                    const leadDate = lead.createdAt ? new Date(lead.createdAt) : (lead.date ? new Date(lead.date) : null);
+                    if (!leadDate || leadDate > currentDate) return false;
+                    
+                    // Check if lead belongs to target users
+                    let belongsToTarget = false;
+                    if (viewType === 'managers') {
+                        const leadAdvisor = this.users.find(u => u.name === lead.advisor);
+                        if (leadAdvisor && leadAdvisor.managerId) {
+                            belongsToTarget = targetUsers.some(m => m.id === leadAdvisor.managerId);
+                        }
+                    } else {
+                        belongsToTarget = targetUsers.some(u => u.name === lead.advisor);
+                    }
+                    
+                    if (!belongsToTarget) return false;
+                    
+                    // Check if lead is still active (not closed or lost)
+                    const isActive = lead.status !== 'Cerrado' && lead.status !== 'Cierre' && lead.status !== 'Perdido';
+                    
+                    // Check if it was closed after this date
+                    if (!isActive) {
+                        const closeDate = lead.lastActivity ? new Date(lead.lastActivity) : leadDate;
+                        return closeDate > currentDate;
+                    }
+                    
+                    return isActive;
+                } catch (e) {
+                    return false;
+                }
+            }).length;
+            
+            activeOpportunitiesAtTime.push(activeAtThisTime);
+        }
+
+        // Calculate cumulative values for better visualization
+        const cumulativeLeads = [];
+        const cumulativeContacts = [];
+        const cumulativeClosings = [];
+        const cumulativeTasks = [];
+        
+        let sumLeads = 0, sumContacts = 0, sumClosings = 0, sumTasks = 0;
+        
+        for (let i = 0; i < dates.length; i++) {
+            sumLeads += totalLeads[i];
+            sumContacts += totalContacts[i];
+            sumClosings += closings[i];
+            sumTasks += tasks[i];
+            
+            cumulativeLeads.push(sumLeads);
+            cumulativeContacts.push(sumContacts);
+            cumulativeClosings.push(sumClosings);
+            cumulativeTasks.push(sumTasks);
+        }
+
+        return {
+            labels: labels,
+            totalLeads: totalLeads,
+            totalContacts: totalContacts,
+            closings: closings,
+            activeOpportunities: activeOpportunitiesAtTime,
+            tasks: tasks,
+            cumulativeLeads: cumulativeLeads,
+            cumulativeContacts: cumulativeContacts,
+            cumulativeClosings: cumulativeClosings,
+            cumulativeTasks: cumulativeTasks
+        };
+    }
+
+    updatePerformanceLineChart() {
+        const canvas = document.getElementById('performanceLineChart');
+        if (!canvas || !window.Chart) {
+            console.log('Canvas o Chart.js no disponible');
+            return;
+        }
+
+        const chartViewType = document.getElementById('chartViewType');
+        const chartPeriod = document.getElementById('chartPeriod');
+        const chartManagerFilter = document.getElementById('chartManagerFilter');
+        const chartAdvisorFilter = document.getElementById('chartAdvisorFilter');
+
+        if (!chartViewType || !chartPeriod) return;
+
+        const viewType = chartViewType.value;
+        const periodDays = parseInt(chartPeriod.value);
+        const filterId = viewType === 'managers' 
+            ? (chartManagerFilter ? chartManagerFilter.value : 'all')
+            : (chartAdvisorFilter ? chartAdvisorFilter.value : 'all');
+
+        // Get data (this will generate simulated data if needed)
+        this.getPerformanceMetricsData(viewType, periodDays, filterId).then(data => {
+            // If no data labels, wait a bit and try again (data might be generating)
+            if (!data || !data.labels || data.labels.length === 0) {
+                console.log('No hay datos disponibles para el gráfico');
+                return;
+            }
+            
+            this.renderPerformanceChart(data);
+        }).catch(error => {
+            console.error('Error obteniendo datos del gráfico:', error);
+        });
+    }
+
+    renderPerformanceChart(data) {
+        const canvas = document.getElementById('performanceLineChart');
+        if (!canvas || !window.Chart) {
+            console.log('Canvas o Chart.js no disponible');
+            return;
+        }
+
+        // Destroy existing chart if it exists
+        if (this._performanceLineChart) {
+            this._performanceLineChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        this._performanceLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Total Leads',
+                        data: data.cumulativeLeads,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Total Contactos',
+                        data: data.cumulativeContacts,
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Cierres',
+                        data: data.cumulativeClosings,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Tareas',
+                        data: data.cumulativeTasks,
+                        borderColor: 'rgb(139, 92, 246)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Oportunidades Activas',
+                        data: data.activeOpportunities,
+                        borderColor: 'rgb(245, 158, 11)',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                family: "'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        padding: 12,
+                        titleFont: {
+                            size: 13,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        borderColor: 'rgba(226, 232, 240, 0.2)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
+                                size: 11
+                            },
+                            color: '#64748b'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(226, 232, 240, 0.5)'
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Roboto', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
+                                size: 11
+                            },
+                            color: '#64748b',
+                            precision: 0
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
     }
 
     // ====== Estadísticas por Asesor (filtros y UI) ======
@@ -11753,25 +12616,14 @@ class CRMApp {
     updateManagersDashboard() {
         console.log('Actualizando dashboard de gerentes...');
         
-        const managersGrid = document.getElementById('managersGrid');
-        if (!managersGrid) return;
-        
         // Get all managers
         const managers = this.users.filter(user => user.role === 'manager' && user.isActive);
         
-        if (managers.length === 0) {
-            managersGrid.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #64748b; background: #f8fafc; border-radius: 12px; border: 2px dashed #e2e8f0;">
-                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">👥</div>
-                    <h3 style="margin: 0 0 0.5rem 0; color: #334155;">Sin Gerentes de Ventas</h3>
-                    <p style="margin: 0; font-size: 1rem;">No hay gerentes de ventas registrados en el sistema</p>
-                </div>
-            `;
-            return;
-        }
+        // Refresh chart filters and update chart
+        this.populateChartManagerFilter && this.populateChartManagerFilter();
+        this.populateChartAdvisorFilter && this.populateChartAdvisorFilter();
+        this.updatePerformanceLineChart && this.updatePerformanceLineChart();
         
-        // Generate manager cards
-        managersGrid.innerHTML = managers.map(manager => this.createManagerCard(manager)).join('');
         // También refrescar la pestaña de estadísticas (tabla y gráfico), si existe
         this.updateGeneralTeamStatsTable && this.updateGeneralTeamStatsTable();
         

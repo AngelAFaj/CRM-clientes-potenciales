@@ -107,22 +107,6 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#advisor-management" class="nav-link" data-section="advisor-management">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            <span>Asesores</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#calendar" class="nav-link" data-section="calendar">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            <span>Calendario</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="#leads" class="nav-link" data-section="leads">
                             <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -160,21 +144,54 @@
                     </div>
                 </div>
 
-                <!-- Vista por Gerentes -->
-                <div id="managersDashboard" class="managers-dashboard">
-                    <h3>
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        Rendimiento por Gerente de Ventas
-                    </h3>
-                    <div class="managers-grid" id="managersGrid">
-                        <!-- Los indicadores por gerente se cargarán dinámicamente -->
+                <!-- Gráfico de Líneas de Rendimiento -->
+                <div class="performance-line-chart-section">
+                    <div class="chart-section-header">
+                        <h3>
+                            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                            </svg>
+                            Gráfico de Rendimiento
+                        </h3>
+                        <div class="chart-controls">
+                            <div class="chart-filter-group">
+                                <label for="chartViewType">Vista:</label>
+                                <select id="chartViewType">
+                                    <option value="managers">Gerentes</option>
+                                    <option value="advisors">Asesores</option>
+                                </select>
+                            </div>
+                            <div class="chart-filter-group">
+                                <label for="chartPeriod">Período:</label>
+                                <select id="chartPeriod">
+                                    <option value="7">Últimos 7 días</option>
+                                    <option value="30" selected>Últimos 30 días</option>
+                                    <option value="90">Últimos 90 días</option>
+                                    <option value="180">Últimos 6 meses</option>
+                                    <option value="365">Último año</option>
+                                </select>
+                            </div>
+                            <div class="chart-filter-group" id="chartManagerFilterGroup">
+                                <label for="chartManagerFilter">Gerente:</label>
+                                <select id="chartManagerFilter">
+                                    <option value="all">Todos los Gerentes</option>
+                                </select>
+                            </div>
+                            <div class="chart-filter-group" id="chartAdvisorFilterGroup" style="display: none;">
+                                <label for="chartAdvisorFilter">Asesor:</label>
+                                <select id="chartAdvisorFilter">
+                                    <option value="all">Todos los Asesores</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container-wrapper">
+                        <canvas id="performanceLineChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Resumen de Cumplimiento de KPIs -->
-                <div class="kpis-summary-section">
+                <div class="kpis-summary-section" style="display: none;">
                     <h3>
                         <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -378,159 +395,6 @@
                     </h3>
                     <div class="chart-placeholder">
                         Espacio reservado para gráfico
-                    </div>
-                </div>
-            </section>
-
-            <!-- Advisor Management Section -->
-            <section id="advisor-management" class="content-section">
-                <!-- Pantalla 1: Estadísticas por Asesor -->
-                <div id="advisor-stats-screen" class="advisor-screen active">
-                    <h3>
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        Estadísticas por Asesor
-                    </h3>
-
-                    <!-- Filtros de tiempo para Estadísticas por Asesor -->
-                    <div class="dashboard-controls" style="margin-top: 0; margin-bottom: 1rem;">
-                        <div class="manager-filter">
-                            <label for="advisorStartMonth">Mes Inicio:</label>
-                            <select id="advisorStartMonth">
-                                <option value="1">Enero</option>
-                                <option value="2">Febrero</option>
-                                <option value="3">Marzo</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Mayo</option>
-                                <option value="6">Junio</option>
-                                <option value="7">Julio</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Septiembre</option>
-                                <option value="10">Octubre</option>
-                                <option value="11">Noviembre</option>
-                                <option value="12">Diciembre</option>
-                            </select>
-                        </div>
-                        <div class="manager-filter">
-                            <label for="advisorStartYear">Año Inicio:</label>
-                            <select id="advisorStartYear">
-                                <!-- Años se poblarán vía JS -->
-                            </select>
-                        </div>
-                        <div class="manager-filter">
-                            <label for="advisorEndMonth">Mes Final:</label>
-                            <select id="advisorEndMonth">
-                                <option value="1">Enero</option>
-                                <option value="2">Febrero</option>
-                                <option value="3">Marzo</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Mayo</option>
-                                <option value="6">Junio</option>
-                                <option value="7">Julio</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Septiembre</option>
-                                <option value="10">Octubre</option>
-                                <option value="11">Noviembre</option>
-                                <option value="12">Diciembre</option>
-                            </select>
-                        </div>
-                        <div class="manager-filter">
-                            <label for="advisorEndYear">Año Final:</label>
-                            <select id="advisorEndYear">
-                                <!-- Años se poblarán vía JS -->
-                            </select>
-                        </div>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h4>Total de Asesores</h4>
-                            <div class="stat-value" id="totalAdvisors">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Leads Asignados</h4>
-                            <div class="stat-value" id="totalAssignedLeads">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Conversiones del Equipo</h4>
-                            <div class="stat-value" id="teamConversions">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Tasa de Conversión</h4>
-                            <div class="stat-value" id="teamConversionRate">0%</div>
-                        </div>
-                    </div>
-                    
-                    <div class="table-container">
-                        <h4>Estadísticas Detalladas por Asesor</h4>
-                        <table class="data-table" id="advisorStatsTable">
-                            <thead>
-                                <tr>
-                                    <th>Asesor</th>
-                                    <th>Leads Asignados</th>
-                                    <th>Acciones Realizadas</th>
-                                    <th>Conversiones</th>
-                                    <th>Tasa Conversión</th>
-                                    <th>Leads Activos</th>
-                                    <th>Última Actividad</th>
-                                </tr>
-                            </thead>
-                            <tbody id="advisorStatsTableBody">
-                                <!-- Los datos se cargarán dinámicamente -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-
-            
-
-            <!-- Calendar Section -->
-            <section id="calendar" class="content-section">
-                <h2>
-                    <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Calendario del Equipo
-                </h2>
-                
-                <!-- Controles del Calendario -->
-                <div class="calendar-controls">
-                    <button id="prevWeek" class="btn btn-secondary">‹ Semana Anterior</button>
-                    <button id="todayBtn" class="btn btn-outline">Hoy</button>
-                    <span id="currentWeek" class="week-display"></span>
-                    <button id="nextWeek" class="btn btn-secondary">Siguiente Semana ›</button>
-                    <button id="createEventBtn" class="btn btn-primary">+ Crear Evento</button>
-                </div>
-                
-                <!-- Calendario Semanal -->
-                <div class="weekly-calendar-container">
-                    <div class="calendar-header">
-                        <div class="day-header">Hora</div>
-                        <div class="day-header">Lunes</div>
-                        <div class="day-header">Martes</div>
-                        <div class="day-header">Miércoles</div>
-                        <div class="day-header">Jueves</div>
-                        <div class="day-header">Viernes</div>
-                        <div class="day-header">Sábado</div>
-                        <div class="day-header">Domingo</div>
-                    </div>
-                    <div class="calendar-grid" id="teamCalendar">
-                        <!-- El calendario se generará dinámicamente -->
-                    </div>
-                </div>
-                
-                <!-- Resumen de Tareas del Equipo -->
-                <div class="team-tasks-summary">
-                    <h3>
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                        </svg>
-                        Resumen de Tareas del Equipo
-                    </h3>
-                    <div class="tasks-summary-grid" id="tasksSummary">
-                        <!-- Las tareas se cargarán dinámicamente -->
                     </div>
                 </div>
             </section>
